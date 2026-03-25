@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { writeFile } from 'fs/promises'
+import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
 
@@ -21,7 +21,12 @@ export async function POST(req) {
 
   const ext = path.extname(file.name)
   const uniqueName = crypto.randomBytes(16).toString('hex') + ext
-  const filepath = path.join(process.cwd(), 'public', 'uploads', uniqueName)
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads')
+
+  // Ensure uploads directory exists
+  try { await mkdir(uploadDir, { recursive: true }) } catch {}
+
+  const filepath = path.join(uploadDir, uniqueName)
   await writeFile(filepath, buffer)
 
   const mimetype = file.type
@@ -40,6 +45,20 @@ export async function POST(req) {
     },
     include: { user: { select: { name: true } }, comments: true },
   })
+
+  // Create notification for media upload
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { title: true } })
+  const users = await prisma.user.findMany({ where: { NOT: { id: session.user.id } } })
+  for (const u of users) {
+    await prisma.notification.create({
+      data: {
+        userId: u.id,
+        type: 'MEDIA',
+        message: `${session.user.name} uploaded ${type === 'VIDEO' ? 'a video' : 'an image'} to "${event?.title || 'an event'}"`,
+        eventId,
+      },
+    })
+  }
 
   return NextResponse.json(media)
 }

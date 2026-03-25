@@ -1,6 +1,6 @@
 {
-  "name": "Sims App",
-  "short_name": "Sims",
+  "name": "Simz App",
+  "short_name": "Simz",
   "description": "Team content calendar & approval workflow",
   "start_url": "/login",
   "display": "standalone",

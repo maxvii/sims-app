@@ -38,5 +38,8 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/.env.production ./.env
 
+# Ensure uploads directory exists and is writable
+RUN mkdir -p /app/public/uploads && chmod 777 /app/public/uploads
+
 EXPOSE 3000
 CMD ["node", "server.js"]

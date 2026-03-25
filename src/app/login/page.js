@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="absolute inset-0">
           <img
             src="/hero.png"
-            alt="Sims"
+            alt="Simz"
             className="w-full h-full object-cover object-top"
             style={{ objectPosition: 'center 15%' }}
           />
@@ -46,7 +46,7 @@ export default function LoginPage() {
 
         {/* "Sims App" Title — positioned bottom-left over the fade */}
         <div className="absolute bottom-6 left-7 z-10">
-          <h1 className="font-script text-[48px] text-gray-800 leading-none" style={{ textShadow: '0 1px 12px rgba(255,255,255,0.5)' }}>Sims</h1>
+          <h1 className="font-script text-[48px] text-gray-800 leading-none" style={{ textShadow: '0 1px 12px rgba(255,255,255,0.5)' }}>Simz</h1>
           <p className="text-gray-500 text-[11px] mt-0.5 tracking-[0.3em] uppercase font-medium">App</p>
         </div>
       </div>

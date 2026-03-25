@@ -110,7 +110,7 @@ export default function CalendarPage() {
         <GradientSpheres variant="default" />
 
         <div className="flex items-center justify-between mb-5 relative z-10">
-          <h1 className="font-script text-4xl text-gray-900">Sims <span className="text-[10px] font-sans font-semibold text-gray-500 tracking-[0.15em] uppercase align-middle ml-0.5" style={{ fontFamily: 'var(--font-sans)' }}>App</span></h1>
+          <h1 className="font-script text-4xl text-gray-900">Simz <span className="text-[10px] font-sans font-semibold text-gray-500 tracking-[0.15em] uppercase align-middle ml-0.5" style={{ fontFamily: 'var(--font-sans)' }}>App</span></h1>
           <div className="w-9 h-9 rounded-full bg-white/40 backdrop-blur-md flex items-center justify-center border border-white/50">
             <span className="text-sm font-bold text-gray-700">{session?.user?.name?.[0] || 'A'}</span>
           </div>
