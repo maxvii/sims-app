@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \":*)",
+      "Bash(npx create-next-app@latest . --js --tailwind --eslint --app --src-dir --no-import-alias --use-npm)",
+      "Read(//private/tmp/**)",
+      "Bash(npx create-next-app@latest sims-app --js --tailwind --eslint --app --src-dir --no-import-alias --use-npm)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma:*)",
+      "Bash(node prisma/seed.js)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(node -e \":*)",
+      "Bash(npm run:*)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 root@82.25.101.166 \"echo connected\")",
+      "Bash(gh auth:*)",
+      "Bash(brew install:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

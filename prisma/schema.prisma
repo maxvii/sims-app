@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          String         @default("VIEWER")
+  avatar        String?
+  createdAt     DateTime       @default(now())
+  comments      Comment[]
+  approvals     Approval[]
+  notifications Notification[]
+  references    Reference[]
+  media         Media[]
+  mediaComments MediaComment[]
+}
+
+model Event {
+  id               String      @id @default(cuid())
+  number           Int
+  month            String
+  date             String
+  endDate          String?
+  title            String
+  opportunityType  String
+  priority         String
+  postConcept      String
+  visualDirection  String
+  captionDirection String
+  platforms        String
+  creativeBriefDue String
+  creativeDue      String
+  status           String      @default("Not Started")
+  notes            String?
+  comments         Comment[]
+  approvals        Approval[]
+  notifications    Notification[]
+  references       Reference[]
+  media            Media[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  eventId   String
+  userId    String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Approval {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  status    String   @default("PENDING")
+  note      String?
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  message   String
+  eventId   String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event?   @relation(fields: [eventId], references: [id])
+}
+
+model Reference {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  url       String
+  title     String
+  type      String   @default("LINK")
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Media {
+  id        String         @id @default(cuid())
+  eventId   String
+  userId    String
+  filename  String
+  filepath  String
+  mimetype  String
+  size      Int
+  type      String         // VIDEO or IMAGE
+  createdAt DateTime       @default(now())
+  event     Event          @relation(fields: [eventId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+  comments  MediaComment[]
+}
+
+model MediaComment {
+  id        String   @id @default(cuid())
+  mediaId   String
+  userId    String
+  content   String
+  timestamp Float?   // seconds into video (for video comments)
+  pinX      Float?   // x position 0-100% (for image comments)
+  pinY      Float?   // y position 0-100% (for image comments)
+  createdAt DateTime @default(now())
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}

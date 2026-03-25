@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E8D5F5"/><stop offset="50%" stop-color="#FFE0E8"/><stop offset="100%" stop-color="#FFF0F3"/></linearGradient></defs>
+  <rect width="192" height="192" rx="42" fill="url(#g)"/>
+  <text x="96" y="88" text-anchor="middle" font-family="Georgia,serif" font-size="56" font-weight="bold" fill="#6B4C7A">Sims</text>
+  <text x="96" y="124" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#9B7AAD" letter-spacing="3">APP</text>
+</svg>
