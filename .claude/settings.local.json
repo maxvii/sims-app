@@ -23,7 +23,11 @@
       "Bash(git push:*)",
       "Bash(gh repo:*)",
       "Bash(sqlite3 /Users/fuck-u/Desktop/sims/prisma/dev.db \"SELECT id, email, name, role FROM User;\")",
-      "Bash(sqlite3 /Users/fuck-u/Desktop/sims/prisma/dev.db \"SELECT email, password FROM User WHERE email=''sims@admin.app'';\")"
+      "Bash(sqlite3 /Users/fuck-u/Desktop/sims/prisma/dev.db \"SELECT email, password FROM User WHERE email=''sims@admin.app'';\")",
+      "Bash(/Users/fuck-u/Desktop/sims/start.sh:*)",
+      "Bash(chmod +x /Users/fuck-u/Desktop/sims/start.sh)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:SimzDB2026SecureX9@82.25.101.166:5432/sims\" npx prisma migrate dev --name init)",
+      "Bash(DATABASE_URL=\"postgresql://x:x@x:5432/x\" npx prisma migrate diff --from-empty --to-schema-datamodel /Users/fuck-u/Desktop/sims/prisma/schema.prisma --script)"
     ]
   }
 }

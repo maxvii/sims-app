@@ -9,6 +9,9 @@
     "start": "next start",
     "seed": "node prisma/seed.cjs"
   },
+  "prisma": {
+    "seed": "node prisma/seed.cjs"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

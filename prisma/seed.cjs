@@ -51,25 +51,39 @@ const events = [
 async function main() {
   const hashedPassword = await bcrypt.hash('admin123', 10)
 
+  // Admin user
+  await prisma.user.upsert({
+    where: { email: 'sims@admin.app' },
+    update: {},
+    create: {
+      name: 'Karim',
+      email: 'sims@admin.app',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  })
+
+  // Approver 1
+  await prisma.user.upsert({
+    where: { email: 'editor@sims.app' },
+    update: {},
+    create: {
+      name: 'Anda',
+      email: 'editor@sims.app',
+      password: await bcrypt.hash('admin123', 10),
+      role: 'APPROVER',
+    },
+  })
+
+  // Approver 2
   await prisma.user.upsert({
     where: { email: 'admin@sims.app' },
     update: {},
     create: {
       name: 'Mrs Veds',
       email: 'admin@sims.app',
-      password: hashedPassword,
-      role: 'ADMIN',
-    },
-  })
-
-  await prisma.user.upsert({
-    where: { email: 'editor@sims.app' },
-    update: {},
-    create: {
-      name: 'Content Editor',
-      email: 'editor@sims.app',
-      password: await bcrypt.hash('editor123', 10),
-      role: 'EDITOR',
+      password: await bcrypt.hash('admin123', 10),
+      role: 'APPROVER',
     },
   })
 
@@ -77,7 +91,7 @@ async function main() {
     await prisma.event.create({ data: event })
   }
 
-  console.log('Seeded 42 events + 2 users')
+  console.log('Seeded 42 events + 3 users')
 }
 
 main()

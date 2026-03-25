@@ -5,8 +5,7 @@ RUN apk add --no-cache libc6-compat openssl
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --legacy-peer-deps
-RUN npm rebuild
+RUN npm ci --legacy-peer-deps && npm rebuild
 
 # Build
 FROM base AS builder
@@ -14,21 +13,16 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV DATABASE_URL="file:/app/prisma/dev.db"
-ENV NEXTAUTH_SECRET="sims-production-secret-2026-xK9mP2qR"
-ENV NEXTAUTH_URL="https://sims.ai-gcc.com"
-RUN npx prisma generate
-RUN npm run build
+# Placeholder — prisma generate only reads schema, doesn't connect
+ENV DATABASE_URL="postgresql://x:x@x:5432/x"
+RUN npx prisma generate && npm run build
 
-# Production — run as root in container for simplicity
+# Production
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
-ENV DATABASE_URL="file:/app/prisma/dev.db"
-ENV NEXTAUTH_SECRET="sims-production-secret-2026-xK9mP2qR"
-ENV NEXTAUTH_URL="https://sims.ai-gcc.com"
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
@@ -36,10 +30,11 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/.env.production ./.env
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY start.sh ./start.sh
 
-# Ensure uploads directory exists and is writable
 RUN mkdir -p /app/public/uploads && chmod 777 /app/public/uploads
+RUN chmod +x /app/start.sh
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["sh", "start.sh"]
