@@ -1,12 +1,11 @@
 FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 
 # Install dependencies
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --legacy-peer-deps
-# Rebuild native bindings for Alpine Linux (Tailwind v4 oxide)
 RUN npm rebuild
 
 # Build
@@ -17,8 +16,6 @@ COPY . .
 
 ENV DATABASE_URL="file:./prisma/dev.db"
 RUN npx prisma generate
-RUN npx prisma db push --accept-data-loss
-RUN node prisma/seed.cjs
 RUN npm run build
 
 # Production
@@ -27,6 +24,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
+ENV DATABASE_URL="file:./prisma/dev.db"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -38,10 +36,6 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
-# Copy the seeded database
-COPY --from=builder /app/prisma/dev.db ./prisma/dev.db
-
-# Data directory needs to be writable
 RUN chown -R nextjs:nodejs /app/prisma
 
 USER nextjs
