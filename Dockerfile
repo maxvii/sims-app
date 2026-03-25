@@ -1,10 +1,13 @@
 FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
 
 # Install dependencies
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --legacy-peer-deps
+# Rebuild native bindings for Alpine Linux (Tailwind v4 oxide)
+RUN npm rebuild
 
 # Build
 FROM base AS builder
