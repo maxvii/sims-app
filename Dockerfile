@@ -14,7 +14,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV DATABASE_URL="file:./dev.db"
+ENV DATABASE_URL="file:/app/prisma/dev.db"
 ENV NEXTAUTH_SECRET="sims-production-secret-2026-xK9mP2qR"
 ENV NEXTAUTH_URL="https://sims.ai-gcc.com"
 RUN npx prisma generate
@@ -26,7 +26,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=3000
-ENV DATABASE_URL="file:./dev.db"
+ENV DATABASE_URL="file:/app/prisma/dev.db"
 ENV NEXTAUTH_SECRET="sims-production-secret-2026-xK9mP2qR"
 ENV NEXTAUTH_URL="https://sims.ai-gcc.com"
 
