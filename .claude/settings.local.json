@@ -21,7 +21,9 @@
       "Bash(git checkout:*)",
       "Bash(git branch:*)",
       "Bash(git push:*)",
-      "Bash(gh repo:*)"
+      "Bash(gh repo:*)",
+      "Bash(sqlite3 /Users/fuck-u/Desktop/sims/prisma/dev.db \"SELECT id, email, name, role FROM User;\")",
+      "Bash(sqlite3 /Users/fuck-u/Desktop/sims/prisma/dev.db \"SELECT email, password FROM User WHERE email=''sims@admin.app'';\")"
     ]
   }
 }
