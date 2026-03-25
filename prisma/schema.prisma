@@ -19,8 +19,9 @@ model User {
   approvals     Approval[]
   notifications Notification[]
   references    Reference[]
-  media         Media[]
-  mediaComments MediaComment[]
+  media              Media[]
+  mediaComments      MediaComment[]
+  pushSubscriptions  PushSubscription[]
 }
 
 model Event {
@@ -118,4 +119,16 @@ model MediaComment {
   createdAt DateTime @default(now())
   media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
 }

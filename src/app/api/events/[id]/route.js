@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { notifyOthers } from '@/lib/notify'
 
 export async function GET(req, { params }) {
   const session = await getServerSession(authOptions)
@@ -27,19 +28,13 @@ export async function PATCH(req, { params }) {
   const oldEvent = await prisma.event.findUnique({ where: { id: params.id }, select: { status: true, title: true } })
   const event = await prisma.event.update({ where: { id: params.id }, data })
 
-  // Create notification when status changes
   if (data.status && oldEvent && data.status !== oldEvent.status) {
-    const users = await prisma.user.findMany({ where: { NOT: { id: session.user.id } } })
-    for (const u of users) {
-      await prisma.notification.create({
-        data: {
-          userId: u.id,
-          type: 'STATUS',
-          message: `${session.user.name} changed "${oldEvent.title}" to ${data.status}`,
-          eventId: params.id,
-        },
-      })
-    }
+    await notifyOthers({
+      actorId: session.user.id,
+      type: 'STATUS',
+      message: `${session.user.name} changed "${oldEvent.title}" to ${data.status}`,
+      eventId: params.id,
+    })
   }
 
   return NextResponse.json(event)

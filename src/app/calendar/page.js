@@ -45,9 +45,12 @@ export default function CalendarPage() {
   const [events, setEvents] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [now, setNow] = useState(new Date())
+  const [showAddEvent, setShowAddEvent] = useState(false)
+  const [addingEvent, setAddingEvent] = useState(false)
 
   useEffect(() => { if (authStatus === 'unauthenticated') router.push('/login') }, [authStatus, router])
-  useEffect(() => { fetch('/api/events').then(r => r.json()).then(d => { if (Array.isArray(d)) setEvents(d) }).catch(() => {}) }, [])
+  const fetchEvents = () => fetch('/api/events').then(r => r.json()).then(d => { if (Array.isArray(d)) setEvents(d) }).catch(() => {})
+  useEffect(() => { fetchEvents() }, [])
   useEffect(() => { const t = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(t) }, [])
 
   // Build a 90-day calendar strip starting from 7 days ago
@@ -191,7 +194,117 @@ export default function CalendarPage() {
         )}
       </div>
 
+      {/* FAB — Add Event */}
+      {session?.user?.role === 'ADMIN' && (
+        <button
+          onClick={() => setShowAddEvent(true)}
+          className="fixed bottom-24 right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-40 transition-transform active:scale-90"
+          style={{ background: 'linear-gradient(135deg, #C9A0DC, #FF6F97)', boxShadow: '0 4px 20px rgba(201,160,220,0.4)' }}
+        >
+          <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
+        </button>
+      )}
+
+      {/* Quick Add Event Modal */}
+      {showAddEvent && <AddEventModal onClose={() => setShowAddEvent(false)} onCreated={() => { fetchEvents(); setShowAddEvent(false) }} />}
+
       <Navbar />
+    </div>
+  )
+}
+
+/* ── Quick Add Event Modal ── */
+function AddEventModal({ onClose, onCreated }) {
+  const [title, setTitle] = useState('')
+  const [date, setDate] = useState('')
+  const [priority, setPriority] = useState('MEDIUM')
+  const [opportunityType, setOpportunityType] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!title || !date) return
+    setSaving(true)
+
+    // Convert date input (2026-04-15) to "15 Apr 2026" format
+    const d = new Date(date + 'T00:00:00')
+    const formatted = `${String(d.getDate()).padStart(2, '0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`
+
+    await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, date: formatted, priority, opportunityType }),
+    })
+    setSaving(false)
+    onCreated()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-end justify-center" onClick={onClose}>
+      <div
+        className="w-full max-w-lg mx-auto rounded-t-3xl p-6 pb-10 animate-slide-up"
+        style={{
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.85), rgba(255,240,243,0.9))',
+          backdropFilter: 'blur(40px)',
+          border: '1px solid rgba(255,255,255,0.5)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
+        <h3 className="font-display text-xl font-bold text-gray-800 italic mb-5">New Event</h3>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Title *</label>
+            <input
+              value={title} onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#C9A0DC]/50"
+              placeholder="Event name" required
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Date *</label>
+            <input
+              type="date" value={date} onChange={(e) => setDate(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#C9A0DC]/50"
+              required
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Priority</label>
+              <select
+                value={priority} onChange={(e) => setPriority(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none"
+              >
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</label>
+              <input
+                value={opportunityType} onChange={(e) => setOpportunityType(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none"
+                placeholder="e.g. Holiday"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit" disabled={saving || !title || !date}
+            className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50"
+            style={{ background: 'linear-gradient(135deg, #C9A0DC, #FF6F97)' }}
+          >
+            {saving ? 'Creating...' : 'Create Event'}
+          </button>
+          <p className="text-[10px] text-gray-400 text-center">You can add brief, captions, and more details after creating</p>
+        </form>
+      </div>
     </div>
   )
 }

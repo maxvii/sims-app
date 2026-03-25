@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { notifyOthers } from '@/lib/notify'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
@@ -38,7 +39,7 @@ export async function POST(req) {
       eventId,
       userId: session.user.id,
       filename: file.name,
-      filepath: `/uploads/${uniqueName}`,
+      filepath: `/api/uploads/${uniqueName}`,
       mimetype,
       size: buffer.length,
       type,
@@ -46,19 +47,13 @@ export async function POST(req) {
     include: { user: { select: { name: true } }, comments: true },
   })
 
-  // Create notification for media upload
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { title: true } })
-  const users = await prisma.user.findMany({ where: { NOT: { id: session.user.id } } })
-  for (const u of users) {
-    await prisma.notification.create({
-      data: {
-        userId: u.id,
-        type: 'MEDIA',
-        message: `${session.user.name} uploaded ${type === 'VIDEO' ? 'a video' : 'an image'} to "${event?.title || 'an event'}"`,
-        eventId,
-      },
-    })
-  }
+  await notifyOthers({
+    actorId: session.user.id,
+    type: 'MEDIA',
+    message: `${session.user.name} uploaded ${type === 'VIDEO' ? 'a video' : 'an image'} to "${event?.title || 'an event'}"`,
+    eventId,
+  })
 
   return NextResponse.json(media)
 }
@@ -91,7 +86,8 @@ export async function DELETE(req) {
   if (!media) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const fs = await import('fs/promises')
-  try { await fs.unlink(path.join(process.cwd(), 'public', media.filepath)) } catch {}
+  const diskPath = media.filepath.replace('/api/uploads/', '/uploads/')
+  try { await fs.unlink(path.join(process.cwd(), 'public', diskPath)) } catch {}
   await prisma.media.delete({ where: { id } })
   return NextResponse.json({ success: true })
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { notifyOthers } from '@/lib/notify'
 
 export async function POST(req) {
   const session = await getServerSession(authOptions)
@@ -14,6 +15,15 @@ export async function POST(req) {
     data: { eventId, userId: session.user.id, url, title, type: type || 'LINK' },
     include: { user: { select: { name: true } } },
   })
+
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { title: true } })
+  await notifyOthers({
+    actorId: session.user.id,
+    type: 'REFERENCE',
+    message: `${session.user.name} added a reference to "${event?.title}"`,
+    eventId,
+  })
+
   return NextResponse.json(reference)
 }
 

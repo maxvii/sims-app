@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { notifyOthers } from '@/lib/notify'
 
 export async function POST(req) {
   const session = await getServerSession(authOptions)
@@ -22,17 +23,12 @@ export async function POST(req) {
   }
 
   const event = await prisma.event.findUnique({ where: { id: eventId }, select: { title: true } })
-  const users = await prisma.user.findMany({ where: { NOT: { id: session.user.id } } })
-  for (const u of users) {
-    await prisma.notification.create({
-      data: {
-        userId: u.id,
-        type: 'APPROVAL',
-        message: `${session.user.name} ${status.toLowerCase()} "${event.title}"`,
-        eventId,
-      },
-    })
-  }
+  await notifyOthers({
+    actorId: session.user.id,
+    type: 'APPROVAL',
+    message: `${session.user.name} ${status.toLowerCase()} "${event?.title}"`,
+    eventId,
+  })
 
   return NextResponse.json(approval)
 }
