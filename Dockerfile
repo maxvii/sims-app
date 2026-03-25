@@ -20,7 +20,7 @@ ENV NEXTAUTH_URL="https://sims.ai-gcc.com"
 RUN npx prisma generate
 RUN npm run build
 
-# Production
+# Production — run as root in container for simplicity
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -30,9 +30,6 @@ ENV DATABASE_URL="file:./dev.db"
 ENV NEXTAUTH_SECRET="sims-production-secret-2026-xK9mP2qR"
 ENV NEXTAUTH_URL="https://sims.ai-gcc.com"
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
@@ -41,9 +38,5 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/.env.production ./.env
 
-RUN chown -R nextjs:nodejs /app/prisma /app/.env
-
-USER nextjs
 EXPOSE 3000
-
 CMD ["node", "server.js"]
