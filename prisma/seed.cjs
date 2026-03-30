@@ -137,7 +137,13 @@ async function main() {
     },
   })
 
-  // Clear existing events and re-seed
+  // Clear existing data and re-seed (order matters for foreign keys)
+  await prisma.mediaComment.deleteMany()
+  await prisma.media.deleteMany()
+  await prisma.comment.deleteMany()
+  await prisma.approval.deleteMany()
+  await prisma.reference.deleteMany()
+  await prisma.notification.deleteMany()
   await prisma.event.deleteMany()
   for (const event of events) {
     await prisma.event.create({ data: event })
