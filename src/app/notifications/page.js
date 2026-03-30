@@ -59,7 +59,7 @@ export default function NotificationsPage() {
             <p className="text-xs text-gray-500">{unreadCount} unread</p>
           </div>
           {unreadCount > 0 && (
-            <button onClick={markAllRead} className="text-xs font-semibold text-pink-500 hover:text-pink-600">
+            <button onClick={markAllRead} className="text-xs font-semibold text-[#935073] hover:text-[#502D55]">
               Mark all read
             </button>
           )}
@@ -71,14 +71,14 @@ export default function NotificationsPage() {
           <button
             key={n.id}
             onClick={() => markRead(n.id, n.event?.id)}
-            className={`liquid-glass-card p-4 w-full text-left flex items-start gap-3 transition-all hover:scale-[1.01] ${!n.read ? 'ring-1 ring-pink-200' : 'opacity-70'}`}
+            className={`liquid-glass-card p-4 w-full text-left flex items-start gap-3 transition-all hover:scale-[1.01] ${!n.read ? 'ring-1 ring-[#935073]/30' : 'opacity-70'}`}
           >
             <div className="mt-0.5">{typeIcons[n.type] || typeIcons.COMMENT}</div>
             <div className="flex-1 min-w-0">
               <p className={`text-sm ${!n.read ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>{n.message}</p>
               <p className="text-[10px] text-gray-500 mt-1">{new Date(n.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
             </div>
-            {!n.read && <div className="w-2.5 h-2.5 rounded-full bg-pink-500 flex-shrink-0 mt-1.5" />}
+            {!n.read && <div className="w-2.5 h-2.5 rounded-full bg-[#935073] flex-shrink-0 mt-1.5" />}
           </button>
         ))}
 

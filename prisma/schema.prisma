@@ -31,14 +31,18 @@ model Event {
   date             String
   endDate          String?
   title            String
-  opportunityType  String
-  priority         String
-  postConcept      String
-  visualDirection  String
-  captionDirection String
-  platforms        String
-  creativeBriefDue String
-  creativeDue      String
+  category         String?
+  opportunityType  String?
+  priority         String      @default("MEDIUM")
+  postConcept      String?
+  visualDirection  String?
+  captionDirection String?
+  platforms        String?
+  creativeBriefDue String?
+  round1Due        String?
+  round2Due        String?
+  finalCreativeDue String?
+  creativeDue      String?
   status           String      @default("Not Started")
   notes            String?
   comments         Comment[]

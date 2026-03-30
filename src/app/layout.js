@@ -2,8 +2,8 @@ import './globals.css'
 import Providers from './providers'
 
 export const metadata = {
-  title: 'Simz - Content Calendar',
-  description: 'Team content calendar & approval workflow',
+  title: 'The SMZ - Sima Ved',
+  description: 'Personal brand management by Sima Ganwani Ved',
 }
 
 export default function RootLayout({ children }) {
@@ -16,8 +16,8 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Simz App" />
-        <meta name="theme-color" content="#FFF0F3" />
+        <meta name="apple-mobile-web-app-title" content="The SMZ" />
+        <meta name="theme-color" content="#502D55" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>

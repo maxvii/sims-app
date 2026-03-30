@@ -1,11 +1,11 @@
 {
-  "name": "Simz App",
-  "short_name": "Simz",
-  "description": "Team content calendar & approval workflow",
+  "name": "The SMZ",
+  "short_name": "SMZ",
+  "description": "Personal brand management by Sima Ganwani Ved",
   "start_url": "/login",
   "display": "standalone",
-  "background_color": "#FFF0F3",
-  "theme_color": "#FFF0F3",
+  "background_color": "#502D55",
+  "theme_color": "#502D55",
   "orientation": "portrait",
   "icons": [
     {
