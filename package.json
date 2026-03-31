@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@ai-sdk/google": "^3.0.54",
+    "@ai-sdk/groq": "^3.0.31",
     "@ai-sdk/react": "^3.0.143",
     "@prisma/client": "^5.22.0",
     "@tailwindcss/postcss": "^4.2.2",
