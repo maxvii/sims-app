@@ -40,7 +40,8 @@ function deriveMonth(dateStr) {
 /**
  * Create a new event in the database.
  */
-export async function createEvent({ title, date, category, priority, opportunityType, platforms, notes }) {
+export async function createEvent(params) {
+  const { title, date, category, priority, opportunityType, platforms, notes } = params || {};
   // Auto-derive month from date
   const month = deriveMonth(date);
 
@@ -72,7 +73,8 @@ export async function createEvent({ title, date, category, priority, opportunity
 /**
  * Search events with flexible filters.
  */
-export async function searchEvents({ query, dateFrom, dateTo, category, status, priority, limit }) {
+export async function searchEvents(params) {
+  const { query, dateFrom, dateTo, category, status, priority, limit } = params || {};
   const take = limit || 10;
 
   // Build Prisma where clause
@@ -123,7 +125,8 @@ export async function searchEvents({ query, dateFrom, dateTo, category, status, 
 /**
  * Update an existing event's fields.
  */
-export async function updateEvent({ eventId, status, notes, priority }) {
+export async function updateEvent(params) {
+  const { eventId, status, notes, priority } = params || {};
   const data = {};
 
   if (status !== undefined && status !== null) data.status = status;
