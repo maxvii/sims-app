@@ -24,6 +24,14 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen pb-safe-nav">
+      {/* Back button */}
+      <div className="absolute top-12 left-5 z-20">
+        <button onClick={() => router.push('/calendar')} className="flex items-center gap-1 text-sm text-white/80 hover:text-white backdrop-blur-sm bg-black/20 rounded-full px-3 py-1.5">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+      </div>
+
       {/* ── Hero Section ── */}
       <div className="relative w-full h-[520px] overflow-hidden animate-fade-in">
         <img

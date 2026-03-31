@@ -53,6 +53,12 @@ export default function NotificationsPage() {
     <div className="min-h-screen pb-safe-nav">
       <div className="liquid-glass px-5 pt-12 pb-4 relative overflow-hidden" style={{ borderRadius: '0 0 24px 24px' }}>
         <GradientSpheres variant="compact" />
+        <div className="relative z-10">
+          <button onClick={() => router.push('/calendar')} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            Back
+          </button>
+        </div>
         <div className="flex items-center justify-between relative z-10">
           <div>
             <h1 className="font-display text-3xl font-black italic text-gray-800">Alerts</h1>

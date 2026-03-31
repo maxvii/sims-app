@@ -296,6 +296,13 @@ export default function ChatPage() {
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
+          <button
+            onClick={() => router.push('/calendar')}
+            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90"
+            style={{ background: 'rgba(80,45,85,0.08)' }}
+          >
+            <svg className="w-5 h-5" style={{ color: '#502D55' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+          </button>
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
             style={{ background: 'linear-gradient(135deg, #502D55, #935073)' }}

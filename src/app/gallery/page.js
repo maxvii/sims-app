@@ -45,6 +45,10 @@ export default function GalleryPage() {
       <div className="relative overflow-hidden px-5 pt-14 pb-6">
         <GradientSpheres variant="compact" />
         <div className="relative z-10">
+          <button onClick={() => router.push('/calendar')} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            Back
+          </button>
           <h1
             className="text-3xl font-bold tracking-tight animate-fade-in"
             style={{ color: '#502D55' }}
