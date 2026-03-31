@@ -123,7 +123,7 @@ export default function CalendarPage() {
       >
         <div className="flex items-center justify-between mb-4 relative z-10">
           <div className="flex items-center gap-2.5">
-            <img src="/images/simz-logo.png" alt="SIMS" className="w-8 h-8 object-contain" />
+            <img src="/images/simz-logo.png" alt="SIMS" className="w-9 h-9 rounded-lg object-cover" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }} />
             <h1 className="font-display text-2xl font-black italic text-[#F8F4E9] tracking-tight">SIMS Calendar</h1>
           </div>
           <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/50 shadow-md">

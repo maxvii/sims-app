@@ -38,13 +38,13 @@ export default function LoginPage() {
         style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(80,45,85,0.15) 0%, rgba(26,16,32,0.6) 100%)' }}
       />
 
-      {/* Logo — big and clean */}
-      <div className="relative z-10 mb-12 animate-fade-in">
+      {/* Logo — big, clean, with rounded corners */}
+      <div className="relative z-10 mb-14 animate-fade-in">
         <img
           src="/images/simz-logo.png"
           alt="The SIMS"
-          className="w-56 h-auto mx-auto"
-          style={{ filter: 'drop-shadow(0 8px 40px rgba(246,219,192,0.2))' }}
+          className="w-64 h-auto mx-auto rounded-3xl"
+          style={{ boxShadow: '0 12px 50px rgba(0,0,0,0.5)' }}
         />
       </div>
 

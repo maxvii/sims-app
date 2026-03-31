@@ -35,8 +35,8 @@ export default function AppHeader() {
         <img
           src="/images/simz-logo.png"
           alt="Simz"
-          className="w-6 h-6 object-contain"
-          style={{ filter: 'drop-shadow(0 1px 4px rgba(246,219,192,0.3))' }}
+          className="w-7 h-7 rounded-md object-cover"
+          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}
         />
         <span
           className="font-script text-lg leading-none"
