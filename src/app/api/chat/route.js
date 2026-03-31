@@ -1,21 +1,34 @@
-import { streamText, tool } from 'ai'
+import { streamText, tool, stepCountIs } from 'ai'
 import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } from '@/lib/agent-tools'
 
+export const maxDuration = 60
+
 export async function POST(req) {
   const session = await getServerSession(authOptions)
   if (!session) {
-    return new Response('Unauthorized', { status: 401 })
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })
   }
 
-  const { messages } = await req.json()
+  let body
+  try {
+    body = await req.json()
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+  }
+
+  const { messages } = body
+
+  if (!messages || !Array.isArray(messages)) {
+    return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+  }
 
   try {
     const result = streamText({
-      model: google('gemini-2.0-flash-001'),
+      model: google('gemini-2.0-flash'),
       system: `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
 
 Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
@@ -32,7 +45,7 @@ When asked about schedule, use search_events or get_today_brief tools.
 
 Be professional, concise, and proactive. Use emojis sparingly. Always confirm actions taken.`,
       messages,
-      maxSteps: 5,
+      stopWhen: stepCountIs(5),
       tools: {
         create_event: tool({
           description: 'Create a new calendar event for Sima Ved. Use this when the user asks to add, schedule, or create an event.',
@@ -108,9 +121,10 @@ Be professional, concise, and proactive. Use emojis sparingly. Always confirm ac
 
     return result.toDataStreamResponse()
   } catch (error) {
-    console.error('Sims GPT chat error:', error)
+    console.error('Sims GPT chat error:', error?.message || error)
+    console.error('Stack:', error?.stack)
     return new Response(
-      JSON.stringify({ error: 'Failed to process chat request. Please try again.' }),
+      JSON.stringify({ error: error?.message || 'Failed to process chat request. Please try again.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }

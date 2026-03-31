@@ -197,6 +197,8 @@ export default function ChatPage() {
   const recognitionRef = useRef(null)
 
   // useChat from Vercel AI SDK
+  const [chatError, setChatError] = useState(null)
+
   const {
     messages,
     input,
@@ -205,7 +207,14 @@ export default function ChatPage() {
     handleInputChange,
     isLoading,
     append,
-  } = useChat({ api: '/api/chat' })
+    error,
+  } = useChat({
+    api: '/api/chat',
+    onError: (err) => {
+      console.error('Chat error:', err)
+      setChatError(err?.message || 'Something went wrong. Please try again.')
+    },
+  })
 
   // ── Auth guard ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -395,6 +404,14 @@ export default function ChatPage() {
                 <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '300ms' }} />
               </span>
             </div>
+          </div>
+        )}
+
+        {/* Error display */}
+        {(chatError || error) && (
+          <div className="mx-2 mb-2 px-4 py-3 rounded-2xl text-sm animate-fade-in" style={{ background: 'rgba(212,54,92,0.1)', border: '1px solid rgba(212,54,92,0.2)', color: '#D4365C' }}>
+            {chatError || error?.message || 'Something went wrong. Please try again.'}
+            <button onClick={() => setChatError(null)} className="ml-2 font-bold">✕</button>
           </div>
         )}
 
