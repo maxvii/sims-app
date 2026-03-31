@@ -23,7 +23,15 @@ export async function POST(request) {
     }
 
     // Parse form data
-    const formData = await request.formData()
+    let formData
+    try {
+      formData = await request.formData()
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'Please upload both a person photo and a garment photo.' },
+        { status: 400 }
+      )
+    }
     const personImage = formData.get('personImage')
     const garmentImage = formData.get('garmentImage')
 
@@ -66,11 +74,12 @@ export async function POST(request) {
     // Call Replicate IDM-VTON model
     const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
 
-    const output = await replicate.run("cuuupid/idm-vton:c871bb9b046c1b1f21bf6a5283f6faa1c6e9e0d5e1e8d4081c5e6a0f3e7c8d2b", {
+    const output = await replicate.run("cuuupid/idm-vton", {
       input: {
         human_img: personDataUri,
         garm_img: garmentDataUri,
         garment_des: "clothing item",
+        category: "upper_body",
       }
     })
 
