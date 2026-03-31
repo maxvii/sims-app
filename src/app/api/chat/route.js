@@ -119,7 +119,7 @@ Be professional, concise, and proactive. Use emojis sparingly. Always confirm ac
       },
     })
 
-    return result.toDataStreamResponse()
+    return result.toUIMessageStreamResponse()
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
     console.error('Stack:', error?.stack)
