@@ -70,6 +70,7 @@ model Comment {
   content   String
   eventId   String
   userId    String
+  tab       String   @default("copywriting")  // "artwork", "media", "copywriting"
   createdAt DateTime @default(now())
   event     Event    @relation(fields: [eventId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
@@ -79,6 +80,7 @@ model Approval {
   id        String   @id @default(cuid())
   eventId   String
   userId    String
+  tab       String   @default("artwork")  // "artwork", "media", "copywriting"
   status    String   @default("PENDING")
   note      String?
   createdAt DateTime @default(now())

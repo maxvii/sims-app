@@ -7,15 +7,59 @@ import MediaGallery from '@/components/MediaGallery'
 import GradientSpheres from '@/components/GradientSpheres'
 
 const priorityColors = { CRITICAL: 'bg-priority-critical/90 text-white', HIGH: 'bg-priority-high/90 text-white', MEDIUM: 'bg-priority-medium/90 text-gray-800', LOW: 'bg-priority-low/90 text-white' }
-const statusColors = { 'Not Started': 'bg-gray-100/80 text-gray-500', 'Planned': 'bg-blue-50/80 text-blue-600', 'In Progress': 'bg-amber-50/80 text-amber-600', 'Approved': 'bg-emerald-50/80 text-emerald-600', 'Needs Revision': 'bg-red-50/80 text-red-500', 'Published': 'bg-purple-50/80 text-purple-600' }
-const STATUSES = ['Not Started', 'Planned', 'In Progress', 'Approved', 'Needs Revision', 'Published']
+const statusColors = {
+  'Not Started': 'bg-gray-100/80 text-gray-500',
+  'Planned': 'bg-blue-50/80 text-blue-600',
+  'In Progress': 'bg-amber-50/80 text-amber-600',
+  'Approved': 'bg-emerald-50/80 text-emerald-600',
+  'Needs Revision': 'bg-red-50/80 text-red-500',
+  'Published': 'bg-purple-50/80 text-purple-600',
+}
+
+function computeStatus(event) {
+  const approvals = event.approvals || []
+  const artworkApprovals = approvals.filter(a => a.tab === 'artwork')
+  const mediaApprovals = approvals.filter(a => a.tab === 'media')
+  const copyApprovals = approvals.filter(a => a.tab === 'copywriting')
+
+  const latestArtwork = artworkApprovals[0]
+  const latestMedia = mediaApprovals[0]
+  const latestCopy = copyApprovals[0]
+
+  // Check for any rejections
+  if (latestArtwork?.status === 'REJECTED' || latestMedia?.status === 'REJECTED' || latestCopy?.status === 'REJECTED') {
+    return 'Needs Revision'
+  }
+
+  // Check if all 3 are approved
+  const artApproved = latestArtwork?.status === 'APPROVED'
+  const medApproved = latestMedia?.status === 'APPROVED'
+  const copyApproved = latestCopy?.status === 'APPROVED'
+
+  if (artApproved && medApproved && copyApproved) return 'Approved'
+
+  // If any tab has an approval submitted
+  if (artApproved || medApproved || copyApproved) return 'In Progress'
+
+  // Check creative brief due date
+  if (event.creativeBriefDue) {
+    try {
+      const parts = event.creativeBriefDue.split(' ')
+      const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 }
+      const d = new Date(parseInt(parts[2]), MONTHS[parts[1]], parseInt(parts[0]))
+      if (d < new Date()) return 'Planned'
+    } catch {}
+  }
+
+  return 'Not Started'
+}
 
 export default function EventDetailPage() {
   const { data: session } = useSession()
   const router = useRouter()
   const params = useParams()
   const [event, setEvent] = useState(null)
-  const [activeTab, setActiveTab] = useState('workflow')
+  const [activeTab, setActiveTab] = useState('artwork')
   const [comment, setComment] = useState('')
   const [approvalNote, setApprovalNote] = useState('')
   const [refUrl, setRefUrl] = useState('')
@@ -45,14 +89,7 @@ export default function EventDetailPage() {
     </div>
   )
 
-  const handleStatusChange = async (newStatus) => {
-    await fetch(`/api/events/${event.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    })
-    fetchEvent()
-  }
+  const computedStatus = computeStatus(event)
 
   const handleComment = async (e) => {
     e.preventDefault()
@@ -61,19 +98,19 @@ export default function EventDetailPage() {
     await fetch('/api/comments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: comment, eventId: event.id }),
+      body: JSON.stringify({ content: comment, eventId: event.id, tab: 'copywriting' }),
     })
     setComment('')
     setSubmitting(false)
     fetchEvent()
   }
 
-  const handleApproval = async (status) => {
+  const handleApproval = async (status, tab) => {
     setSubmitting(true)
     await fetch('/api/approvals', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ eventId: event.id, status, note: approvalNote }),
+      body: JSON.stringify({ eventId: event.id, status, note: approvalNote, tab }),
     })
     setApprovalNote('')
     setSubmitting(false)
@@ -96,16 +133,17 @@ export default function EventDetailPage() {
   }
 
   const tabs = [
-    { id: 'workflow', label: 'Workflow' },
+    { id: 'artwork', label: 'Artwork' },
     { id: 'media', label: `Media (${media.length})` },
-    { id: 'comments', label: `Comments (${event.comments?.length || 0})` },
-    { id: 'approvals', label: 'Approval' },
-    { id: 'references', label: 'Refs' },
+    { id: 'copywriting', label: 'Copywriting' },
   ]
+
+  // Filter approvals by tab
+  const getTabApprovals = (tab) => (event.approvals || []).filter(a => a.tab === tab)
 
   return (
     <div className="min-h-screen pb-safe-nav">
-      {/* Header */}
+      {/* ── Header ── */}
       <div className="liquid-glass px-5 pt-12 pb-5 relative overflow-hidden" style={{ borderRadius: '0 0 24px 24px' }}>
         <GradientSpheres variant="compact" />
         <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-gray-500 mb-3 hover:text-gray-700 relative z-10">
@@ -115,18 +153,21 @@ export default function EventDetailPage() {
 
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className={`pill-tag text-[10px] ${priorityColors[event.priority]}`}>{event.priority}</span>
-              <span className={`pill-tag text-[10px] ${statusColors[event.status] || 'bg-gray-100/80 text-gray-500'}`}>{event.status}</span>
+              <span className={`pill-tag text-[10px] ${statusColors[computedStatus] || 'bg-gray-100/80 text-gray-500'}`}>{computedStatus}</span>
+              {event.category && (
+                <span className="pill-tag text-[10px] bg-[#935073]/10 text-[#935073]">{event.category}</span>
+              )}
             </div>
             <h1 className="font-display text-xl font-black italic text-gray-800 mb-1">{event.title}</h1>
-            <p className="text-sm text-gray-500">{event.date}{event.endDate ? ` — ${event.endDate}` : ''}</p>
+            <p className="text-sm text-gray-500">{event.date}{event.endDate ? ` -- ${event.endDate}` : ''}</p>
           </div>
           <span className="font-display text-3xl font-black italic text-lavender/60">#{event.number}</span>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* ── Tabs ── */}
       <div className="flex gap-1 px-4 pt-4 overflow-x-auto scrollbar-hide">
         {tabs.map((t) => (
           <button
@@ -139,189 +180,166 @@ export default function EventDetailPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
+      {/* ── Tab Content ── */}
       <div className="px-4 pt-4 animate-fade-in">
-        {activeTab === 'workflow' && (
+
+        {/* ========== ARTWORK TAB ========== */}
+        {activeTab === 'artwork' && (
           <div className="space-y-4">
-            {/* Status Changer */}
-            {(session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR' || session?.user?.role === 'APPROVER') && (
-              <div className="liquid-glass-card p-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Update Status</h3>
-                <div className="flex flex-wrap gap-2">
-                  {STATUSES.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => handleStatusChange(s)}
-                      className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${event.status === s ? statusColors[s] + ' ring-2 ring-[#B0688A]' : 'bg-white/50 text-gray-500 hover:bg-white/70'}`}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Step-by-Step Workflow */}
-            <WorkflowStep num={1} title="Opportunity Type" content={event.opportunityType} />
-            <WorkflowStep num={2} title="Post Concept" content={event.postConcept} />
-            <WorkflowStep num={3} title="Visual Direction" content={event.visualDirection} />
-            <WorkflowStep num={4} title="Caption Direction" content={event.captionDirection} />
-            <WorkflowStep num={5} title="Target Platforms" content={event.platforms} />
-
-            {/* Deadlines */}
+            {/* Deadlines Grid */}
             <div className="liquid-glass-card p-4">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Deadlines</h3>
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Creative Deadlines</h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/50 rounded-xl p-3">
-                  <p className="text-[10px] font-semibold text-gray-500 uppercase">Brief Due</p>
-                  <p className="text-sm font-bold text-gray-700">{event.creativeBriefDue}</p>
-                </div>
-                <div className="bg-white/50 rounded-xl p-3">
-                  <p className="text-[10px] font-semibold text-gray-500 uppercase">Creative Due</p>
-                  <p className="text-sm font-bold text-gray-700">{event.creativeDue}</p>
-                </div>
+                <DeadlineCell label="Brief Due" value={event.creativeBriefDue} />
+                <DeadlineCell label="Round 1" value={event.round1Due} />
+                <DeadlineCell label="Round 2" value={event.round2Due} />
+                <DeadlineCell label="Final Creative" value={event.finalCreativeDue} />
               </div>
             </div>
 
-            {event.notes && (
-              <div className="liquid-glass-card p-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Notes</h3>
-                <p className="text-sm text-gray-600">{event.notes}</p>
-              </div>
-            )}
-          </div>
-        )}
+            {/* Visual Direction */}
+            <InfoCard title="Visual Direction" content={event.visualDirection} />
 
-        {activeTab === 'media' && (
-          <MediaGallery eventId={event.id} media={media} onRefresh={() => { fetchMedia(); fetchEvent() }} />
-        )}
+            {/* Post Concept */}
+            <InfoCard title="Post Concept" content={event.postConcept} />
 
-        {activeTab === 'comments' && (
-          <div className="space-y-4">
-            <form onSubmit={handleComment} className="liquid-glass-card p-4">
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Add a comment..."
-                rows={3}
-                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 resize-none border border-white/40"
-              />
-              <button type="submit" disabled={submitting || !comment.trim()} className="mt-2 liquid-gradient-btn px-5 py-2 text-sm disabled:opacity-50">
-                {submitting ? 'Posting...' : 'Post Comment'}
-              </button>
-            </form>
+            {/* Opportunity Type */}
+            <InfoCard title="Opportunity Type" content={event.opportunityType} />
 
-            {event.comments?.map((c) => (
-              <div key={c.id} className="liquid-glass-card p-4 animate-fade-in">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#935073] to-coral flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">{c.user.name[0]}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">{c.user.name}</p>
-                    <p className="text-[10px] text-gray-500">{new Date(c.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
+            {/* Target Platforms */}
+            <InfoCard title="Target Platforms" content={event.platforms} />
+
+            {/* Notes */}
+            {event.notes && <InfoCard title="Notes" content={event.notes} />}
+
+            {/* References Section */}
+            <div className="liquid-glass-card p-4">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">References</h3>
+
+              {event.references?.length > 0 && (
+                <div className="space-y-2 mb-4">
+                  {event.references.map((r) => (
+                    <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2.5 rounded-xl bg-white/40 hover:bg-white/60 transition-all">
+                      <div className="w-8 h-8 rounded-lg bg-[#935073]/10 flex items-center justify-center flex-shrink-0">
+                        {r.type === 'IMAGE' ? (
+                          <svg className="w-4 h-4 text-[#935073]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        ) : (
+                          <svg className="w-4 h-4 text-[#935073]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-700 truncate">{r.title}</p>
+                        <p className="text-[10px] text-gray-500">by {r.user.name}</p>
+                      </div>
+                    </a>
+                  ))}
                 </div>
-                <p className="text-sm text-gray-600 pl-9">{c.content}</p>
-              </div>
-            ))}
+              )}
 
-            {event.comments?.length === 0 && (
-              <div className="text-center text-gray-500 text-sm py-8">No comments yet</div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'approvals' && (
-          <div className="space-y-4">
-            {(session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR' || session?.user?.role === 'APPROVER') && (
-              <div className="liquid-glass-card p-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Submit Decision</h3>
-                <textarea
-                  value={approvalNote}
-                  onChange={(e) => setApprovalNote(e.target.value)}
-                  placeholder="Add a note (optional)..."
-                  rows={2}
-                  className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 resize-none border border-white/40 mb-3"
+              {/* Add Reference Form */}
+              <form onSubmit={handleAddRef} className="space-y-2">
+                <input
+                  value={refTitle}
+                  onChange={(e) => setRefTitle(e.target.value)}
+                  placeholder="Reference title..."
+                  className="w-full bg-white/50 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
                 />
-                <div className="flex gap-2">
-                  <button onClick={() => handleApproval('APPROVED')} disabled={submitting} className="flex-1 py-2.5 bg-green-500 text-white rounded-xl font-semibold text-sm hover:bg-green-600 transition-all disabled:opacity-50">
-                    Approve
-                  </button>
-                  <button onClick={() => handleApproval('REJECTED')} disabled={submitting} className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-semibold text-sm hover:bg-red-600 transition-all disabled:opacity-50">
-                    Reject
-                  </button>
-                </div>
-              </div>
-            )}
+                <input
+                  value={refUrl}
+                  onChange={(e) => setRefUrl(e.target.value)}
+                  placeholder="URL or image link..."
+                  className="w-full bg-white/50 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+                />
+                <button type="submit" disabled={submitting || !refUrl.trim() || !refTitle.trim()} className="liquid-gradient-btn px-4 py-2 text-sm disabled:opacity-50">
+                  Add Reference
+                </button>
+              </form>
+            </div>
 
-            {event.approvals?.map((a) => (
-              <div key={a.id} className="liquid-glass-card p-4 animate-fade-in">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center ${a.status === 'APPROVED' ? 'bg-green-100' : a.status === 'REJECTED' ? 'bg-red-100' : 'bg-yellow-100'}`}>
-                    {a.status === 'APPROVED' ? (
-                      <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
-                    ) : a.status === 'REJECTED' ? (
-                      <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
-                    ) : (
-                      <svg className="w-4 h-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">{a.user.name} — <span className={a.status === 'APPROVED' ? 'text-green-600' : a.status === 'REJECTED' ? 'text-red-600' : 'text-yellow-600'}>{a.status}</span></p>
-                    <p className="text-[10px] text-gray-500">{new Date(a.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
-                </div>
-                {a.note && <p className="text-sm text-gray-600 pl-9">{a.note}</p>}
-              </div>
-            ))}
-
-            {event.approvals?.length === 0 && (
-              <div className="text-center text-gray-500 text-sm py-8">No approval decisions yet</div>
-            )}
+            {/* Artwork Approval */}
+            <ApprovalSection
+              tab="artwork"
+              approvals={getTabApprovals('artwork')}
+              approvalNote={approvalNote}
+              setApprovalNote={setApprovalNote}
+              handleApproval={handleApproval}
+              submitting={submitting}
+              session={session}
+            />
           </div>
         )}
 
-        {activeTab === 'references' && (
+        {/* ========== MEDIA TAB ========== */}
+        {activeTab === 'media' && (
           <div className="space-y-4">
-            <form onSubmit={handleAddRef} className="liquid-glass-card p-4 space-y-3">
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Add Reference</h3>
-              <input
-                value={refTitle}
-                onChange={(e) => setRefTitle(e.target.value)}
-                placeholder="Reference title..."
-                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
-              />
-              <input
-                value={refUrl}
-                onChange={(e) => setRefUrl(e.target.value)}
-                placeholder="URL or image link..."
-                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
-              />
-              <button type="submit" disabled={submitting || !refUrl.trim() || !refTitle.trim()} className="liquid-gradient-btn px-5 py-2 text-sm disabled:opacity-50">
-                Add Reference
-              </button>
-            </form>
+            <MediaGallery eventId={event.id} media={media} onRefresh={() => { fetchMedia(); fetchEvent() }} />
 
-            {event.references?.map((r) => (
-              <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className="liquid-glass-card p-4 flex items-center gap-3 hover:scale-[1.01] transition-all block">
-                <div className="w-10 h-10 rounded-xl bg-[#935073]/10 flex items-center justify-center flex-shrink-0">
-                  {r.type === 'IMAGE' ? (
-                    <svg className="w-5 h-5 text-[#935073]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                  ) : (
-                    <svg className="w-5 h-5 text-[#935073]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-700 truncate">{r.title}</p>
-                  <p className="text-xs text-gray-500">by {r.user.name}</p>
-                </div>
-              </a>
-            ))}
+            {/* Media Approval */}
+            <ApprovalSection
+              tab="media"
+              approvals={getTabApprovals('media')}
+              approvalNote={approvalNote}
+              setApprovalNote={setApprovalNote}
+              handleApproval={handleApproval}
+              submitting={submitting}
+              session={session}
+            />
+          </div>
+        )}
 
-            {event.references?.length === 0 && (
-              <div className="text-center text-gray-500 text-sm py-8">No references added yet</div>
-            )}
+        {/* ========== COPYWRITING TAB ========== */}
+        {activeTab === 'copywriting' && (
+          <div className="space-y-4">
+            {/* Caption Direction */}
+            <InfoCard title="Caption Direction" content={event.captionDirection} />
+
+            {/* Comments Section */}
+            <div className="liquid-glass-card p-4">
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Comments</h3>
+
+              <form onSubmit={handleComment} className="mb-4">
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Add copywriting feedback..."
+                  rows={3}
+                  className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 resize-none border border-white/40"
+                />
+                <button type="submit" disabled={submitting || !comment.trim()} className="mt-2 liquid-gradient-btn px-5 py-2 text-sm disabled:opacity-50">
+                  {submitting ? 'Posting...' : 'Post Comment'}
+                </button>
+              </form>
+
+              {event.comments?.filter(c => !c.tab || c.tab === 'copywriting').map((c) => (
+                <div key={c.id} className="mb-3 p-3 rounded-xl bg-white/30 animate-fade-in">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#935073] to-coral flex items-center justify-center">
+                      <span className="text-xs font-bold text-white">{c.user.name[0]}</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700">{c.user.name}</p>
+                      <p className="text-[10px] text-gray-500">{new Date(c.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 pl-9">{c.content}</p>
+                </div>
+              ))}
+
+              {(!event.comments || event.comments.filter(c => !c.tab || c.tab === 'copywriting').length === 0) && (
+                <p className="text-center text-gray-400 text-sm py-4">No comments yet</p>
+              )}
+            </div>
+
+            {/* Copywriting Approval */}
+            <ApprovalSection
+              tab="copywriting"
+              approvals={getTabApprovals('copywriting')}
+              approvalNote={approvalNote}
+              setApprovalNote={setApprovalNote}
+              handleApproval={handleApproval}
+              submitting={submitting}
+              session={session}
+            />
           </div>
         )}
       </div>
@@ -331,16 +349,106 @@ export default function EventDetailPage() {
   )
 }
 
-function WorkflowStep({ num, title, content }) {
+/* ── Deadline Cell ── */
+function DeadlineCell({ label, value }) {
+  const isPast = (() => {
+    if (!value) return false
+    try {
+      const MONTHS = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 }
+      const parts = value.split(' ')
+      const d = new Date(parseInt(parts[2]), MONTHS[parts[1]], parseInt(parts[0]))
+      return d < new Date()
+    } catch { return false }
+  })()
+
+  return (
+    <div className={`rounded-xl p-3 ${isPast ? 'bg-red-50/60' : 'bg-white/50'}`}>
+      <p className="text-[10px] font-semibold text-gray-500 uppercase">{label}</p>
+      <p className={`text-sm font-bold ${isPast ? 'text-red-600' : 'text-gray-700'}`}>{value || '--'}</p>
+    </div>
+  )
+}
+
+/* ── Info Card ── */
+function InfoCard({ title, content }) {
+  if (!content) return null
   return (
     <div className="liquid-glass-card p-4">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#502D55] to-[#935073] flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-bold text-white">{num}</span>
+      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{title}</h3>
+      <p className="text-sm text-gray-700 leading-relaxed">{content}</p>
+    </div>
+  )
+}
+
+/* ── Per-Tab Approval Section ── */
+function ApprovalSection({ tab, approvals, approvalNote, setApprovalNote, handleApproval, submitting, session }) {
+  const canApprove = session?.user?.role === 'ADMIN' || session?.user?.role === 'EDITOR' || session?.user?.role === 'APPROVER'
+  const tabLabel = tab.charAt(0).toUpperCase() + tab.slice(1)
+
+  return (
+    <div className="liquid-glass-card p-4">
+      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+        {tabLabel} Approval
+      </h3>
+
+      {/* Submit form */}
+      {canApprove && (
+        <div className="mb-4">
+          <textarea
+            value={approvalNote}
+            onChange={(e) => setApprovalNote(e.target.value)}
+            placeholder={`Add a note for ${tab} approval (optional)...`}
+            rows={2}
+            className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 resize-none border border-white/40 mb-3"
+          />
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleApproval('APPROVED', tab)}
+              disabled={submitting}
+              className="flex-1 py-2.5 bg-green-500 text-white rounded-xl font-semibold text-sm hover:bg-green-600 transition-all disabled:opacity-50"
+            >
+              Approve
+            </button>
+            <button
+              onClick={() => handleApproval('REJECTED', tab)}
+              disabled={submitting}
+              className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-semibold text-sm hover:bg-red-600 transition-all disabled:opacity-50"
+            >
+              Reject
+            </button>
+          </div>
         </div>
-        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.12em]">{title}</h3>
-      </div>
-      <p className="text-sm text-gray-700 pl-11 leading-relaxed">{content}</p>
+      )}
+
+      {/* Approval history */}
+      {approvals.length > 0 ? (
+        <div className="space-y-2.5">
+          {approvals.map((a) => (
+            <div key={a.id} className="p-3 rounded-xl bg-white/30 animate-fade-in">
+              <div className="flex items-center gap-2 mb-1">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${a.status === 'APPROVED' ? 'bg-green-100' : a.status === 'REJECTED' ? 'bg-red-100' : 'bg-yellow-100'}`}>
+                  {a.status === 'APPROVED' ? (
+                    <svg className="w-3.5 h-3.5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
+                  ) : a.status === 'REJECTED' ? (
+                    <svg className="w-3.5 h-3.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {a.user.name} -- <span className={a.status === 'APPROVED' ? 'text-green-600' : a.status === 'REJECTED' ? 'text-red-600' : 'text-yellow-600'}>{a.status}</span>
+                  </p>
+                  <p className="text-[10px] text-gray-500">{new Date(a.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+              {a.note && <p className="text-sm text-gray-600 pl-8">{a.note}</p>}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-gray-400 text-sm py-3">No {tab} approvals yet</p>
+      )}
     </div>
   )
 }

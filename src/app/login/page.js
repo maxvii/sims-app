@@ -23,20 +23,29 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-8"
-      style={{ background: 'linear-gradient(170deg, #3D2240 0%, #502D55 35%, #6B3A6E 60%, #502D55 85%, #3D2240 100%)' }}
+      style={{ background: 'linear-gradient(170deg, #3D2240 0%, #502D55 30%, #3D2240 60%, #1A1020 100%)' }}
     >
       {/* Logo */}
-      <div className="mb-12 animate-fade-in">
+      <div className="mb-14 animate-fade-in flex flex-col items-center">
         <img
-          src="/images/logo.png"
-          alt="The SMZ"
-          className="w-48 h-auto mx-auto"
-          style={{ filter: 'drop-shadow(0 4px 20px rgba(246,219,192,0.3))' }}
+          src="/images/simz-logo.png"
+          alt="Simz"
+          className="w-40 h-auto mx-auto"
+          style={{ filter: 'drop-shadow(0 6px 30px rgba(246,219,192,0.35))' }}
         />
       </div>
 
-      {/* Login Form */}
-      <div className="w-full max-w-sm animate-slide-up">
+      {/* Login Card */}
+      <div
+        className="w-full max-w-sm animate-slide-up p-6 rounded-3xl"
+        style={{
+          background: 'rgba(26,16,32,0.55)',
+          backdropFilter: 'blur(30px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(30px) saturate(1.5)',
+          border: '1px solid rgba(248,244,233,0.1)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(248,244,233,0.08)',
+        }}
+      >
         {error && (
           <div
             className="text-sm p-3 rounded-2xl text-center font-medium mb-5"
@@ -57,8 +66,8 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full py-3.5 px-5 rounded-2xl text-[15px] outline-none transition-all"
             style={{
-              background: 'rgba(248,244,233,0.08)',
-              border: '1.5px solid rgba(248,244,233,0.15)',
+              background: 'rgba(248,244,233,0.06)',
+              border: '1.5px solid rgba(248,244,233,0.12)',
               color: '#F8F4E9',
               backdropFilter: 'blur(20px)',
             }}
@@ -73,8 +82,8 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full py-3.5 px-5 pr-12 rounded-2xl text-[15px] outline-none transition-all"
               style={{
-                background: 'rgba(248,244,233,0.08)',
-                border: '1.5px solid rgba(248,244,233,0.15)',
+                background: 'rgba(248,244,233,0.06)',
+                border: '1.5px solid rgba(248,244,233,0.12)',
                 color: '#F8F4E9',
                 backdropFilter: 'blur(20px)',
               }}
@@ -118,6 +127,11 @@ export default function LoginPage() {
           <span className="text-[12px] font-medium cursor-pointer transition-colors" style={{ color: 'rgba(246,219,192,0.45)' }}>Forgot password?</span>
         </p>
       </div>
+
+      {/* Subtle branding at bottom */}
+      <p className="mt-10 text-[11px] tracking-widest uppercase" style={{ color: 'rgba(246,219,192,0.2)' }}>
+        Powered by Simz
+      </p>
     </div>
   )
 }

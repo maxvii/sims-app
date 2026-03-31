@@ -15,6 +15,7 @@ export async function POST(request) {
 
     // Check if Replicate token is configured
     if (!process.env.REPLICATE_API_TOKEN) {
+      console.error('REPLICATE_API_TOKEN is not set')
       return NextResponse.json(
         { error: 'Try-on service not configured', code: 'NOT_CONFIGURED' },
         { status: 503 }
@@ -58,10 +59,14 @@ export async function POST(request) {
     const garmentBuffer = Buffer.from(await garmentImage.arrayBuffer())
     const garmentDataUri = `data:${garmentImage.type};base64,${garmentBuffer.toString('base64')}`
 
+    console.log('Starting try-on request with IDM-VTON model...')
+    console.log(`Person image: ${personImage.type}, ${(personImage.size / 1024).toFixed(1)}KB`)
+    console.log(`Garment image: ${garmentImage.type}, ${(garmentImage.size / 1024).toFixed(1)}KB`)
+
     // Call Replicate IDM-VTON model
     const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN })
 
-    const output = await replicate.run("cuuupid/idm-vton", {
+    const output = await replicate.run("cuuupid/idm-vton:c871bb9b046c1b1f21bf6a5283f6faa1c6e9e0d5e1e8d4081c5e6a0f3e7c8d2b", {
       input: {
         human_img: personDataUri,
         garm_img: garmentDataUri,
@@ -69,15 +74,43 @@ export async function POST(request) {
       }
     })
 
-    // Output is a URL string to the result image
-    return NextResponse.json({ resultUrl: output })
+    console.log('Try-on output type:', typeof output, Array.isArray(output) ? 'array' : '')
+    console.log('Try-on output:', JSON.stringify(output).slice(0, 200))
+
+    // Handle different output formats from Replicate
+    let resultUrl
+    if (typeof output === 'string') {
+      resultUrl = output
+    } else if (Array.isArray(output) && output.length > 0) {
+      resultUrl = output[0]
+    } else if (output?.output) {
+      resultUrl = output.output
+    } else if (output?.url) {
+      resultUrl = output.url
+    } else {
+      console.error('Unexpected output format from Replicate:', output)
+      return NextResponse.json(
+        { error: 'Unexpected response from try-on model' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ resultUrl })
   } catch (error) {
-    console.error('Try-on API error:', error)
+    console.error('Try-on API error:', error?.message || error)
+    console.error('Try-on API error stack:', error?.stack)
 
     if (error.message?.includes('timeout') || error.message?.includes('Timeout')) {
       return NextResponse.json(
         { error: 'The try-on process timed out. Please try again with smaller images.' },
         { status: 504 }
+      )
+    }
+
+    if (error.message?.includes('Invalid') || error.message?.includes('authentication')) {
+      return NextResponse.json(
+        { error: 'Try-on service authentication failed. Please check API configuration.' },
+        { status: 503 }
       )
     }
 

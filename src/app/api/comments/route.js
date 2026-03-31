@@ -8,11 +8,14 @@ export async function POST(req) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { content, eventId } = await req.json()
+  const { content, eventId, tab } = await req.json()
   if (!content || !eventId) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
+  const validTabs = ['artwork', 'media', 'copywriting']
+  const commentTab = validTabs.includes(tab) ? tab : 'copywriting'
+
   const comment = await prisma.comment.create({
-    data: { content, eventId, userId: session.user.id },
+    data: { content, eventId, userId: session.user.id, tab: commentTab },
     include: { user: { select: { id: true, name: true, role: true } } },
   })
 
