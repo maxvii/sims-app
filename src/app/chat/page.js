@@ -88,7 +88,7 @@ function formatInline(text) {
     if (part.startsWith('*') && part.endsWith('*'))
       return <em key={i}>{part.slice(1, -1)}</em>
     if (part.startsWith('`') && part.endsWith('`'))
-      return <code key={i} className="px-1 py-0.5 rounded text-xs" style={{ background: 'rgba(80,45,85,0.08)' }}>{part.slice(1, -1)}</code>
+      return <code key={i} className="px-1 py-0.5 rounded text-xs" style={{ background: 'rgba(54,58,71,0.08)' }}>{part.slice(1, -1)}</code>
     return part
   })
 }
@@ -133,13 +133,13 @@ function ToolCard({ invocation }) {
     <div
       className="flex items-center gap-2 px-3 py-2 rounded-xl mt-1 mb-1 text-xs"
       style={{
-        background: isResult ? 'rgba(80,45,85,0.06)' : 'rgba(147,80,115,0.08)',
-        border: '1px solid rgba(80,45,85,0.08)',
+        background: isResult ? 'rgba(54,58,71,0.06)' : 'rgba(107,123,141,0.08)',
+        border: '1px solid rgba(54,58,71,0.08)',
       }}
     >
       <span className="text-sm">{label.icon}</span>
       <div className="flex-1 min-w-0">
-        <span style={{ color: '#502D55' }} className="font-medium">
+        <span style={{ color: '#363A47' }} className="font-medium">
           {isToolLoading ? label.loading : label.done}
         </span>
         {resultSummary && (
@@ -148,9 +148,9 @@ function ToolCard({ invocation }) {
       </div>
       {isToolLoading && (
         <span className="flex gap-0.5">
-          <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '0ms' }} />
-          <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '150ms' }} />
-          <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '300ms' }} />
+          <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#6B7B8D', animationDelay: '0ms' }} />
+          <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#6B7B8D', animationDelay: '150ms' }} />
+          <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#6B7B8D', animationDelay: '300ms' }} />
         </span>
       )}
     </div>
@@ -169,7 +169,7 @@ function MessageBubble({ message }) {
       {!isUser && (
         <div
           className="w-7 h-7 rounded-full shrink-0 mt-1 mr-2 flex items-center justify-center text-white text-xs font-bold"
-          style={{ background: 'linear-gradient(135deg, #502D55, #935073)' }}
+          style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
         >
           S
         </div>
@@ -185,12 +185,12 @@ function MessageBubble({ message }) {
             }`}
             style={
               isUser
-                ? { background: 'linear-gradient(135deg, #502D55, #935073)' }
+                ? { background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }
                 : {
-                    background: 'rgba(248,244,233,0.65)',
+                    background: 'rgba(247,249,250,0.65)',
                     backdropFilter: 'blur(36px)',
                     WebkitBackdropFilter: 'blur(36px)',
-                    border: '1px solid rgba(248,244,233,0.65)',
+                    border: '1px solid rgba(247,249,250,0.65)',
                     color: '#1f1f1f',
                   }
             }
@@ -306,37 +306,37 @@ export default function ChatPage() {
   return (
     <div
       className="flex flex-col h-screen"
-      style={{ background: '#F8F4E9' }}
+      style={{ background: '#F7F9FA' }}
     >
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div
         className="shrink-0 px-5 pt-12 pb-4 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(248,244,233,0.8) 0%, rgba(246,219,192,0.35) 50%, rgba(248,244,233,0.75) 100%)',
+          background: 'linear-gradient(135deg, rgba(247,249,250,0.8) 0%, rgba(208,217,226,0.35) 50%, rgba(247,249,250,0.75) 100%)',
           backdropFilter: 'blur(40px) saturate(2)',
           WebkitBackdropFilter: 'blur(40px) saturate(2)',
           borderRadius: '0 0 24px 24px',
-          borderBottom: '1.5px solid rgba(248,244,233,0.7)',
-          boxShadow: '0 8px 32px rgba(80,45,85,0.06)',
+          borderBottom: '1.5px solid rgba(247,249,250,0.7)',
+          boxShadow: '0 8px 32px rgba(54,58,71,0.06)',
         }}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #935073, transparent 70%)' }} />
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #502D55, transparent 70%)' }} />
-          <div className="absolute top-4 right-24 w-16 h-16 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #F6DBC0, transparent 70%)' }} />
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #6B7B8D, transparent 70%)' }} />
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #363A47, transparent 70%)' }} />
+          <div className="absolute top-4 right-24 w-16 h-16 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #D0D9E2, transparent 70%)' }} />
         </div>
 
         <div className="relative z-10 flex items-center gap-3">
           <button
             onClick={() => router.push('/calendar')}
             className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all active:scale-90"
-            style={{ background: 'rgba(80,45,85,0.08)' }}
+            style={{ background: 'rgba(54,58,71,0.08)' }}
           >
-            <svg className="w-5 h-5" style={{ color: '#502D55' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            <svg className="w-5 h-5" style={{ color: '#363A47' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
           </button>
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-            style={{ background: 'linear-gradient(135deg, #502D55, #935073)' }}
+            style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
           >
             S
           </div>
@@ -357,11 +357,11 @@ export default function ChatPage() {
               disabled={isLoading}
               className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all active:scale-95 disabled:opacity-50"
               style={{
-                background: 'rgba(248,244,233,0.65)',
+                background: 'rgba(247,249,250,0.65)',
                 backdropFilter: 'blur(36px)',
                 WebkitBackdropFilter: 'blur(36px)',
-                border: '1px solid rgba(248,244,233,0.65)',
-                color: '#502D55',
+                border: '1px solid rgba(247,249,250,0.65)',
+                color: '#363A47',
               }}
             >
               <span>{action.emoji}</span>
@@ -382,7 +382,7 @@ export default function ChatPage() {
           <div className="flex flex-col items-center justify-center pt-12 animate-fade-in">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: 'linear-gradient(135deg, #502D55, #935073, #F6DBC0)' }}
+              style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D, #D0D9E2)' }}
             >
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2L13.09 8.26L18 6L14.74 10.91L21 12L14.74 13.09L18 18L13.09 15.74L12 22L10.91 15.74L6 18L9.26 13.09L3 12L9.26 10.91L6 6L10.91 8.26L12 2Z" />
@@ -407,23 +407,23 @@ export default function ChatPage() {
           <div className="flex justify-start animate-fade-in">
             <div
               className="w-7 h-7 rounded-full shrink-0 mt-1 mr-2 flex items-center justify-center text-white text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg, #502D55, #935073)' }}
+              style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
             >
               S
             </div>
             <div
               className="px-4 py-3 rounded-2xl rounded-bl-sm"
               style={{
-                background: 'rgba(248,244,233,0.65)',
+                background: 'rgba(247,249,250,0.65)',
                 backdropFilter: 'blur(36px)',
                 WebkitBackdropFilter: 'blur(36px)',
-                border: '1px solid rgba(248,244,233,0.65)',
+                border: '1px solid rgba(247,249,250,0.65)',
               }}
             >
               <span className="flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '0ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '150ms' }} />
-                <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '300ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#6B7B8D', animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#6B7B8D', animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full animate-bounce" style={{ background: '#6B7B8D', animationDelay: '300ms' }} />
               </span>
             </div>
           </div>
@@ -465,11 +465,11 @@ export default function ChatPage() {
           <div
             className="flex-1 flex items-end rounded-2xl px-4 py-2.5"
             style={{
-              background: 'rgba(248,244,233,0.65)',
+              background: 'rgba(247,249,250,0.65)',
               backdropFilter: 'blur(36px)',
               WebkitBackdropFilter: 'blur(36px)',
-              border: '1.5px solid rgba(248,244,233,0.7)',
-              boxShadow: '0 4px 16px rgba(80,45,85,0.06)',
+              border: '1.5px solid rgba(247,249,250,0.7)',
+              boxShadow: '0 4px 16px rgba(54,58,71,0.06)',
             }}
           >
             <textarea
@@ -502,8 +502,8 @@ export default function ChatPage() {
                 style={{
                   background: isListening
                     ? 'linear-gradient(135deg, #e53e3e, #c53030)'
-                    : 'rgba(80,45,85,0.08)',
-                  color: isListening ? '#fff' : '#935073',
+                    : 'rgba(54,58,71,0.08)',
+                  color: isListening ? '#fff' : '#6B7B8D',
                 }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -520,12 +520,12 @@ export default function ChatPage() {
             className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
             style={{
               background: input.trim()
-                ? 'linear-gradient(135deg, #502D55, #935073)'
-                : 'rgba(80,45,85,0.12)',
-              boxShadow: input.trim() ? '0 4px 16px rgba(80,45,85,0.3)' : 'none',
+                ? 'linear-gradient(135deg, #363A47, #6B7B8D)'
+                : 'rgba(54,58,71,0.12)',
+              boxShadow: input.trim() ? '0 4px 16px rgba(54,58,71,0.3)' : 'none',
             }}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke={input.trim() ? '#fff' : '#935073'} strokeWidth={2}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke={input.trim() ? '#fff' : '#6B7B8D'} strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
           </button>

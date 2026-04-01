@@ -23,27 +23,20 @@ export default function AppHeader() {
     <div
       className="flex items-center justify-between px-4 h-12 sticky top-0 z-40"
       style={{
-        background: 'rgba(26,16,32,0.45)',
+        background: 'rgba(20,22,30,0.45)',
         backdropFilter: 'blur(30px) saturate(1.8)',
         WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
-        borderBottom: '1px solid rgba(248,244,233,0.08)',
+        borderBottom: '1px solid rgba(247,249,250,0.08)',
         boxShadow: '0 2px 16px rgba(0,0,0,0.15)',
       }}
     >
-      {/* Logo + Brand */}
+      {/* Logo */}
       <Link href="/calendar" className="flex items-center gap-2">
         <img
-          src="/images/simz-logo.png"
-          alt="Simz"
-          className="w-7 h-7 rounded-md object-cover"
-          style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}
+          src="/logo.png"
+          alt="The Sims App"
+          className="h-8 w-auto"
         />
-        <span
-          className="font-script text-lg leading-none"
-          style={{ color: '#F6DBC0' }}
-        >
-          Simz
-        </span>
       </Link>
 
       {/* Notification Bell */}
@@ -54,7 +47,7 @@ export default function AppHeader() {
           viewBox="0 0 24 24"
           stroke="currentColor"
           strokeWidth={1.8}
-          style={{ color: 'rgba(246,219,192,0.7)' }}
+          style={{ color: 'rgba(208,217,226,0.7)' }}
         >
           <path
             strokeLinecap="round"

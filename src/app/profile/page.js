@@ -82,7 +82,7 @@ export default function ProfilePage() {
           </button>
         </div>
         <div className="flex flex-col items-center relative z-10">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#502D55] to-[#935073] flex items-center justify-center mb-3 shadow-lg">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#363A47] to-[#6B7B8D] flex items-center justify-center mb-3 shadow-lg">
             <span className="text-2xl font-extrabold text-white">{session.user.name[0]}</span>
           </div>
           <h1 className="font-display text-xl font-black italic text-gray-800">{session.user.name}</h1>
@@ -110,7 +110,7 @@ export default function ProfilePage() {
                   <input
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="bg-white/50 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40 w-36 text-right"
+                    className="bg-white/50 rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40 w-36 text-right"
                     autoFocus
                   />
                   <button onClick={handleSaveName} disabled={saving} className="text-emerald-500 text-xs font-semibold">Save</button>
@@ -119,7 +119,7 @@ export default function ProfilePage() {
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-gray-800">{session.user.name}</span>
-                  <button onClick={() => setEditingName(true)} className="text-[#935073] hover:text-[#502D55] transition-colors">
+                  <button onClick={() => setEditingName(true)} className="text-[#6B7B8D] hover:text-[#363A47] transition-colors">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                   </button>
                 </div>
@@ -137,7 +137,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</h3>
             {!changingPassword && (
-              <button onClick={() => setChangingPassword(true)} className="text-xs font-semibold text-[#935073] hover:text-[#502D55] transition-colors">
+              <button onClick={() => setChangingPassword(true)} className="text-xs font-semibold text-[#6B7B8D] hover:text-[#363A47] transition-colors">
                 Change
               </button>
             )}
@@ -149,21 +149,21 @@ export default function ProfilePage() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 placeholder="Current password"
-                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
               />
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New password"
-                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
               />
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
-                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+                className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
               />
               <div className="flex gap-2">
                 <button onClick={handleChangePassword} disabled={saving} className="flex-1 liquid-gradient-btn py-2.5 text-sm disabled:opacity-50">

@@ -57,8 +57,8 @@ export default function AdminPage() {
   }
 
   const avatarGradients = [
-    'from-[#502D55] to-[#935073]',
-    'from-[#935073] to-coral',
+    'from-[#363A47] to-[#6B7B8D]',
+    'from-[#6B7B8D] to-coral',
     'from-[#7C6FD4] to-[#A78BFA]',
     'from-[#F59E0B] to-[#EF4444]',
     'from-[#10B981] to-[#3B82F6]',
@@ -91,7 +91,7 @@ export default function AdminPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Full name"
-              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
               required
             />
             <input
@@ -99,7 +99,7 @@ export default function AdminPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="Email"
-              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
               required
             />
             <input
@@ -107,13 +107,13 @@ export default function AdminPage() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Password"
-              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
               required
             />
             <select
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+              className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
             >
               <option value="VIEWER">Viewer</option>
               <option value="EDITOR">Editor</option>

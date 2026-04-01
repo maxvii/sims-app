@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 
 const CATEGORY_COLORS = {
-  'Social/Key Moments': '#935073',
-  'Sponsorships': '#502D55',
+  'Social/Key Moments': '#6B7B8D',
+  'Sponsorships': '#363A47',
   'Corporate Campaign': '#C9956B',
-  'Corporate Event': '#7E5A8C',
-  'Gifting': '#B0688A',
-  'PR Birthdays': '#E8A0BF',
+  'Corporate Event': '#5A7A8C',
+  'Gifting': '#9AAAB8',
+  'PR Birthdays': '#96B4C3',
   'HR & CSR': '#6B8E6B',
   'Coca Cola Arena': '#D4365C',
 }
@@ -27,13 +27,13 @@ const PRIORITY_STYLES = {
 }
 
 function getCategoryColor(category) {
-  if (!category) return '#935073'
+  if (!category) return '#6B7B8D'
   for (const [key, color] of Object.entries(CATEGORY_COLORS)) {
     if (category.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(category.toLowerCase())) {
       return color
     }
   }
-  return '#935073'
+  return '#6B7B8D'
 }
 
 export default function EventsCalendarPage() {
@@ -70,23 +70,23 @@ export default function EventsCalendarPage() {
   if (authStatus === 'loading') return null
 
   return (
-    <div className="min-h-screen pb-28" style={{ background: '#F8F4E9' }}>
+    <div className="min-h-screen pb-28" style={{ background: '#F7F9FA' }}>
       {/* Header */}
       <div
         className="px-5 pt-12 pb-4 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(248,244,233,0.8) 0%, rgba(246,219,192,0.35) 50%, rgba(248,244,233,0.75) 100%)',
+          background: 'linear-gradient(135deg, rgba(247,249,250,0.8) 0%, rgba(208,217,226,0.35) 50%, rgba(247,249,250,0.75) 100%)',
           backdropFilter: 'blur(40px) saturate(2)',
           WebkitBackdropFilter: 'blur(40px) saturate(2)',
           borderRadius: '0 0 24px 24px',
-          borderBottom: '1.5px solid rgba(248,244,233,0.7)',
-          boxShadow: '0 8px 32px rgba(80,45,85,0.06)',
+          borderBottom: '1.5px solid rgba(247,249,250,0.7)',
+          boxShadow: '0 8px 32px rgba(54,58,71,0.06)',
         }}
       >
         {/* Gradient spheres */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #935073, transparent 70%)' }} />
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #502D55, transparent 70%)' }} />
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #6B7B8D, transparent 70%)' }} />
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #363A47, transparent 70%)' }} />
         </div>
 
         <div className="relative z-10">
@@ -106,7 +106,7 @@ export default function EventsCalendarPage() {
       <div className="px-4 mt-5">
         {loading ? (
           <div className="flex flex-col items-center py-20">
-            <div className="w-10 h-10 rounded-full border-3 border-t-transparent animate-spin" style={{ borderColor: 'rgba(147,80,115,0.2)', borderTopColor: '#935073' }} />
+            <div className="w-10 h-10 rounded-full border-3 border-t-transparent animate-spin" style={{ borderColor: 'rgba(107,123,141,0.2)', borderTopColor: '#6B7B8D' }} />
             <p className="text-sm text-gray-500 mt-4">Loading events...</p>
           </div>
         ) : (
@@ -127,19 +127,19 @@ export default function EventsCalendarPage() {
                   <button
                     onClick={() => setExpandedMonth(isExpanded ? null : month)}
                     className={`w-full text-left rounded-2xl p-4 transition-all duration-200 active:scale-[0.98] ${
-                      isExpanded ? 'ring-2 ring-[#935073]/30' : ''
+                      isExpanded ? 'ring-2 ring-[#6B7B8D]/30' : ''
                     }`}
                     style={{
-                      background: 'rgba(248,244,233,0.65)',
+                      background: 'rgba(247,249,250,0.65)',
                       backdropFilter: 'blur(36px)',
                       WebkitBackdropFilter: 'blur(36px)',
-                      border: '1px solid rgba(248,244,233,0.65)',
-                      boxShadow: '0 2px 12px rgba(80,45,85,0.06)',
+                      border: '1px solid rgba(247,249,250,0.65)',
+                      boxShadow: '0 2px 12px rgba(54,58,71,0.06)',
                     }}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-display text-base font-bold" style={{ color: '#502D55' }}>
+                        <h3 className="font-display text-base font-bold" style={{ color: '#363A47' }}>
                           {month}
                         </h3>
                         <p className="text-xs text-gray-500 mt-0.5">
@@ -186,7 +186,7 @@ export default function EventsCalendarPage() {
                               background: 'rgba(255,255,255,0.5)',
                               backdropFilter: 'blur(12px)',
                               WebkitBackdropFilter: 'blur(12px)',
-                              border: '1px solid rgba(248,244,233,0.5)',
+                              border: '1px solid rgba(247,249,250,0.5)',
                             }}
                           >
                             {/* Category color bar */}

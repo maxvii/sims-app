@@ -80,7 +80,7 @@ export default function VideoPlayer({ media, onRefresh }) {
           <div className="absolute top-3 left-3 right-3 animate-fade-in">
             {nearbyComments.map((c) => (
               <div key={c.id} className="glass-card px-3 py-2 mb-1 text-xs">
-                <span className="font-semibold text-[#935073]">{c.user.name}</span>
+                <span className="font-semibold text-[#6B7B8D]">{c.user.name}</span>
                 <span className="text-gray-600 ml-1">{c.content}</span>
               </div>
             ))}
@@ -93,7 +93,7 @@ export default function VideoPlayer({ media, onRefresh }) {
         <div className="flex items-center gap-3 mb-2">
           <button
             onClick={() => playing ? videoRef.current?.pause() : videoRef.current?.play()}
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-[#935073] to-coral flex items-center justify-center flex-shrink-0"
+            className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6B7B8D] to-coral flex items-center justify-center flex-shrink-0"
           >
             {playing ? (
               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
@@ -112,14 +112,14 @@ export default function VideoPlayer({ media, onRefresh }) {
               value={currentTime}
               onChange={(e) => { if (videoRef.current) videoRef.current.currentTime = parseFloat(e.target.value) }}
               className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-              style={{ background: `linear-gradient(to right, #935073 ${(currentTime / (duration || 1)) * 100}%, #e5e7eb ${(currentTime / (duration || 1)) * 100}%)` }}
+              style={{ background: `linear-gradient(to right, #6B7B8D ${(currentTime / (duration || 1)) * 100}%, #e5e7eb ${(currentTime / (duration || 1)) * 100}%)` }}
             />
             {/* Comment markers on timeline */}
             {comments.filter((c) => c.timestamp != null).map((c) => (
               <button
                 key={c.id}
                 onClick={() => { jumpTo(c.timestamp); setActiveComment(c.id) }}
-                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#935073] border-2 border-white shadow-sm hover:scale-150 transition-transform z-10"
+                className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-[#6B7B8D] border-2 border-white shadow-sm hover:scale-150 transition-transform z-10"
                 style={{ left: `${(c.timestamp / (duration || 1)) * 100}%` }}
                 title={`${c.user.name}: ${c.content}`}
               />
@@ -137,7 +137,7 @@ export default function VideoPlayer({ media, onRefresh }) {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder={`Comment at ${formatTime(currentTime)}...`}
-            className="flex-1 bg-white/50 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+            className="flex-1 bg-white/50 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
           />
           <button type="submit" disabled={submitting || !comment.trim()} className="gradient-btn px-4 py-2 text-xs disabled:opacity-50">
             Post
@@ -157,9 +157,9 @@ export default function VideoPlayer({ media, onRefresh }) {
             <button
               key={c.id}
               onClick={() => jumpTo(c.timestamp)}
-              className={`glass-card p-3 w-full text-left flex items-start gap-3 transition-all hover:scale-[1.01] ${activeComment === c.id ? 'ring-2 ring-[#B0688A]' : ''}`}
+              className={`glass-card p-3 w-full text-left flex items-start gap-3 transition-all hover:scale-[1.01] ${activeComment === c.id ? 'ring-2 ring-[#9AAAB8]' : ''}`}
             >
-              <span className="px-2 py-0.5 rounded-lg bg-[#935073]/10 text-[#935073] text-xs font-mono font-bold flex-shrink-0">
+              <span className="px-2 py-0.5 rounded-lg bg-[#6B7B8D]/10 text-[#6B7B8D] text-xs font-mono font-bold flex-shrink-0">
                 {formatTime(c.timestamp)}
               </span>
               <div className="min-w-0">

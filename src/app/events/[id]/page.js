@@ -85,7 +85,7 @@ export default function EventDetailPage() {
 
   if (!event) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="w-10 h-10 border-3 border-[#B0688A] border-t-[#935073] rounded-full animate-spin" />
+      <div className="w-10 h-10 border-3 border-[#9AAAB8] border-t-[#6B7B8D] rounded-full animate-spin" />
     </div>
   )
 
@@ -157,7 +157,7 @@ export default function EventDetailPage() {
               <span className={`pill-tag text-[10px] ${priorityColors[event.priority]}`}>{event.priority}</span>
               <span className={`pill-tag text-[10px] ${statusColors[computedStatus] || 'bg-gray-100/80 text-gray-500'}`}>{computedStatus}</span>
               {event.category && (
-                <span className="pill-tag text-[10px] bg-[#935073]/10 text-[#935073]">{event.category}</span>
+                <span className="pill-tag text-[10px] bg-[#6B7B8D]/10 text-[#6B7B8D]">{event.category}</span>
               )}
             </div>
             <h1 className="font-display text-xl font-black italic text-gray-800 mb-1">{event.title}</h1>
@@ -173,7 +173,7 @@ export default function EventDetailPage() {
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${activeTab === t.id ? 'bg-[#935073] text-white shadow-md' : 'liquid-glass-pill text-gray-500'}`}
+            className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${activeTab === t.id ? 'bg-[#6B7B8D] text-white shadow-md' : 'liquid-glass-pill text-gray-500'}`}
           >
             {t.label}
           </button>
@@ -220,11 +220,11 @@ export default function EventDetailPage() {
                 <div className="space-y-2 mb-4">
                   {event.references.map((r) => (
                     <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-2.5 rounded-xl bg-white/40 hover:bg-white/60 transition-all">
-                      <div className="w-8 h-8 rounded-lg bg-[#935073]/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-[#6B7B8D]/10 flex items-center justify-center flex-shrink-0">
                         {r.type === 'IMAGE' ? (
-                          <svg className="w-4 h-4 text-[#935073]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                          <svg className="w-4 h-4 text-[#6B7B8D]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         ) : (
-                          <svg className="w-4 h-4 text-[#935073]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                          <svg className="w-4 h-4 text-[#6B7B8D]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                         )}
                       </div>
                       <div className="min-w-0">
@@ -242,13 +242,13 @@ export default function EventDetailPage() {
                   value={refTitle}
                   onChange={(e) => setRefTitle(e.target.value)}
                   placeholder="Reference title..."
-                  className="w-full bg-white/50 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+                  className="w-full bg-white/50 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
                 />
                 <input
                   value={refUrl}
                   onChange={(e) => setRefUrl(e.target.value)}
                   placeholder="URL or image link..."
-                  className="w-full bg-white/50 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 border border-white/40"
+                  className="w-full bg-white/50 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 border border-white/40"
                 />
                 <button type="submit" disabled={submitting || !refUrl.trim() || !refTitle.trim()} className="liquid-gradient-btn px-4 py-2 text-sm disabled:opacity-50">
                   Add Reference
@@ -303,7 +303,7 @@ export default function EventDetailPage() {
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Add copywriting feedback..."
                   rows={3}
-                  className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 resize-none border border-white/40"
+                  className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 resize-none border border-white/40"
                 />
                 <button type="submit" disabled={submitting || !comment.trim()} className="mt-2 liquid-gradient-btn px-5 py-2 text-sm disabled:opacity-50">
                   {submitting ? 'Posting...' : 'Post Comment'}
@@ -313,7 +313,7 @@ export default function EventDetailPage() {
               {event.comments?.filter(c => !c.tab || c.tab === 'copywriting').map((c) => (
                 <div key={c.id} className="mb-3 p-3 rounded-xl bg-white/30 animate-fade-in">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#935073] to-coral flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#6B7B8D] to-coral flex items-center justify-center">
                       <span className="text-xs font-bold text-white">{c.user.name[0]}</span>
                     </div>
                     <div>
@@ -399,7 +399,7 @@ function ApprovalSection({ tab, approvals, approvalNote, setApprovalNote, handle
             onChange={(e) => setApprovalNote(e.target.value)}
             placeholder={`Add a note for ${tab} approval (optional)...`}
             rows={2}
-            className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#935073]/20 resize-none border border-white/40 mb-3"
+            className="w-full bg-white/50 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#6B7B8D]/20 resize-none border border-white/40 mb-3"
           />
           <div className="flex gap-2">
             <button

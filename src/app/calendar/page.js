@@ -44,10 +44,10 @@ function QuickAction({ icon, label, href, gradient, onClick }) {
       onClick={handleClick}
       className="flex flex-col items-center gap-2 p-4 rounded-2xl transition-all active:scale-95"
       style={{
-        background: 'linear-gradient(145deg, rgba(255,255,255,0.55) 0%, rgba(240,230,255,0.2) 50%, rgba(255,255,255,0.4) 100%)',
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.55) 0%, rgba(220,228,235,0.2) 50%, rgba(255,255,255,0.4) 100%)',
         backdropFilter: 'blur(20px)',
         border: '1.5px solid rgba(255,255,255,0.5)',
-        boxShadow: '0 4px 16px rgba(180,160,220,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
+        boxShadow: '0 4px 16px rgba(107,123,141,0.08), inset 0 1px 0 rgba(255,255,255,0.7)',
       }}
     >
       <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: gradient }}>
@@ -122,24 +122,22 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen pb-safe-nav">
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(165deg, #502D55 0%, #6B3A6E 30%, #935073 60%, #B0688A 80%, #F6DBC0 100%)' }}>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(165deg, #363A47 0%, #4A5060 30%, #6B7B8D 60%, #9AAAB8 80%, #D0D9E2 100%)' }}>
         <GradientSpheres variant="default" />
 
         <div className="px-5 pt-14 pb-5 relative z-10">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-5">
-            <h1 className="font-script text-4xl text-[#F8F4E9]">
-              Simz <span className="text-[10px] font-sans font-semibold text-[#F6DBC0]/70 tracking-[0.15em] uppercase align-middle ml-0.5" style={{ fontFamily: 'var(--font-sans)' }}>App</span>
-            </h1>
+            <img src="/logo.png" alt="The Sims App" className="h-10" />
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/60 shadow-md">
               <img src="/images/sima-portrait.jpg" alt="Sima" className="w-full h-full object-cover" />
             </div>
           </div>
 
           {/* Date & greeting */}
-          <p className="text-[10px] font-semibold text-[#F6DBC0]/70 uppercase tracking-[0.2em]">{dateStr}</p>
-          <p className="font-display text-3xl font-bold text-[#F8F4E9] italic tracking-tight mb-1">{timeStr}</p>
-          <p className="text-sm text-[#F6DBC0]/80">Welcome, <span className="font-semibold text-[#F8F4E9]">{session?.user?.name || 'Sima'}</span></p>
+          <p className="text-[10px] font-semibold text-[#D0D9E2]/70 uppercase tracking-[0.2em]">{dateStr}</p>
+          <p className="font-display text-3xl font-bold text-[#F7F9FA] italic tracking-tight mb-1">{timeStr}</p>
+          <p className="text-sm text-[#D0D9E2]/80">Welcome, <span className="font-semibold text-[#F7F9FA]">{session?.user?.name || 'Sima'}</span></p>
         </div>
       </div>
 
@@ -150,13 +148,13 @@ export default function CalendarPage() {
             icon={<svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>}
             label="About Sims"
             href="/about"
-            gradient="linear-gradient(135deg, #502D55, #6B3A6E)"
+            gradient="linear-gradient(135deg, #363A47, #4A5060)"
           />
           <QuickAction
             icon={<svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>}
             label="Gallery"
             href="/gallery"
-            gradient="linear-gradient(135deg, #935073, #B0688A)"
+            gradient="linear-gradient(135deg, #6B7B8D, #9AAAB8)"
           />
           <QuickAction
             icon={<svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>}
@@ -168,13 +166,13 @@ export default function CalendarPage() {
             icon={<svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>}
             label="Analytics"
             href="/analytics"
-            gradient="linear-gradient(135deg, #7E5A8C, #9B6EA8)"
+            gradient="linear-gradient(135deg, #5C6B7A, #7A8D9E)"
           />
           <QuickAction
             icon={<svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>}
             label="Try-On"
             href="/try-on"
-            gradient="linear-gradient(135deg, #B86E8F, #D4869F)"
+            gradient="linear-gradient(135deg, #7A8F9E, #9AB0BE)"
           />
           {session?.user?.role === 'ADMIN' && (
             <QuickAction
@@ -250,7 +248,7 @@ export default function CalendarPage() {
         <button
           onClick={() => setShowAddEvent(true)}
           className="fixed bottom-24 right-5 w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-40 transition-transform active:scale-90"
-          style={{ background: 'linear-gradient(135deg, #502D55, #935073)', boxShadow: '0 4px 20px rgba(80,45,85,0.4)' }}
+          style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)', boxShadow: '0 4px 20px rgba(54,58,71,0.4)' }}
         >
           <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
         </button>
@@ -301,7 +299,7 @@ function AddEventModal({ onClose, onCreated }) {
       <div
         className="w-full max-w-lg mx-auto rounded-t-3xl p-6 pb-10 animate-slide-up"
         style={{
-          background: 'linear-gradient(145deg, rgba(248,244,233,0.95), rgba(246,219,192,0.3))',
+          background: 'linear-gradient(145deg, rgba(247,249,250,0.95), rgba(208,217,226,0.3))',
           backdropFilter: 'blur(40px)',
           border: '1px solid rgba(255,255,255,0.5)',
         }}
@@ -313,11 +311,11 @@ function AddEventModal({ onClose, onCreated }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Title *</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#935073]/50" placeholder="Event name" required />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-[#6B7B8D]/50" placeholder="Event name" required />
           </div>
           <div>
             <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Date *</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#935073]/50" required />
+            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
@@ -334,7 +332,7 @@ function AddEventModal({ onClose, onCreated }) {
               <input value={opportunityType} onChange={(e) => setOpportunityType(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none" placeholder="e.g. Holiday" />
             </div>
           </div>
-          <button type="submit" disabled={saving || !title || !date} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #935073, #502D55)' }}>
+          <button type="submit" disabled={saving || !title || !date} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6B7B8D, #363A47)' }}>
             {saving ? 'Creating...' : 'Create Event'}
           </button>
           <p className="text-[10px] text-gray-400 text-center">You can add more details after creating</p>

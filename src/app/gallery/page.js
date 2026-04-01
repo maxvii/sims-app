@@ -40,7 +40,7 @@ export default function GalleryPage() {
   if (!session) return null
 
   return (
-    <div className="min-h-screen bg-[#F8F4E9] pb-safe-nav">
+    <div className="min-h-screen bg-[#F7F9FA] pb-safe-nav">
       {/* Header */}
       <div className="relative overflow-hidden px-5 pt-14 pb-6">
         <GradientSpheres variant="compact" />
@@ -51,13 +51,13 @@ export default function GalleryPage() {
           </button>
           <h1
             className="text-3xl font-bold tracking-tight animate-fade-in"
-            style={{ color: '#502D55' }}
+            style={{ color: '#363A47' }}
           >
             Gallery
           </h1>
           <p
             className="text-sm mt-1 animate-fade-in"
-            style={{ color: '#935073', animationDelay: '0.1s' }}
+            style={{ color: '#6B7B8D', animationDelay: '0.1s' }}
           >
             Curated moments, captured in style
           </p>
@@ -86,16 +86,16 @@ export default function GalleryPage() {
             >
               <button
                 onClick={() => setSelectedIndex(index)}
-                className="relative w-full h-full rounded-2xl overflow-hidden group focus:outline-none focus:ring-2 focus:ring-[#935073]/50"
+                className="relative w-full h-full rounded-2xl overflow-hidden group focus:outline-none focus:ring-2 focus:ring-[#6B7B8D]/50"
                 style={{
                   minHeight: photo.span === 'tall' ? '320px' : '150px',
-                  background: 'linear-gradient(135deg, rgba(80,45,85,0.08), rgba(147,80,115,0.06))',
+                  background: 'linear-gradient(135deg, rgba(54,58,71,0.08), rgba(107,123,141,0.06))',
                 }}
               >
                 {/* Shimmer placeholder */}
                 {!loaded[photo.id] && (
                   <div className="absolute inset-0 animate-pulse" style={{
-                    background: 'linear-gradient(135deg, rgba(246,219,192,0.4), rgba(147,80,115,0.15), rgba(246,219,192,0.3))',
+                    background: 'linear-gradient(135deg, rgba(208,217,226,0.4), rgba(107,123,141,0.15), rgba(208,217,226,0.3))',
                   }} />
                 )}
                 <img
@@ -113,15 +113,15 @@ export default function GalleryPage() {
                 <div
                   className="absolute inset-x-0 bottom-0 h-16 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{
-                    background: 'linear-gradient(to top, rgba(80,45,85,0.5), transparent)',
+                    background: 'linear-gradient(to top, rgba(54,58,71,0.5), transparent)',
                   }}
                 />
                 {/* Glass border effect */}
                 <div
                   className="absolute inset-0 rounded-2xl pointer-events-none"
                   style={{
-                    border: '1px solid rgba(248,244,233,0.25)',
-                    boxShadow: 'inset 0 1px 0 rgba(248,244,233,0.15), 0 2px 12px rgba(80,45,85,0.1)',
+                    border: '1px solid rgba(247,249,250,0.25)',
+                    boxShadow: 'inset 0 1px 0 rgba(247,249,250,0.15), 0 2px 12px rgba(54,58,71,0.1)',
                   }}
                 />
               </button>
@@ -133,7 +133,7 @@ export default function GalleryPage() {
         <div className="flex justify-center mt-6">
           <div
             className="liquid-glass-card px-4 py-2 rounded-full"
-            style={{ color: '#935073', fontSize: '13px' }}
+            style={{ color: '#6B7B8D', fontSize: '13px' }}
           >
             {photos.length} photos
           </div>
@@ -162,12 +162,12 @@ export default function GalleryPage() {
             onClick={() => setSelectedIndex(null)}
             className="absolute top-12 right-5 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
-              background: 'rgba(248,244,233,0.12)',
+              background: 'rgba(247,249,250,0.12)',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(248,244,233,0.15)',
+              border: '1px solid rgba(247,249,250,0.15)',
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F8F4E9" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F7F9FA" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -178,12 +178,12 @@ export default function GalleryPage() {
             onClick={(e) => { e.stopPropagation(); setSelectedIndex((prev) => (prev - 1 + photos.length) % photos.length) }}
             className="absolute left-3 top-1/2 -translate-y-1/2 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
-              background: 'rgba(248,244,233,0.1)',
+              background: 'rgba(247,249,250,0.1)',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(248,244,233,0.12)',
+              border: '1px solid rgba(247,249,250,0.12)',
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F8F4E9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F7F9FA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
@@ -191,12 +191,12 @@ export default function GalleryPage() {
             onClick={(e) => { e.stopPropagation(); setSelectedIndex((prev) => (prev + 1) % photos.length) }}
             className="absolute right-3 top-1/2 -translate-y-1/2 z-50 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
             style={{
-              background: 'rgba(248,244,233,0.1)',
+              background: 'rgba(247,249,250,0.1)',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(248,244,233,0.12)',
+              border: '1px solid rgba(247,249,250,0.12)',
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F8F4E9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F7F9FA" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </button>
@@ -224,10 +224,10 @@ export default function GalleryPage() {
           <div
             className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 px-4 py-1.5 rounded-full"
             style={{
-              background: 'rgba(248,244,233,0.1)',
+              background: 'rgba(247,249,250,0.1)',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(248,244,233,0.1)',
-              color: '#F6DBC0',
+              border: '1px solid rgba(247,249,250,0.1)',
+              color: '#D0D9E2',
               fontSize: '13px',
               fontWeight: '500',
               letterSpacing: '0.02em',
@@ -240,7 +240,7 @@ export default function GalleryPage() {
           <div
             className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50"
             style={{
-              color: 'rgba(246,219,192,0.45)',
+              color: 'rgba(208,217,226,0.45)',
               fontSize: '11px',
               animation: 'fadeIn 0.5s ease 1s both, fadeOut 0.5s ease 4s both',
             }}

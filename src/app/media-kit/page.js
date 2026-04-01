@@ -37,7 +37,7 @@ const ACHIEVEMENTS = [
 const SOCIAL_LINKS = [
   { name: 'Instagram', handle: '@thesimaved', url: 'https://instagram.com/thesimaved', color: '#E4405F' },
   { name: 'LinkedIn', handle: 'Sima Ganwani Ved', url: 'https://linkedin.com/in/simaved', color: '#0A66C2' },
-  { name: 'Website', handle: 'simaved.com', url: 'https://simaved.com', color: '#502D55' },
+  { name: 'Website', handle: 'simaved.com', url: 'https://simaved.com', color: '#363A47' },
 ]
 
 function Section({ title, children }) {
@@ -67,7 +67,7 @@ export default function MediaKitPage() {
   ]
 
   return (
-    <div className="min-h-screen pb-safe-nav" style={{ background: '#F8F4E9' }}>
+    <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
       {/* Header */}
       <div className="liquid-glass px-5 pt-12 pb-4 relative overflow-hidden" style={{ borderRadius: '0 0 24px 24px' }}>
         <GradientSpheres variant="compact" />
@@ -89,7 +89,7 @@ export default function MediaKitPage() {
             onClick={() => setActiveTab(tab.id)}
             className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
             style={{
-              background: activeTab === tab.id ? 'linear-gradient(135deg, #502D55, #935073)' : 'rgba(255,255,255,0.5)',
+              background: activeTab === tab.id ? 'linear-gradient(135deg, #363A47, #6B7B8D)' : 'rgba(255,255,255,0.5)',
               color: activeTab === tab.id ? '#fff' : '#888',
             }}
           >
@@ -103,7 +103,7 @@ export default function MediaKitPage() {
         {activeTab === 'card' && (
           <div className="space-y-5 animate-fade-in">
             {/* Digital Business Card */}
-            <div className="relative rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #502D55 0%, #935073 50%, #F6DBC0 100%)' }}>
+            <div className="relative rounded-3xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #363A47 0%, #6B7B8D 50%, #D0D9E2 100%)' }}>
               {/* Decorative circles */}
               <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10" style={{ background: '#fff' }} />
               <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full opacity-10" style={{ background: '#fff' }} />
@@ -172,7 +172,7 @@ export default function MediaKitPage() {
               <div className="space-y-2">
                 {ACHIEVEMENTS.map((a, i) => (
                   <div key={i} className="liquid-glass-card p-3 rounded-xl flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.6)' }}>
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${i % 2 === 0 ? '#502D55' : '#935073'}, ${i % 2 === 0 ? '#935073' : '#F6DBC0'})` }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${i % 2 === 0 ? '#363A47' : '#6B7B8D'}, ${i % 2 === 0 ? '#6B7B8D' : '#D0D9E2'})` }}>
                       <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                       </svg>
@@ -223,8 +223,8 @@ export default function MediaKitPage() {
               <p className="text-[10px] text-gray-400 mb-4">80+ international brands across multiple categories</p>
               <div className="grid grid-cols-4 gap-2 mb-4">
                 {STATS.map(s => (
-                  <div key={s.label} className="text-center p-2 rounded-xl" style={{ background: 'rgba(80,45,85,0.05)' }}>
-                    <div className="text-sm font-black" style={{ color: '#502D55' }}>{s.value}</div>
+                  <div key={s.label} className="text-center p-2 rounded-xl" style={{ background: 'rgba(54,58,71,0.05)' }}>
+                    <div className="text-sm font-black" style={{ color: '#363A47' }}>{s.value}</div>
                     <div className="text-[8px] text-gray-400">{s.label}</div>
                   </div>
                 ))}
@@ -244,9 +244,9 @@ export default function MediaKitPage() {
                       className="w-9 h-9 rounded-lg flex items-center justify-center text-white text-[10px] font-black flex-shrink-0"
                       style={{
                         background: `linear-gradient(135deg, ${
-                          ['#502D55', '#935073', '#7B3F5E', '#B86B8A', '#6A4C6D', '#C98BA5'][i % 6]
+                          ['#363A47', '#6B7B8D', '#4A5A6A', '#7A9BAE', '#3F5060', '#8FABB8'][i % 6]
                         }, ${
-                          ['#935073', '#F6DBC0', '#935073', '#F6DBC0', '#935073', '#F6DBC0'][i % 6]
+                          ['#6B7B8D', '#D0D9E2', '#6B7B8D', '#D0D9E2', '#6B7B8D', '#D0D9E2'][i % 6]
                         })`,
                       }}
                     >
@@ -271,7 +271,7 @@ export default function MediaKitPage() {
                 >
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ background: ['#502D55', '#935073', '#7B3F5E', '#F6DBC0'][i] }}
+                    style={{ background: ['#363A47', '#6B7B8D', '#4A5A6A', '#D0D9E2'][i] }}
                   >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       {i === 0 && <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />}
@@ -295,14 +295,14 @@ export default function MediaKitPage() {
               <h3 className="text-sm font-bold text-gray-700 mb-1">Press Inquiries</h3>
               <p className="text-[10px] text-gray-400 mb-4">For interviews, features, and media requests</p>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: 'rgba(80,45,85,0.05)' }}>
-                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#935073' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: 'rgba(54,58,71,0.05)' }}>
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#6B7B8D' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                   </svg>
                   <span className="text-xs text-gray-600">press@apparelgroup.com</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: 'rgba(80,45,85,0.05)' }}>
-                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#935073' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: 'rgba(54,58,71,0.05)' }}>
+                  <svg className="w-4 h-4 flex-shrink-0" style={{ color: '#6B7B8D' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                   </svg>
                   <span className="text-xs text-gray-600">simaved.com</span>
@@ -346,7 +346,7 @@ export default function MediaKitPage() {
                     className="liquid-glass-card p-3 rounded-xl flex items-center gap-3"
                     style={{ background: 'rgba(255,255,255,0.6)' }}
                   >
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ background: '#935073' }}>
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ background: '#6B7B8D' }}>
                       {i + 1}
                     </div>
                     <span className="text-xs text-gray-700 font-medium">{topic}</span>
@@ -356,8 +356,8 @@ export default function MediaKitPage() {
             </Section>
 
             {/* Brand Guidelines Note */}
-            <div className="liquid-glass-card p-4 rounded-2xl text-center" style={{ background: 'rgba(80,45,85,0.05)' }}>
-              <svg className="w-8 h-8 mx-auto mb-2" style={{ color: '#935073' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <div className="liquid-glass-card p-4 rounded-2xl text-center" style={{ background: 'rgba(54,58,71,0.05)' }}>
+              <svg className="w-8 h-8 mx-auto mb-2" style={{ color: '#6B7B8D' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
               </svg>
               <p className="text-xs text-gray-500 leading-relaxed">

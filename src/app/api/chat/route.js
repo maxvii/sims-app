@@ -1,5 +1,5 @@
 import { streamText, tool, stepCountIs } from 'ai'
-import { groq } from '@ai-sdk/groq'
+import { google } from '@ai-sdk/google'
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -52,7 +52,7 @@ export async function POST(req) {
 
   try {
     const result = streamText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: google('gemini-2.0-flash'),
       system: `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
 
 Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.

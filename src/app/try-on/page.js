@@ -186,7 +186,7 @@ export default function VirtualTryOnPage() {
   if (authStatus === 'loading') return null
 
   return (
-    <div className="min-h-screen pb-safe-nav" style={{ background: '#F8F4E9' }}>
+    <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
       {/* Header */}
       <div className="liquid-glass px-5 pt-12 pb-4 relative overflow-hidden" style={{ borderRadius: '0 0 24px 24px' }}>
         <div className="relative z-10">
@@ -207,8 +207,8 @@ export default function VirtualTryOnPage() {
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300"
                 style={{
-                  background: step >= s ? 'linear-gradient(135deg, #502D55, #935073)' : 'rgba(147,80,115,0.15)',
-                  color: step >= s ? '#fff' : '#935073',
+                  background: step >= s ? 'linear-gradient(135deg, #363A47, #6B7B8D)' : 'rgba(107,123,141,0.15)',
+                  color: step >= s ? '#fff' : '#6B7B8D',
                 }}
               >
                 {step > s ? (
@@ -216,7 +216,7 @@ export default function VirtualTryOnPage() {
                 ) : s}
               </div>
               {s < 3 && (
-                <div className="w-8 h-0.5 rounded" style={{ background: step > s ? '#935073' : 'rgba(147,80,115,0.2)' }} />
+                <div className="w-8 h-0.5 rounded" style={{ background: step > s ? '#6B7B8D' : 'rgba(107,123,141,0.2)' }} />
               )}
             </div>
           ))}
@@ -234,20 +234,20 @@ export default function VirtualTryOnPage() {
                   onClick={() => personInputRef.current?.click()}
                   className="w-full rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-all duration-200 active:scale-[0.98] cursor-pointer"
                   style={{
-                    border: '2px dashed rgba(147,80,115,0.3)',
+                    border: '2px dashed rgba(107,123,141,0.3)',
                     background: 'rgba(255,255,255,0.4)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     minHeight: '220px',
                   }}
                 >
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(147,80,115,0.1)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#935073" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(107,123,141,0.1)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6B7B8D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                       <circle cx="12" cy="7" r="4"/>
                     </svg>
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: '#502D55' }}>Tap to upload your photo</span>
+                  <span className="text-sm font-semibold" style={{ color: '#363A47' }}>Tap to upload your photo</span>
                   <span className="text-xs text-gray-400">JPG, PNG, or WebP</span>
                 </button>
                 <input
@@ -266,8 +266,8 @@ export default function VirtualTryOnPage() {
                     background: 'rgba(255,255,255,0.5)',
                     backdropFilter: 'blur(8px)',
                     WebkitBackdropFilter: 'blur(8px)',
-                    color: '#502D55',
-                    border: '1px solid rgba(147,80,115,0.2)',
+                    color: '#363A47',
+                    border: '1px solid rgba(107,123,141,0.2)',
                   }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -297,7 +297,7 @@ export default function VirtualTryOnPage() {
                   <button
                     onClick={capturePhoto}
                     className="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center"
-                    style={{ background: 'linear-gradient(135deg, #502D55, #935073)' }}
+                    style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
                   >
                     <div className="w-12 h-12 rounded-full border-2 border-white" />
                   </button>
@@ -332,7 +332,7 @@ export default function VirtualTryOnPage() {
               <button
                 onClick={() => { setStep(1); setPersonImage(null); setPersonPreview(null) }}
                 className="text-xs font-semibold px-3 py-1 rounded-full"
-                style={{ color: '#935073', background: 'rgba(147,80,115,0.1)' }}
+                style={{ color: '#6B7B8D', background: 'rgba(107,123,141,0.1)' }}
               >
                 Change
               </button>
@@ -344,19 +344,19 @@ export default function VirtualTryOnPage() {
                   onClick={() => garmentInputRef.current?.click()}
                   className="w-full rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-all duration-200 active:scale-[0.98] cursor-pointer"
                   style={{
-                    border: '2px dashed rgba(147,80,115,0.3)',
+                    border: '2px dashed rgba(107,123,141,0.3)',
                     background: 'rgba(255,255,255,0.4)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
                     minHeight: '220px',
                   }}
                 >
-                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(147,80,115,0.1)' }}>
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#935073" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(107,123,141,0.1)' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6B7B8D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20.38 3.46L16 2 12 5.5 8 2 3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
                     </svg>
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: '#502D55' }}>Tap to upload outfit</span>
+                  <span className="text-sm font-semibold" style={{ color: '#363A47' }}>Tap to upload outfit</span>
                   <span className="text-xs text-gray-400">JPG, PNG, or WebP</span>
                 </button>
                 <input
@@ -383,7 +383,7 @@ export default function VirtualTryOnPage() {
                   <button
                     onClick={() => { setGarmentImage(null); setGarmentPreview(null) }}
                     className="absolute top-3 right-3 text-xs font-semibold px-3 py-1.5 rounded-full"
-                    style={{ color: '#fff', background: 'rgba(80,45,85,0.7)', backdropFilter: 'blur(8px)' }}
+                    style={{ color: '#fff', background: 'rgba(54,58,71,0.7)', backdropFilter: 'blur(8px)' }}
                   >
                     Change
                   </button>
@@ -394,8 +394,8 @@ export default function VirtualTryOnPage() {
                   onClick={handleGenerate}
                   className="w-full mt-5 py-4 rounded-2xl text-white font-bold text-base transition-all active:scale-[0.97] shadow-lg"
                   style={{
-                    background: 'linear-gradient(135deg, #502D55, #935073)',
-                    boxShadow: '0 8px 24px rgba(80,45,85,0.3)',
+                    background: 'linear-gradient(135deg, #363A47, #6B7B8D)',
+                    boxShadow: '0 8px 24px rgba(54,58,71,0.3)',
                   }}
                 >
                   Try It On
@@ -414,10 +414,10 @@ export default function VirtualTryOnPage() {
                 <div className="relative w-20 h-20">
                   <div
                     className="absolute inset-0 rounded-full border-4 border-t-transparent animate-spin"
-                    style={{ borderColor: 'rgba(147,80,115,0.2)', borderTopColor: '#935073' }}
+                    style={{ borderColor: 'rgba(107,123,141,0.2)', borderTopColor: '#6B7B8D' }}
                   />
-                  <div className="absolute inset-2 rounded-full flex items-center justify-center" style={{ background: 'rgba(147,80,115,0.08)' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#935073" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <div className="absolute inset-2 rounded-full flex items-center justify-center" style={{ background: 'rgba(107,123,141,0.08)' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B7B8D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20.38 3.46L16 2 12 5.5 8 2 3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
                     </svg>
                   </div>
@@ -427,12 +427,12 @@ export default function VirtualTryOnPage() {
                   <p className="text-xs text-gray-400 mt-1">This may take up to a minute</p>
                 </div>
                 {/* Progress bar */}
-                <div className="w-full max-w-xs h-2 rounded-full overflow-hidden" style={{ background: 'rgba(147,80,115,0.1)' }}>
+                <div className="w-full max-w-xs h-2 rounded-full overflow-hidden" style={{ background: 'rgba(107,123,141,0.1)' }}>
                   <div
                     className="h-full rounded-full transition-all duration-1000 ease-out"
                     style={{
                       width: `${progress}%`,
-                      background: 'linear-gradient(90deg, #502D55, #935073)',
+                      background: 'linear-gradient(90deg, #363A47, #6B7B8D)',
                     }}
                   />
                 </div>
@@ -445,8 +445,8 @@ export default function VirtualTryOnPage() {
               <div className="flex flex-col items-center gap-4 py-10 animate-fade-in">
                 {error === 'COMING_SOON' ? (
                   <>
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(147,80,115,0.1)' }}>
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#935073" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(107,123,141,0.1)' }}>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6B7B8D" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M12 6v6l4 2"/>
                       </svg>
@@ -476,7 +476,7 @@ export default function VirtualTryOnPage() {
                 <button
                   onClick={handleReset}
                   className="mt-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.97]"
-                  style={{ color: '#502D55', background: 'rgba(147,80,115,0.1)' }}
+                  style={{ color: '#363A47', background: 'rgba(107,123,141,0.1)' }}
                 >
                   Try Again
                 </button>
@@ -507,7 +507,7 @@ export default function VirtualTryOnPage() {
                     background: 'rgba(255,255,255,0.5)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)',
-                    boxShadow: '0 8px 32px rgba(80,45,85,0.12)',
+                    boxShadow: '0 8px 32px rgba(54,58,71,0.12)',
                   }}
                 >
                   <img src={resultUrl} alt="Try-on result" className="w-full object-contain" style={{ maxHeight: '500px' }} />
@@ -518,7 +518,7 @@ export default function VirtualTryOnPage() {
                   <button
                     onClick={handleDownload}
                     className="flex-1 py-3.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
-                    style={{ background: 'linear-gradient(135deg, #502D55, #935073)' }}
+                    style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -530,7 +530,7 @@ export default function VirtualTryOnPage() {
                   <button
                     onClick={handleReset}
                     className="flex-1 py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.97]"
-                    style={{ color: '#502D55', background: 'rgba(147,80,115,0.1)', border: '1px solid rgba(147,80,115,0.2)' }}
+                    style={{ color: '#363A47', background: 'rgba(107,123,141,0.1)', border: '1px solid rgba(107,123,141,0.2)' }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="1 4 1 10 7 10"/>

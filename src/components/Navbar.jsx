@@ -90,12 +90,12 @@ export default function Navbar() {
       <div
         className="mx-3 mb-2"
         style={{
-          background: 'linear-gradient(135deg, rgba(248,244,233,0.75) 0%, rgba(246,219,192,0.3) 50%, rgba(248,244,233,0.68) 100%)',
+          background: 'linear-gradient(135deg, rgba(247,249,250,0.75) 0%, rgba(208,217,226,0.3) 50%, rgba(247,249,250,0.68) 100%)',
           backdropFilter: 'blur(40px) saturate(2)',
           WebkitBackdropFilter: 'blur(40px) saturate(2)',
-          border: '1.5px solid rgba(248,244,233,0.7)',
+          border: '1.5px solid rgba(247,249,250,0.7)',
           borderRadius: '22px',
-          boxShadow: '0 8px 32px rgba(80,45,85,0.1), inset 0 1.5px 0 rgba(248,244,233,0.85)',
+          boxShadow: '0 8px 32px rgba(54,58,71,0.1), inset 0 1.5px 0 rgba(247,249,250,0.85)',
         }}
       >
         <div className="flex justify-around items-end py-1.5 px-1 max-w-lg mx-auto">
@@ -107,14 +107,14 @@ export default function Navbar() {
                   <div
                     className={`w-[54px] h-[54px] rounded-full flex items-center justify-center mb-0.5 transition-all active:scale-95 ${item.active ? 'scale-105' : ''}`}
                     style={{
-                      background: 'linear-gradient(135deg, #502D55, #935073)',
-                      boxShadow: '0 6px 24px rgba(80,45,85,0.45), inset 0 1px 0 rgba(246,219,192,0.3)',
-                      border: '2.5px solid rgba(248,244,233,0.6)',
+                      background: 'linear-gradient(135deg, #363A47, #6B7B8D)',
+                      boxShadow: '0 6px 24px rgba(54,58,71,0.45), inset 0 1px 0 rgba(208,217,226,0.3)',
+                      border: '2.5px solid rgba(247,249,250,0.6)',
                     }}
                   >
                     <span className="text-white">{item.icon}</span>
                   </div>
-                  <span className="text-[8px] font-bold tracking-wide bg-gradient-to-r from-[#502D55] to-[#935073] bg-clip-text text-transparent">
+                  <span className="text-[8px] font-bold tracking-wide bg-gradient-to-r from-[#363A47] to-[#6B7B8D] bg-clip-text text-transparent">
                     {item.label}
                   </span>
                 </Link>
@@ -126,11 +126,11 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-2xl transition-all active:scale-95 ${
-                  item.active ? 'text-[#502D55]' : 'text-gray-400 hover:text-gray-500'
+                  item.active ? 'text-[#363A47]' : 'text-gray-400 hover:text-gray-500'
                 }`}
               >
                 {item.icon}
-                <span className={`text-[9px] font-semibold tracking-wide ${item.active ? 'text-[#502D55]' : ''}`}>
+                <span className={`text-[9px] font-semibold tracking-wide ${item.active ? 'text-[#363A47]' : ''}`}>
                   {item.label}
                 </span>
               </Link>

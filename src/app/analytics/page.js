@@ -6,14 +6,14 @@ import Navbar from '@/components/Navbar'
 import GradientSpheres from '@/components/GradientSpheres'
 
 const CATEGORY_COLORS = {
-  'Social/Key Moments': '#502D55',
-  'Sponsorships': '#935073',
-  'Corporate Campaign': '#F6DBC0',
-  'Corporate Event': '#7B3F5E',
-  'Gifting': '#C98BA5',
+  'Social/Key Moments': '#363A47',
+  'Sponsorships': '#6B7B8D',
+  'Corporate Campaign': '#D0D9E2',
+  'Corporate Event': '#4A5A6A',
+  'Gifting': '#8FABB8',
   'PR Birthdays': '#E8C4A0',
-  'HR & CSR': '#6A4C6D',
-  'Coca Cola Arena': '#B86B8A',
+  'HR & CSR': '#3F5060',
+  'Coca Cola Arena': '#7A9BAE',
   'Uncategorized': '#999',
 }
 
@@ -24,11 +24,11 @@ function KpiCard({ label, value, sub, icon, color }) {
   return (
     <div className="liquid-glass-card p-4 rounded-2xl animate-fade-in" style={{ background: 'rgba(255,255,255,0.6)' }}>
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: color || 'linear-gradient(135deg, #502D55, #935073)' }}>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: color || 'linear-gradient(135deg, #363A47, #6B7B8D)' }}>
           {icon}
         </div>
       </div>
-      <div className="text-2xl font-black" style={{ color: '#502D55' }}>{value}</div>
+      <div className="text-2xl font-black" style={{ color: '#363A47' }}>{value}</div>
       <div className="text-xs text-gray-500 font-medium">{label}</div>
       {sub && <div className="text-[10px] text-gray-400 mt-0.5">{sub}</div>}
     </div>
@@ -42,7 +42,7 @@ function BarChart({ data, colors, maxHeight = 120 }) {
     <div className="flex items-end gap-1.5 justify-between" style={{ height: maxHeight }}>
       {entries.map(([key, val]) => {
         const h = (val / maxVal) * 100
-        const color = colors?.[key] || '#935073'
+        const color = colors?.[key] || '#6B7B8D'
         return (
           <div key={key} className="flex flex-col items-center flex-1 min-w-0">
             <span className="text-[9px] font-bold mb-1" style={{ color }}>{val || ''}</span>
@@ -66,12 +66,12 @@ function HorizontalBar({ items, colors }) {
         <div key={item.name}>
           <div className="flex justify-between items-center mb-1">
             <span className="text-xs font-medium text-gray-600 truncate flex-1 mr-2">{item.name}</span>
-            <span className="text-xs font-bold" style={{ color: colors?.[item.name] || '#502D55' }}>{item.count}</span>
+            <span className="text-xs font-bold" style={{ color: colors?.[item.name] || '#363A47' }}>{item.count}</span>
           </div>
           <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${(item.count / max) * 100}%`, background: colors?.[item.name] || '#935073' }}
+              style={{ width: `${(item.count / max) * 100}%`, background: colors?.[item.name] || '#6B7B8D' }}
             />
           </div>
         </div>
@@ -90,7 +90,7 @@ function DonutChart({ data, colors, size = 100 }) {
     const percent = (val / total) * 100
     const start = cumPercent
     cumPercent += percent
-    return { key, val, percent, start, color: colors?.[key] || '#935073' }
+    return { key, val, percent, start, color: colors?.[key] || '#6B7B8D' }
   })
 
   const r = size / 2
@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
   if (authStatus === 'loading') return null
 
   return (
-    <div className="min-h-screen pb-safe-nav" style={{ background: '#F8F4E9' }}>
+    <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
       {/* Header */}
       <div className="liquid-glass px-5 pt-12 pb-4 relative overflow-hidden" style={{ borderRadius: '0 0 24px 24px' }}>
         <GradientSpheres variant="compact" />
@@ -166,13 +166,13 @@ export default function AnalyticsPage() {
       <div className="px-4 mt-5 space-y-5 animate-fade-in">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-10 h-10 border-3 border-gray-200 rounded-full animate-spin" style={{ borderTopColor: '#502D55' }} />
+            <div className="w-10 h-10 border-3 border-gray-200 rounded-full animate-spin" style={{ borderTopColor: '#363A47' }} />
             <p className="text-xs text-gray-400 mt-3">Loading analytics...</p>
           </div>
         ) : error ? (
           <div className="liquid-glass-card p-6 rounded-2xl text-center">
             <p className="text-sm text-red-500">Failed to load analytics</p>
-            <button onClick={() => window.location.reload()} className="mt-2 text-xs underline" style={{ color: '#935073' }}>Retry</button>
+            <button onClick={() => window.location.reload()} className="mt-2 text-xs underline" style={{ color: '#6B7B8D' }}>Retry</button>
           </div>
         ) : data ? (
           <>
@@ -182,7 +182,7 @@ export default function AnalyticsPage() {
                 label="Total Events"
                 value={data.kpis.totalEvents}
                 icon={<svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>}
-                color="linear-gradient(135deg, #502D55, #935073)"
+                color="linear-gradient(135deg, #363A47, #6B7B8D)"
               />
               <KpiCard
                 label="Completion Rate"
@@ -208,11 +208,11 @@ export default function AnalyticsPage() {
             {/* Secondary KPIs */}
             <div className="grid grid-cols-3 gap-2">
               <div className="liquid-glass-card p-3 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.5)' }}>
-                <div className="text-lg font-black" style={{ color: '#502D55' }}>{data.kpis.totalMedia}</div>
+                <div className="text-lg font-black" style={{ color: '#363A47' }}>{data.kpis.totalMedia}</div>
                 <div className="text-[9px] text-gray-400 font-medium">Media Files</div>
               </div>
               <div className="liquid-glass-card p-3 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.5)' }}>
-                <div className="text-lg font-black" style={{ color: '#935073' }}>{data.kpis.totalComments}</div>
+                <div className="text-lg font-black" style={{ color: '#6B7B8D' }}>{data.kpis.totalComments}</div>
                 <div className="text-[9px] text-gray-400 font-medium">Comments</div>
               </div>
               <div className="liquid-glass-card p-3 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.5)' }}>
@@ -227,7 +227,7 @@ export default function AnalyticsPage() {
               <BarChart
                 data={data.byMonth}
                 colors={Object.fromEntries(
-                  Object.keys(data.byMonth).map((m, i) => [m, i < 3 ? '#F6DBC0' : i < 6 ? '#935073' : i < 9 ? '#502D55' : '#7B3F5E'])
+                  Object.keys(data.byMonth).map((m, i) => [m, i < 3 ? '#D0D9E2' : i < 6 ? '#6B7B8D' : i < 9 ? '#363A47' : '#4A5A6A'])
                 )}
               />
             </div>

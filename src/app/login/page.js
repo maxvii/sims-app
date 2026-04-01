@@ -26,7 +26,7 @@ export default function LoginPage() {
       <div
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: 'url(/images/login-bg.png)',
+          backgroundImage: 'url(/gradient-bg.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -35,16 +35,16 @@ export default function LoginPage() {
       {/* Overlay for extra depth */}
       <div
         className="absolute inset-0 z-0"
-        style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(80,45,85,0.15) 0%, rgba(26,16,32,0.6) 100%)' }}
+        style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(54,58,71,0.15) 0%, rgba(20,22,30,0.6) 100%)' }}
       />
 
-      {/* Logo — big, clean, with rounded corners */}
+      {/* Logo */}
       <div className="relative z-10 mb-14 animate-fade-in">
         <img
-          src="/images/simz-logo.png"
-          alt="The SIMS"
-          className="w-64 h-auto mx-auto rounded-3xl"
-          style={{ boxShadow: '0 12px 50px rgba(0,0,0,0.5)' }}
+          src="/logo.png"
+          alt="The Sims App"
+          className="h-16 w-auto mx-auto"
+          style={{ filter: 'drop-shadow(0 12px 50px rgba(0,0,0,0.5))' }}
         />
       </div>
 
@@ -52,11 +52,11 @@ export default function LoginPage() {
       <div
         className="w-full max-w-sm relative z-10 animate-slide-up p-7 rounded-3xl"
         style={{
-          background: 'rgba(26,16,32,0.45)',
+          background: 'rgba(20,22,30,0.45)',
           backdropFilter: 'blur(40px) saturate(1.6)',
           WebkitBackdropFilter: 'blur(40px) saturate(1.6)',
-          border: '1px solid rgba(248,244,233,0.08)',
-          boxShadow: '0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(248,244,233,0.06)',
+          border: '1px solid rgba(247,249,250,0.08)',
+          boxShadow: '0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(247,249,250,0.06)',
         }}
       >
         {error && (
@@ -65,7 +65,7 @@ export default function LoginPage() {
             style={{
               background: 'rgba(212,54,92,0.2)',
               border: '1px solid rgba(212,54,92,0.3)',
-              color: '#F6DBC0',
+              color: '#D0D9E2',
             }}
           >
             {error}
@@ -74,16 +74,16 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: 'rgba(246,219,192,0.5)' }}>Email</label>
+            <label className="block text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: 'rgba(208,217,226,0.5)' }}>Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full py-3.5 px-5 rounded-2xl text-[15px] outline-none transition-all placeholder:text-white/20"
               style={{
-                background: 'rgba(248,244,233,0.05)',
-                border: '1.5px solid rgba(248,244,233,0.1)',
-                color: '#F8F4E9',
+                background: 'rgba(247,249,250,0.05)',
+                border: '1.5px solid rgba(247,249,250,0.1)',
+                color: '#F7F9FA',
               }}
               placeholder="your@email.com"
               required
@@ -91,7 +91,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: 'rgba(246,219,192,0.5)' }}>Password</label>
+            <label className="block text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: 'rgba(208,217,226,0.5)' }}>Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -99,9 +99,9 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full py-3.5 px-5 pr-12 rounded-2xl text-[15px] outline-none transition-all placeholder:text-white/20"
                 style={{
-                  background: 'rgba(248,244,233,0.05)',
-                  border: '1.5px solid rgba(248,244,233,0.1)',
-                  color: '#F8F4E9',
+                  background: 'rgba(247,249,250,0.05)',
+                  border: '1.5px solid rgba(247,249,250,0.1)',
+                  color: '#F7F9FA',
                 }}
                 placeholder="••••••••"
                 required
@@ -110,7 +110,7 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: 'rgba(246,219,192,0.4)' }}
+                style={{ color: 'rgba(208,217,226,0.4)' }}
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
@@ -126,9 +126,9 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-4 rounded-2xl font-semibold text-[15px] disabled:opacity-50 transition-all mt-2"
             style={{
-              background: 'linear-gradient(135deg, #F6DBC0, #E8C9A8)',
-              color: '#3D2240',
-              boxShadow: '0 4px 24px rgba(246,219,192,0.25)',
+              background: 'linear-gradient(135deg, #D0D9E2, #B8C8D5)',
+              color: '#2B2E38',
+              boxShadow: '0 4px 24px rgba(208,217,226,0.25)',
               letterSpacing: '0.05em',
             }}
           >
@@ -143,7 +143,7 @@ export default function LoginPage() {
       </div>
 
       {/* Bottom text */}
-      <p className="relative z-10 mt-10 text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(246,219,192,0.15)' }}>
+      <p className="relative z-10 mt-10 text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(208,217,226,0.15)' }}>
         The Sims App
       </p>
     </div>

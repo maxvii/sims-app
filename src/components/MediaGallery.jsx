@@ -95,16 +95,16 @@ export default function MediaGallery({ eventId, media, onRefresh }) {
         <button
           onClick={() => fileRef.current?.click()}
           disabled={uploading}
-          className="w-full py-4 border-2 border-dashed border-[#935073]/20 rounded-xl hover:border-[#935073] hover:bg-[#935073]/5 transition-all flex flex-col items-center gap-2 disabled:opacity-50"
+          className="w-full py-4 border-2 border-dashed border-[#6B7B8D]/20 rounded-xl hover:border-[#6B7B8D] hover:bg-[#6B7B8D]/5 transition-all flex flex-col items-center gap-2 disabled:opacity-50"
         >
           {uploading ? (
             <>
-              <svg className="w-8 h-8 text-[#935073] animate-spin" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-              <span className="text-sm font-semibold text-[#935073]">Uploading...</span>
+              <svg className="w-8 h-8 text-[#6B7B8D] animate-spin" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              <span className="text-sm font-semibold text-[#6B7B8D]">Uploading...</span>
             </>
           ) : (
             <>
-              <svg className="w-8 h-8 text-[#B0688A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+              <svg className="w-8 h-8 text-[#9AAAB8]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
               <span className="text-sm font-semibold text-gray-500">Upload Video or Image</span>
               <span className="text-[10px] text-gray-400">MP4, MOV, WebM, JPG, PNG, GIF &middot; Max 100MB</span>
             </>
@@ -126,7 +126,7 @@ export default function MediaGallery({ eventId, media, onRefresh }) {
                   <video src={m.filepath} className="w-full h-full object-cover" preload="metadata" muted />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                     <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-[#935073] ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                      <svg className="w-5 h-5 text-[#6B7B8D] ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </div>
                   </div>
                 </div>
@@ -140,7 +140,7 @@ export default function MediaGallery({ eventId, media, onRefresh }) {
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-[10px] text-gray-400">{m.user.name}</span>
                   {m.comments?.length > 0 && (
-                    <span className="flex items-center gap-0.5 text-[10px] text-[#935073] font-semibold">
+                    <span className="flex items-center gap-0.5 text-[10px] text-[#6B7B8D] font-semibold">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                       {m.comments.length}
                     </span>
