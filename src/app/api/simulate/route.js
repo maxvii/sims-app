@@ -1,26 +1,7 @@
-// OpenClaw webhook caller
-async function callOpenClaw(message) {
-  const tunnelUrl = process.env.OPENCLAW_TUNNEL_URL
-  const secret = process.env.OPENCLAW_WEBHOOK_SECRET
-  if (!tunnelUrl) throw new Error('OPENCLAW_TUNNEL_URL not configured')
+import { generateText } from 'ai'
+import { createGroq } from '@ai-sdk/groq'
 
-  const res = await fetch(tunnelUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(secret ? { 'X-Webhook-Secret': secret } : {}),
-    },
-    body: JSON.stringify({ message, agent: 'main' }),
-  })
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => res.statusText)
-    throw new Error(`OpenClaw returned ${res.status}: ${errText}`)
-  }
-
-  const data = await res.json()
-  return data.result || data.response || data.message || data.output || ''
-}
+const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -448,21 +429,19 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
 
     let qualitative = {}
     try {
-      const rawText = await callOpenClaw(geminiPrompt)
+      const result = await generateText({
+        model: groq('llama-3.3-70b-versatile'),
+        prompt: geminiPrompt,
+        maxTokens: 1500,
+      })
 
-      let text = (rawText || '').trim()
+      let text = result.text.trim()
       if (text.startsWith('```')) {
         text = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
       }
-      // Try to extract JSON from the response
-      const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        qualitative = JSON.parse(jsonMatch[0])
-      } else if (text) {
-        qualitative = { strengths: [text], improvements: [], captionSuggestion: null }
-      }
-    } catch (openclawErr) {
-      console.error('OpenClaw qualitative analysis failed:', openclawErr?.message)
+      qualitative = JSON.parse(text)
+    } catch (groqErr) {
+      console.error('Groq qualitative analysis failed:', groqErr?.message)
       // Non-fatal — we still return the mathematical predictions
       qualitative = {
         strengths: ['Mathematical prediction completed successfully'],
@@ -534,7 +513,7 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
         version: '2.0',
         baseFollowers: FOLLOWERS,
         variancePercent: 15,
-        engine: 'mathematical_prediction + openclaw_qualitative',
+        engine: 'mathematical_prediction + groq_qualitative',
       },
     }
 

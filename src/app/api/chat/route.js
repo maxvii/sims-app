@@ -1,116 +1,13 @@
+import { streamText, tool, stepCountIs } from 'ai'
+import { createGroq } from '@ai-sdk/groq'
+
+const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
+import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } from '@/lib/agent-tools'
 
-export const maxDuration = 120
-
-const SYSTEM_PROMPT = `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
-
-Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
-
-She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
-
-Event categories: Brand Events, Conferences, Internal Communications, Social Greetings.
-Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
-
-## YOUR TOOLS (call by responding with JSON)
-
-You have access to these database tools. To use them, respond with ONLY a JSON block like this:
-\`\`\`json
-{"tool": "tool_name", "params": {...}}
-\`\`\`
-
-Available tools:
-
-1. **search_events** — Search and filter calendar events
-   Params: { "query": "optional search text", "dateFrom": "DD Mon YYYY", "dateTo": "DD Mon YYYY", "category": "Brand Events|Conferences|Internal Communications|Social Greetings", "status": "Not Started|In Progress|Completed|Cancelled", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "limit": 10 }
-   All params are optional.
-
-2. **create_event** — Create a new calendar event
-   Params: { "title": "Event title (required)", "date": "DD Mon YYYY (required)", "category": "optional", "priority": "optional, default MEDIUM", "opportunityType": "optional", "platforms": "optional", "notes": "optional" }
-
-3. **update_event** — Update an existing event (need eventId from search results)
-   Params: { "eventId": "the event ID (required)", "status": "optional new status", "notes": "optional new notes", "priority": "optional new priority" }
-
-4. **get_today_brief** — Get today's events + upcoming 7 days + stats
-   Params: {} (no params needed)
-
-5. **get_analytics** — Get full analytics: totals by category/priority/status/month
-   Params: {} (no params needed)
-
-## RULES
-- When the user asks about schedule/events/calendar, USE search_events or get_today_brief.
-- When the user asks to add/create/schedule an event, USE create_event. Format dates as "DD Mon YYYY".
-- When the user asks to update/change/modify an event, first search for it, then use update_event.
-- When the user asks about stats/analytics/overview, USE get_analytics.
-- If you need to call a tool, respond with ONLY the JSON block. Nothing else.
-- If you can answer directly without tools, just respond normally with text.
-- After receiving tool results, give a clear, helpful summary to the user.
-- Be professional, concise, and proactive. Use emojis sparingly.
-- Today's date is ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}.`
-
-// ─── Available tools map ───
-const TOOLS = {
-  search_events: searchEvents,
-  create_event: createEvent,
-  update_event: updateEvent,
-  get_today_brief: getTodayBrief,
-  get_analytics: getAnalytics,
-}
-
-// ─── Call OpenClaw webhook ───
-async function callOpenClaw(message) {
-  const tunnelUrl = process.env.OPENCLAW_TUNNEL_URL
-  const secret = process.env.OPENCLAW_WEBHOOK_SECRET
-
-  if (!tunnelUrl) throw new Error('OPENCLAW_TUNNEL_URL not configured')
-
-  const res = await fetch(tunnelUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(secret ? { 'X-Webhook-Secret': secret } : {}),
-    },
-    body: JSON.stringify({ message, agent: 'main' }),
-  })
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => res.statusText)
-    throw new Error(`OpenClaw returned ${res.status}: ${errText}`)
-  }
-
-  const data = await res.json()
-  return data.result || data.response || data.message || data.output || ''
-}
-
-// ─── Parse tool call from OpenClaw response ───
-function parseToolCall(text) {
-  if (!text) return null
-  // Try to find JSON block with tool field
-  const jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) || text.match(/(\{"tool"\s*:[\s\S]*?\})/)
-  if (!jsonMatch) return null
-  try {
-    const parsed = JSON.parse(jsonMatch[1])
-    if (parsed.tool && TOOLS[parsed.tool]) {
-      return { tool: parsed.tool, params: parsed.params || {} }
-    }
-  } catch {}
-  return null
-}
-
-// ─── Build AI SDK v6 stream response ───
-function streamResponse(text) {
-  const encoder = new TextEncoder()
-  const stream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(encoder.encode(`0:${JSON.stringify(text)}\n`))
-      controller.enqueue(encoder.encode(`e:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 }, isContinued: false })}\n`))
-      controller.enqueue(encoder.encode(`d:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })}\n`))
-      controller.close()
-    },
-  })
-  return new Response(stream, { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
-}
+export const maxDuration = 60
 
 export async function POST(req) {
   const session = await getServerSession(authOptions)
@@ -131,67 +28,120 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
-  // AI SDK v6: convert UIMessage[] to clean messages
+  // AI SDK v6: client sends UIMessage[] with parts array — convert to clean ModelMessage[]
   const messages = rawMessages.map(msg => {
     if (Array.isArray(msg.parts)) {
-      const text = msg.parts.filter(p => p.type === 'text').map(p => p.text || '').join('')
+      const text = msg.parts
+        .filter(p => p.type === 'text')
+        .map(p => p.text || '')
+        .join('')
       return { role: msg.role, content: text || '' }
     }
-    if (typeof msg.content === 'string') return { role: msg.role, content: msg.content }
+    if (typeof msg.content === 'string') {
+      return { role: msg.role, content: msg.content }
+    }
     if (Array.isArray(msg.content)) {
-      const text = msg.content.map(p => typeof p === 'string' ? p : p?.text || '').join('')
+      const text = msg.content
+        .map(p => typeof p === 'string' ? p : p?.text || '')
+        .join('')
       return { role: msg.role, content: text || '' }
     }
     return { role: msg.role, content: '' }
   })
 
   try {
-    // ─── PHASE 1: Send conversation to OpenClaw ───
-    let prompt = SYSTEM_PROMPT + '\n\n'
-    const recentMessages = messages.slice(-12)
-    prompt += 'Conversation:\n'
-    for (const msg of recentMessages) {
-      prompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`
-    }
-    prompt += '\nAssistant:'
+    const result = streamText({
+      model: groq('llama-3.3-70b-versatile'),
+      system: `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
 
-    const phase1Response = await callOpenClaw(prompt)
+Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
 
-    // ─── PHASE 2: Check if OpenClaw wants to call a tool ───
-    const toolCall = parseToolCall(phase1Response)
+She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
 
-    if (toolCall) {
-      console.log(`[Sims GPT] Tool call: ${toolCall.tool}`, JSON.stringify(toolCall.params))
+Event categories available: Brand Events, Conferences, Internal Communications, Social Greetings.
 
-      // Execute the tool on the VPS database
-      let toolResult
-      try {
-        toolResult = await TOOLS[toolCall.tool](toolCall.params)
-      } catch (toolErr) {
-        console.error(`[Sims GPT] Tool ${toolCall.tool} failed:`, toolErr?.message)
-        toolResult = { error: toolErr?.message || 'Tool execution failed' }
-      }
+Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
 
-      // ─── PHASE 3: Send tool results back to OpenClaw for final response ───
-      const phase2Prompt = `${SYSTEM_PROMPT}
+When users ask to add events via voice or text, extract the details (title, date, category, priority) and use the create_event tool. Format dates as 'DD Mon YYYY' (e.g. '07 Apr 2026').
 
-The user asked: "${messages.filter(m => m.role === 'user').pop()?.content || ''}"
+When asked about schedule, use search_events or get_today_brief tools.
 
-You called the tool "${toolCall.tool}" with params: ${JSON.stringify(toolCall.params)}
+Be professional, concise, and proactive. Use emojis sparingly. Always confirm actions taken.`,
+      messages,
+      stopWhen: stepCountIs(5),
+      tools: {
+        create_event: tool({
+          description: 'Create a new calendar event for Sima Ved. Use this when the user asks to add, schedule, or create an event.',
+          parameters: z.object({
+            title: z.string().describe('The event title'),
+            date: z.string().describe('Event date in "DD Mon YYYY" format, e.g. "07 Apr 2026"'),
+            category: z.enum([
+              'Brand Events',
+              'Conferences',
+              'Internal Communications',
+              'Social Greetings',
+            ]).optional().describe('Event category'),
+            priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional().describe('Event priority level'),
+            opportunityType: z.string().optional().describe('Type of opportunity, e.g. "Instagram Reel", "Press Release"'),
+            platforms: z.string().optional().describe('Target platforms, e.g. "Instagram, LinkedIn"'),
+            notes: z.string().optional().describe('Additional notes for the event'),
+          }),
+          execute: async (params) => {
+            return await createEvent(params)
+          },
+        }),
 
-Tool result:
-${JSON.stringify(toolResult, null, 2)}
+        search_events: tool({
+          description: 'Search and filter calendar events. Use this when the user asks about upcoming events, schedule, or searches for specific events.',
+          parameters: z.object({
+            query: z.string().optional().describe('Search query to match against event titles and notes'),
+            dateFrom: z.string().optional().describe('Start date filter in "DD Mon YYYY" format'),
+            dateTo: z.string().optional().describe('End date filter in "DD Mon YYYY" format'),
+            category: z.string().optional().describe('Filter by event category'),
+            status: z.string().optional().describe('Filter by status: UPCOMING, IN_PROGRESS, COMPLETED, CANCELLED'),
+            priority: z.string().optional().describe('Filter by priority: CRITICAL, HIGH, MEDIUM, LOW'),
+            limit: z.number().optional().describe('Maximum number of results to return'),
+          }),
+          execute: async (params) => {
+            return await searchEvents(params)
+          },
+        }),
 
-Now give the user a clear, helpful response based on these results. Do NOT output JSON. Respond naturally.`
+        update_event: tool({
+          description: 'Update an existing calendar event. Use this when the user asks to change status, add notes, or modify an event.',
+          parameters: z.object({
+            eventId: z.string().describe('The ID of the event to update'),
+            status: z.string().optional().describe('New status: UPCOMING, IN_PROGRESS, COMPLETED, CANCELLED'),
+            notes: z.string().optional().describe('Updated notes for the event'),
+            priority: z.string().optional().describe('Updated priority: CRITICAL, HIGH, MEDIUM, LOW'),
+          }),
+          execute: async (params) => {
+            return await updateEvent(params)
+          },
+        }),
 
-      const finalResponse = await callOpenClaw(phase2Prompt)
-      return streamResponse(finalResponse || 'I found the data but got an empty response. Please try again.')
-    }
+        get_today_brief: tool({
+          description: 'Get a brief summary of today\'s events and upcoming priorities. Use this when the user asks "what\'s on today", "daily brief", or similar.',
+          parameters: z.object({}),
+          execute: async () => {
+            return await getTodayBrief()
+          },
+        }),
 
-    // No tool call — direct text response
-    return streamResponse(phase1Response || 'I received your message but got an empty response. Please try again.')
+        get_analytics: tool({
+          description: 'Get analytics and statistics about the calendar events. Use this when the user asks about metrics, stats, or overview numbers.',
+          parameters: z.object({}),
+          execute: async () => {
+            return await getAnalytics()
+          },
+        }),
+      },
+    })
+
+    return result.toUIMessageStreamResponse()
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
+    console.error('Stack:', error?.stack)
     return new Response(
       JSON.stringify({ error: error?.message || 'Failed to process chat request. Please try again.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
