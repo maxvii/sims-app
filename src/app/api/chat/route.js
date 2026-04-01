@@ -10,11 +10,53 @@ Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aero
 
 She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
 
-Event categories available: Brand Events, Conferences, Internal Communications, Social Greetings.
+Event categories: Brand Events, Conferences, Internal Communications, Social Greetings.
 Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
 
-When users ask about schedule or events, include relevant data from the calendar.
-Be professional, concise, and proactive. Use emojis sparingly. Always confirm actions taken.`
+## YOUR TOOLS (call by responding with JSON)
+
+You have access to these database tools. To use them, respond with ONLY a JSON block like this:
+\`\`\`json
+{"tool": "tool_name", "params": {...}}
+\`\`\`
+
+Available tools:
+
+1. **search_events** — Search and filter calendar events
+   Params: { "query": "optional search text", "dateFrom": "DD Mon YYYY", "dateTo": "DD Mon YYYY", "category": "Brand Events|Conferences|Internal Communications|Social Greetings", "status": "Not Started|In Progress|Completed|Cancelled", "priority": "CRITICAL|HIGH|MEDIUM|LOW", "limit": 10 }
+   All params are optional.
+
+2. **create_event** — Create a new calendar event
+   Params: { "title": "Event title (required)", "date": "DD Mon YYYY (required)", "category": "optional", "priority": "optional, default MEDIUM", "opportunityType": "optional", "platforms": "optional", "notes": "optional" }
+
+3. **update_event** — Update an existing event (need eventId from search results)
+   Params: { "eventId": "the event ID (required)", "status": "optional new status", "notes": "optional new notes", "priority": "optional new priority" }
+
+4. **get_today_brief** — Get today's events + upcoming 7 days + stats
+   Params: {} (no params needed)
+
+5. **get_analytics** — Get full analytics: totals by category/priority/status/month
+   Params: {} (no params needed)
+
+## RULES
+- When the user asks about schedule/events/calendar, USE search_events or get_today_brief.
+- When the user asks to add/create/schedule an event, USE create_event. Format dates as "DD Mon YYYY".
+- When the user asks to update/change/modify an event, first search for it, then use update_event.
+- When the user asks about stats/analytics/overview, USE get_analytics.
+- If you need to call a tool, respond with ONLY the JSON block. Nothing else.
+- If you can answer directly without tools, just respond normally with text.
+- After receiving tool results, give a clear, helpful summary to the user.
+- Be professional, concise, and proactive. Use emojis sparingly.
+- Today's date is ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}.`
+
+// ─── Available tools map ───
+const TOOLS = {
+  search_events: searchEvents,
+  create_event: createEvent,
+  update_event: updateEvent,
+  get_today_brief: getTodayBrief,
+  get_analytics: getAnalytics,
+}
 
 // ─── Call OpenClaw webhook ───
 async function callOpenClaw(message) {
@@ -29,10 +71,7 @@ async function callOpenClaw(message) {
       'Content-Type': 'application/json',
       ...(secret ? { 'X-Webhook-Secret': secret } : {}),
     },
-    body: JSON.stringify({
-      message,
-      agent: 'main',
-    }),
+    body: JSON.stringify({ message, agent: 'main' }),
   })
 
   if (!res.ok) {
@@ -41,35 +80,36 @@ async function callOpenClaw(message) {
   }
 
   const data = await res.json()
-  return data.result || data.response || data.message || data.output || JSON.stringify(data)
+  return data.result || data.response || data.message || data.output || ''
 }
 
-// ─── Execute local tools based on user intent ───
-async function executeToolsIfNeeded(lastMessage) {
-  const msg = lastMessage.toLowerCase()
-
-  // Today's brief
-  if (msg.includes('brief') || msg.includes("what's on today") || msg.includes('today') || msg.includes('daily')) {
-    try {
-      return { toolName: 'get_today_brief', result: await getTodayBrief() }
-    } catch { return null }
-  }
-
-  // Search events
-  if (msg.includes('this week') || msg.includes('next week') || msg.includes('upcoming') || msg.includes('schedule') || msg.includes('events')) {
-    try {
-      return { toolName: 'search_events', result: await searchEvents({ limit: 10 }) }
-    } catch { return null }
-  }
-
-  // Analytics
-  if (msg.includes('analytics') || msg.includes('stats') || msg.includes('metrics') || msg.includes('overview')) {
-    try {
-      return { toolName: 'get_analytics', result: await getAnalytics() }
-    } catch { return null }
-  }
-
+// ─── Parse tool call from OpenClaw response ───
+function parseToolCall(text) {
+  if (!text) return null
+  // Try to find JSON block with tool field
+  const jsonMatch = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/) || text.match(/(\{"tool"\s*:[\s\S]*?\})/)
+  if (!jsonMatch) return null
+  try {
+    const parsed = JSON.parse(jsonMatch[1])
+    if (parsed.tool && TOOLS[parsed.tool]) {
+      return { tool: parsed.tool, params: parsed.params || {} }
+    }
+  } catch {}
   return null
+}
+
+// ─── Build AI SDK v6 stream response ───
+function streamResponse(text) {
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`0:${JSON.stringify(text)}\n`))
+      controller.enqueue(encoder.encode(`e:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 }, isContinued: false })}\n`))
+      controller.enqueue(encoder.encode(`d:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })}\n`))
+      controller.close()
+    },
+  })
+  return new Response(stream, { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
 }
 
 export async function POST(req) {
@@ -91,7 +131,7 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
-  // AI SDK v6: client sends UIMessage[] with parts array — convert to clean text
+  // AI SDK v6: convert UIMessage[] to clean messages
   const messages = rawMessages.map(msg => {
     if (Array.isArray(msg.parts)) {
       const text = msg.parts.filter(p => p.type === 'text').map(p => p.text || '').join('')
@@ -106,49 +146,50 @@ export async function POST(req) {
   })
 
   try {
-    const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content || ''
-
-    // Execute local DB tools if the user's message triggers them
-    const toolResult = await executeToolsIfNeeded(lastUserMsg)
-
-    // Build the full prompt for OpenClaw
-    let fullPrompt = SYSTEM_PROMPT + '\n\n'
-
-    // Add tool data as context if available
-    if (toolResult) {
-      fullPrompt += `[CALENDAR DATA from ${toolResult.toolName}]:\n${JSON.stringify(toolResult.result, null, 2)}\n\n`
-      fullPrompt += `Use the calendar data above to answer the user's question.\n\n`
-    }
-
-    // Add conversation history (last 10 messages for context)
-    const recentMessages = messages.slice(-10)
-    fullPrompt += 'Conversation:\n'
+    // ─── PHASE 1: Send conversation to OpenClaw ───
+    let prompt = SYSTEM_PROMPT + '\n\n'
+    const recentMessages = messages.slice(-12)
+    prompt += 'Conversation:\n'
     for (const msg of recentMessages) {
-      fullPrompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`
+      prompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`
     }
-    fullPrompt += '\nAssistant:'
+    prompt += '\nAssistant:'
 
-    // Call OpenClaw
-    const response = await callOpenClaw(fullPrompt)
+    const phase1Response = await callOpenClaw(prompt)
 
-    // Return in AI SDK v6 UIMessage stream format so useChat() understands it
-    const encoder = new TextEncoder()
-    const stream = new ReadableStream({
-      start(controller) {
-        // Text content — AI SDK v6 text stream protocol: prefix 0: for text parts
-        controller.enqueue(encoder.encode(`0:${JSON.stringify(response || 'I received your message but got an empty response. Please try again.')}\n`))
-        // Finish step
-        controller.enqueue(encoder.encode(`e:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 }, isContinued: false })}\n`))
-        // Finish message
-        controller.enqueue(encoder.encode(`d:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })}\n`))
-        controller.close()
-      },
-    })
+    // ─── PHASE 2: Check if OpenClaw wants to call a tool ───
+    const toolCall = parseToolCall(phase1Response)
 
-    return new Response(stream, {
-      status: 200,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    })
+    if (toolCall) {
+      console.log(`[Sims GPT] Tool call: ${toolCall.tool}`, JSON.stringify(toolCall.params))
+
+      // Execute the tool on the VPS database
+      let toolResult
+      try {
+        toolResult = await TOOLS[toolCall.tool](toolCall.params)
+      } catch (toolErr) {
+        console.error(`[Sims GPT] Tool ${toolCall.tool} failed:`, toolErr?.message)
+        toolResult = { error: toolErr?.message || 'Tool execution failed' }
+      }
+
+      // ─── PHASE 3: Send tool results back to OpenClaw for final response ───
+      const phase2Prompt = `${SYSTEM_PROMPT}
+
+The user asked: "${messages.filter(m => m.role === 'user').pop()?.content || ''}"
+
+You called the tool "${toolCall.tool}" with params: ${JSON.stringify(toolCall.params)}
+
+Tool result:
+${JSON.stringify(toolResult, null, 2)}
+
+Now give the user a clear, helpful response based on these results. Do NOT output JSON. Respond naturally.`
+
+      const finalResponse = await callOpenClaw(phase2Prompt)
+      return streamResponse(finalResponse || 'I found the data but got an empty response. Please try again.')
+    }
+
+    // No tool call — direct text response
+    return streamResponse(phase1Response || 'I received your message but got an empty response. Please try again.')
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
     return new Response(
