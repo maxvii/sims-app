@@ -30,9 +30,34 @@ export async function POST(req) {
   let messages
   try {
     messages = convertToModelMessages(rawMessages)
-  } catch {
-    // Fallback: already in legacy format
-    messages = rawMessages
+  } catch (convErr) {
+    // Manual fallback: convert UIMessage parts to simple {role, content} format
+    try {
+      messages = rawMessages.map(msg => {
+        // Already in legacy format
+        if (typeof msg.content === 'string') {
+          return { role: msg.role, content: msg.content }
+        }
+        // UIMessage with parts array
+        if (Array.isArray(msg.parts)) {
+          const text = msg.parts
+            .filter(p => p.type === 'text')
+            .map(p => p.text || '')
+            .join('')
+          return { role: msg.role, content: text || '' }
+        }
+        // Array content (older format)
+        if (Array.isArray(msg.content)) {
+          const text = msg.content
+            .map(p => typeof p === 'string' ? p : p?.text || '')
+            .join('')
+          return { role: msg.role, content: text || '' }
+        }
+        return { role: msg.role, content: '' }
+      })
+    } catch {
+      messages = rawMessages
+    }
   }
 
   try {
