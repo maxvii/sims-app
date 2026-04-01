@@ -1,10 +1,26 @@
-import { generateText } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
+// OpenClaw webhook caller
+async function callOpenClaw(message) {
+  const tunnelUrl = process.env.OPENCLAW_TUNNEL_URL
+  const secret = process.env.OPENCLAW_WEBHOOK_SECRET
+  if (!tunnelUrl) throw new Error('OPENCLAW_TUNNEL_URL not configured')
 
-const openclaw = createOpenAI({
-  baseURL: `${process.env.OPENCLAW_TUNNEL_URL}/v1`,
-  apiKey: 'openclaw',
-})
+  const res = await fetch(tunnelUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(secret ? { 'X-Webhook-Secret': secret } : {}),
+    },
+    body: JSON.stringify({ message, agent: 'main' }),
+  })
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => res.statusText)
+    throw new Error(`OpenClaw returned ${res.status}: ${errText}`)
+  }
+
+  const data = await res.json()
+  return data.result || data.response || data.message || data.output || ''
+}
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -432,19 +448,21 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
 
     let qualitative = {}
     try {
-      const result = await generateText({
-        model: openclaw(process.env.OPENCLAW_MODEL || 'claude-3-5-sonnet-20241022'),
-        prompt: geminiPrompt,
-        maxTokens: 1500,
-      })
+      const rawText = await callOpenClaw(geminiPrompt)
 
-      let text = result.text.trim()
+      let text = (rawText || '').trim()
       if (text.startsWith('```')) {
         text = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
       }
-      qualitative = JSON.parse(text)
-    } catch (geminiErr) {
-      console.error('Gemini qualitative analysis failed:', geminiErr?.message)
+      // Try to extract JSON from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        qualitative = JSON.parse(jsonMatch[0])
+      } else if (text) {
+        qualitative = { strengths: [text], improvements: [], captionSuggestion: null }
+      }
+    } catch (openclawErr) {
+      console.error('OpenClaw qualitative analysis failed:', openclawErr?.message)
       // Non-fatal — we still return the mathematical predictions
       qualitative = {
         strengths: ['Mathematical prediction completed successfully'],
