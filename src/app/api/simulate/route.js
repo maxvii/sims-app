@@ -1,7 +1,10 @@
 import { generateText } from 'ai'
-import { createGroq } from '@ai-sdk/groq'
+import { createOpenAI } from '@ai-sdk/openai'
 
-const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
+const openclaw = createOpenAI({
+  baseURL: `${process.env.OPENCLAW_TUNNEL_URL}/v1`,
+  apiKey: 'openclaw',
+})
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -430,7 +433,7 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
     let qualitative = {}
     try {
       const result = await generateText({
-        model: groq('llama-3.3-70b-versatile'),
+        model: openclaw(process.env.OPENCLAW_MODEL || 'claude-3-5-sonnet-20241022'),
         prompt: geminiPrompt,
         maxTokens: 1500,
       })
@@ -513,7 +516,7 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
         version: '2.0',
         baseFollowers: FOLLOWERS,
         variancePercent: 15,
-        engine: 'mathematical_prediction + gemini_qualitative',
+        engine: 'mathematical_prediction + openclaw_qualitative',
       },
     }
 

@@ -1,7 +1,10 @@
 import { streamText, tool, stepCountIs } from 'ai'
-import { createGroq } from '@ai-sdk/groq'
+import { createOpenAI } from '@ai-sdk/openai'
 
-const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
+const openclaw = createOpenAI({
+  baseURL: `${process.env.OPENCLAW_TUNNEL_URL}/v1`,
+  apiKey: 'openclaw',
+})
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -54,7 +57,7 @@ export async function POST(req) {
 
   try {
     const result = streamText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: openclaw(process.env.OPENCLAW_MODEL || 'claude-3-5-sonnet-20241022'),
       system: `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
 
 Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
