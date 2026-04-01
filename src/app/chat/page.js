@@ -19,18 +19,37 @@ function toolLabel(name) {
   return TOOL_LABELS[name] || { icon: '🔧', loading: 'Working...', done: 'Done' }
 }
 
+/** Extract text from a message — handles AI SDK v6 parts array and legacy content */
+function getMessageText(message) {
+  // AI SDK v6: check parts array first
+  if (Array.isArray(message.parts)) {
+    return message.parts
+      .filter(p => p.type === 'text')
+      .map(p => p.text || '')
+      .join('')
+  }
+  // Legacy: string content
+  if (typeof message.content === 'string') return message.content
+  // Legacy: array content
+  if (Array.isArray(message.content)) {
+    return message.content.map(p => typeof p === 'string' ? p : p?.text || '').join('')
+  }
+  return ''
+}
+
+/** Get tool invocations from a message — handles parts array and legacy */
+function getToolInvocations(message) {
+  // AI SDK v6: extract from parts
+  if (Array.isArray(message.parts)) {
+    return message.parts.filter(p => p.type === 'tool-invocation').map(p => p.toolInvocation || p)
+  }
+  // Legacy
+  return message.toolInvocations || []
+}
+
 /** Very lightweight "markdown" — handles **bold**, *italic*, `code`, and lists */
 function renderMarkdown(text) {
   if (!text) return null
-  if (typeof text !== 'string') {
-    // AI SDK v6 may return content as array of parts
-    if (Array.isArray(text)) {
-      const str = text.map(p => typeof p === 'string' ? p : p?.text || '').join('')
-      if (!str) return null
-      return renderMarkdown(str)
-    }
-    return null
-  }
   const lines = text.split('\n')
   return lines.map((line, i) => {
     // Bullet lists
@@ -62,7 +81,6 @@ function renderMarkdown(text) {
 }
 
 function formatInline(text) {
-  // Split by bold, italic, and code markers
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/)
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**'))
@@ -89,10 +107,9 @@ const QUICK_ACTIONS = [
 
 function ToolCard({ invocation }) {
   const label = toolLabel(invocation.toolName)
-  const isLoading = invocation.state === 'call' || invocation.state === 'partial-call'
+  const isToolLoading = invocation.state === 'call' || invocation.state === 'partial-call'
   const isResult = invocation.state === 'result'
 
-  // Build a short result summary
   let resultSummary = null
   if (isResult && invocation.result) {
     const r = invocation.result
@@ -123,13 +140,13 @@ function ToolCard({ invocation }) {
       <span className="text-sm">{label.icon}</span>
       <div className="flex-1 min-w-0">
         <span style={{ color: '#502D55' }} className="font-medium">
-          {isLoading ? label.loading : label.done}
+          {isToolLoading ? label.loading : label.done}
         </span>
         {resultSummary && (
           <span className="block text-gray-500 truncate mt-0.5">{isResult ? '✅ ' : ''}{resultSummary}</span>
         )}
       </div>
-      {isLoading && (
+      {isToolLoading && (
         <span className="flex gap-0.5">
           <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '0ms' }} />
           <span className="w-1 h-1 rounded-full animate-bounce" style={{ background: '#935073', animationDelay: '150ms' }} />
@@ -144,18 +161,11 @@ function ToolCard({ invocation }) {
 
 function MessageBubble({ message }) {
   const isUser = message.role === 'user'
-
-  // Safely extract text content — AI SDK v6 can return string, array, or undefined
-  let textContent = ''
-  if (typeof message.content === 'string') {
-    textContent = message.content
-  } else if (Array.isArray(message.content)) {
-    textContent = message.content.map(p => typeof p === 'string' ? p : p?.text || '').join('')
-  }
+  const textContent = getMessageText(message)
+  const toolInvocations = getToolInvocations(message)
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-      {/* AI avatar */}
       {!isUser && (
         <div
           className="w-7 h-7 rounded-full shrink-0 mt-1 mr-2 flex items-center justify-center text-white text-xs font-bold"
@@ -166,7 +176,6 @@ function MessageBubble({ message }) {
       )}
 
       <div className="max-w-[80%] flex flex-col gap-0.5">
-        {/* Text content */}
         {textContent ? (
           <div
             className={`px-4 py-2.5 text-sm leading-relaxed ${
@@ -190,8 +199,7 @@ function MessageBubble({ message }) {
           </div>
         ) : null}
 
-        {/* Tool invocations */}
-        {message.toolInvocations?.map((inv, i) => (
+        {toolInvocations.map((inv, i) => (
           <ToolCard key={inv.toolCallId || i} invocation={inv} />
         ))}
       </div>
@@ -208,22 +216,21 @@ export default function ChatPage() {
   const scrollContainerRef = useRef(null)
   const inputRef = useRef(null)
 
+  // Local input state (AI SDK v6 removed input management from useChat)
+  const [input, setInput] = useState('')
+
   // Voice state
   const [isListening, setIsListening] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
   const recognitionRef = useRef(null)
 
-  // useChat from Vercel AI SDK
   const [chatError, setChatError] = useState(null)
 
+  // AI SDK v6 useChat — returns sendMessage, status, messages, error
   const {
     messages,
-    input: rawInput,
-    setInput,
-    handleSubmit,
-    handleInputChange,
-    isLoading,
-    append,
+    sendMessage,
+    status,
     error,
   } = useChat({
     api: '/api/chat',
@@ -233,8 +240,7 @@ export default function ChatPage() {
     },
   })
 
-  // Guard against undefined input from useChat (AI SDK v6 race condition)
-  const input = rawInput ?? ''
+  const isLoading = status === 'submitted' || status === 'streaming'
 
   // ── Auth guard ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -252,7 +258,15 @@ export default function ChatPage() {
   // ── Auto-scroll to newest message ───────────────────────────────────────
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isLoading])
+  }, [messages, status])
+
+  // ── Send message handler ───────────────────────────────────────────────
+  function handleSend(text) {
+    const trimmed = (text || '').trim()
+    if (!trimmed || isLoading) return
+    setInput('')
+    sendMessage({ text: trimmed })
+  }
 
   // ── Voice input logic ───────────────────────────────────────────────────
   function toggleVoice() {
@@ -273,28 +287,17 @@ export default function ChatPage() {
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript
       if (transcript.trim()) {
-        // Append as user message directly (auto-submit)
-        append({ role: 'user', content: transcript.trim() })
+        handleSend(transcript)
       }
       setIsListening(false)
     }
 
-    recognition.onerror = () => {
-      setIsListening(false)
-    }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
+    recognition.onerror = () => setIsListening(false)
+    recognition.onend = () => setIsListening(false)
 
     recognitionRef.current = recognition
     recognition.start()
     setIsListening(true)
-  }
-
-  // ── Quick action handler ────────────────────────────────────────────────
-  function handleQuickAction(prompt) {
-    append({ role: 'user', content: prompt })
   }
 
   // ── Loading skeleton ────────────────────────────────────────────────────
@@ -317,7 +320,6 @@ export default function ChatPage() {
           boxShadow: '0 8px 32px rgba(80,45,85,0.06)',
         }}
       >
-        {/* Inline gradient spheres */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
           <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #935073, transparent 70%)' }} />
           <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #502D55, transparent 70%)' }} />
@@ -351,7 +353,7 @@ export default function ChatPage() {
           {QUICK_ACTIONS.map((action) => (
             <button
               key={action.label}
-              onClick={() => handleQuickAction(action.prompt)}
+              onClick={() => handleSend(action.prompt)}
               disabled={isLoading}
               className="shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all active:scale-95 disabled:opacity-50"
               style={{
@@ -400,7 +402,7 @@ export default function ChatPage() {
           <MessageBubble key={message.id} message={message} />
         ))}
 
-        {/* Typing indicator while loading and last message is user */}
+        {/* Typing indicator */}
         {isLoading && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
           <div className="flex justify-start animate-fade-in">
             <div
@@ -439,7 +441,7 @@ export default function ChatPage() {
       </div>
 
       {/* ── Input Bar ───────────────────────────────────────────────────── */}
-      <div className="shrink-0 px-4 pb-safe-nav pt-2 pb-24">
+      <div className="shrink-0 px-4 pt-2 pb-24">
         {/* Listening indicator */}
         {isListening && (
           <div className="flex items-center justify-center gap-2 mb-2 animate-fade-in">
@@ -453,7 +455,13 @@ export default function ChatPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex items-end gap-2">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSend(input)
+          }}
+          className="flex items-end gap-2"
+        >
           <div
             className="flex-1 flex items-end rounded-2xl px-4 py-2.5"
             style={{
@@ -467,11 +475,11 @@ export default function ChatPage() {
             <textarea
               ref={inputRef}
               value={input}
-              onChange={handleInputChange}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
-                  if (input.trim()) handleSubmit(e)
+                  handleSend(input)
                 }
               }}
               placeholder="Ask Sims GPT..."
@@ -526,11 +534,9 @@ export default function ChatPage() {
 
       <Navbar />
 
-      {/* ── Utility styles ──────────────────────────────────────────────── */}
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .pb-safe-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
       `}</style>
     </div>
   )
