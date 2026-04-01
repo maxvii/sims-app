@@ -1,5 +1,7 @@
 import { generateText } from 'ai'
-import { google } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
+
+const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -428,7 +430,7 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
     let qualitative = {}
     try {
       const result = await generateText({
-        model: google('gemini-2.0-flash'),
+        model: groq('llama-3.3-70b-versatile'),
         prompt: geminiPrompt,
         maxTokens: 1500,
       })
