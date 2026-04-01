@@ -145,6 +145,14 @@ function ToolCard({ invocation }) {
 function MessageBubble({ message }) {
   const isUser = message.role === 'user'
 
+  // Safely extract text content — AI SDK v6 can return string, array, or undefined
+  let textContent = ''
+  if (typeof message.content === 'string') {
+    textContent = message.content
+  } else if (Array.isArray(message.content)) {
+    textContent = message.content.map(p => typeof p === 'string' ? p : p?.text || '').join('')
+  }
+
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
       {/* AI avatar */}
@@ -159,7 +167,7 @@ function MessageBubble({ message }) {
 
       <div className="max-w-[80%] flex flex-col gap-0.5">
         {/* Text content */}
-        {message.content && (
+        {textContent ? (
           <div
             className={`px-4 py-2.5 text-sm leading-relaxed ${
               isUser
@@ -178,9 +186,9 @@ function MessageBubble({ message }) {
                   }
             }
           >
-            {isUser ? (typeof message.content === 'string' ? message.content : '') : renderMarkdown(message.content)}
+            {isUser ? textContent : renderMarkdown(textContent)}
           </div>
-        )}
+        ) : null}
 
         {/* Tool invocations */}
         {message.toolInvocations?.map((inv, i) => (
