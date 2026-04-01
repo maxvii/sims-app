@@ -1,10 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } from '@/lib/agent-tools'
-import { exec } from 'child_process'
-import { promisify } from 'util'
-
-const execAsync = promisify(exec)
+import WebSocket from 'ws'
 
 export const maxDuration = 60
 
@@ -17,20 +14,81 @@ She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai S
 Event categories: Social/Key Moments, Sponsorships, Corporate Campaign, Corporate Event, Gifting, PR Birthdays, HR & CSR, Coca Cola Arena.
 Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
 
-You can help with: scheduling events, reviewing the calendar, drafting content, providing analytics, and strategic advice.
+You help with: scheduling events, reviewing the calendar, drafting content, providing analytics, and strategic advice.
 
 Be professional, concise, and proactive. Never mention OpenClaw or any backend system. You are Sims GPT.`
 
-// Process tool calls from the AI response
-async function processToolCall(name, args) {
-  switch (name) {
-    case 'create_event': return await createEvent(args)
-    case 'search_events': return await searchEvents(args)
-    case 'update_event': return await updateEvent(args)
-    case 'get_today_brief': return await getTodayBrief()
-    case 'get_analytics': return await getAnalytics()
-    default: return { error: `Unknown tool: ${name}` }
-  }
+// Call OpenClaw gateway via WebSocket
+function callOpenClaw(message, sessionId) {
+  return new Promise((resolve, reject) => {
+    const gwUrl = process.env.OPENCLAW_GATEWAY_URL || 'ws://host.docker.internal:18789'
+    const gwToken = process.env.OPENCLAW_GATEWAY_TOKEN || 'simzgpt2026'
+
+    const ws = new WebSocket(`${gwUrl}?auth.token=${gwToken}`)
+    let response = ''
+    let resolved = false
+
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true
+        ws.close()
+        resolve(response || 'I apologize, the request timed out. Please try again.')
+      }
+    }, 50000)
+
+    ws.on('open', () => {
+      ws.send(JSON.stringify({
+        type: 'agent.run',
+        payload: {
+          sessionId: sessionId,
+          message: message,
+          systemPrompt: SYSTEM_PROMPT,
+        }
+      }))
+    })
+
+    ws.on('message', (data) => {
+      try {
+        const msg = JSON.parse(data.toString())
+        if (msg.type === 'agent.text' || msg.type === 'agent.delta') {
+          response += msg.payload?.text || msg.payload?.delta || ''
+        } else if (msg.type === 'agent.done' || msg.type === 'agent.complete') {
+          clearTimeout(timeout)
+          if (!resolved) {
+            resolved = true
+            ws.close()
+            resolve(response || msg.payload?.text || 'Done.')
+          }
+        } else if (msg.type === 'agent.error') {
+          clearTimeout(timeout)
+          if (!resolved) {
+            resolved = true
+            ws.close()
+            reject(new Error(msg.payload?.error || 'Agent error'))
+          }
+        }
+      } catch (e) {
+        // Non-JSON message, accumulate as text
+        response += data.toString()
+      }
+    })
+
+    ws.on('error', (err) => {
+      clearTimeout(timeout)
+      if (!resolved) {
+        resolved = true
+        reject(err)
+      }
+    })
+
+    ws.on('close', () => {
+      clearTimeout(timeout)
+      if (!resolved) {
+        resolved = true
+        resolve(response || 'Connection closed.')
+      }
+    })
+  })
 }
 
 export async function POST(req) {
@@ -51,7 +109,6 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
-  // Get last user message
   const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')
   if (!lastUserMsg) {
     return new Response(JSON.stringify({ error: 'No user message found' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
@@ -60,42 +117,10 @@ export async function POST(req) {
   const userText = typeof lastUserMsg.content === 'string' ? lastUserMsg.content : lastUserMsg.content?.map(c => c.text).join(' ') || ''
 
   try {
-    // Build context from conversation history (last 10 messages)
-    const recentHistory = messages.slice(-10).map(m => {
-      const role = m.role === 'user' ? 'User' : 'Assistant'
-      const text = typeof m.content === 'string' ? m.content : m.content?.map(c => c.text).join(' ') || ''
-      return `${role}: ${text}`
-    }).join('\n')
+    const sessionId = `simzgpt-${session.user.id}`
+    const aiText = await callOpenClaw(userText, sessionId)
 
-    // Combine system prompt + context + user message for OpenClaw
-    const fullPrompt = `${SYSTEM_PROMPT}\n\nRecent conversation:\n${recentHistory}\n\nRespond to the user's latest message. If they want to add/search/update events or get a brief/analytics, say TOOL_CALL:<toolname>:<json_args> on a separate line, then continue your response. Available tools: create_event, search_events, update_event, get_today_brief, get_analytics.`
-
-    // Call OpenClaw agent on VPS (runs locally since app is on same VPS)
-    const escapedPrompt = userText.replace(/'/g, "'\\''").replace(/\n/g, ' ')
-    const { stdout } = await execAsync(
-      `openclaw agent --local --session-id "simzgpt-${session.user.id}" -m '${escapedPrompt}' --json`,
-      { timeout: 55000, env: { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin:/root/.nvm/versions/node/v22.22.2/bin' } }
-    )
-
-    const result = JSON.parse(stdout)
-    const aiText = result?.payloads?.[0]?.text || 'I apologize, I was unable to process your request. Please try again.'
-
-    // Check for tool calls in the response and execute them
-    let finalText = aiText
-    const toolCallRegex = /TOOL_CALL:(\w+):(\{.*?\})/g
-    let match
-    while ((match = toolCallRegex.exec(aiText)) !== null) {
-      const toolName = match[1]
-      try {
-        const toolArgs = JSON.parse(match[2])
-        const toolResult = await processToolCall(toolName, toolArgs)
-        finalText = finalText.replace(match[0], `\n✅ Done. ${JSON.stringify(toolResult).slice(0, 200)}`)
-      } catch (e) {
-        finalText = finalText.replace(match[0], `\n❌ Error: ${e.message}`)
-      }
-    }
-
-    // Stream the response using SSE format matching Vercel AI SDK UI protocol
+    // Stream the response in Vercel AI SDK UI format
     const encoder = new TextEncoder()
     const stream = new ReadableStream({
       start(controller) {
@@ -103,8 +128,7 @@ export async function POST(req) {
         controller.enqueue(encoder.encode(`data: {"type":"start-step"}\n\n`))
         controller.enqueue(encoder.encode(`data: {"type":"text-start","id":"txt-0"}\n\n`))
 
-        // Send text in chunks for streaming feel
-        const words = finalText.split(' ')
+        const words = aiText.split(' ')
         for (let i = 0; i < words.length; i++) {
           const word = (i > 0 ? ' ' : '') + words[i]
           const escaped = JSON.stringify(word).slice(1, -1)
