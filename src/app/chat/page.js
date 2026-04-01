@@ -22,6 +22,15 @@ function toolLabel(name) {
 /** Very lightweight "markdown" — handles **bold**, *italic*, `code`, and lists */
 function renderMarkdown(text) {
   if (!text) return null
+  if (typeof text !== 'string') {
+    // AI SDK v6 may return content as array of parts
+    if (Array.isArray(text)) {
+      const str = text.map(p => typeof p === 'string' ? p : p?.text || '').join('')
+      if (!str) return null
+      return renderMarkdown(str)
+    }
+    return null
+  }
   const lines = text.split('\n')
   return lines.map((line, i) => {
     // Bullet lists
@@ -169,7 +178,7 @@ function MessageBubble({ message }) {
                   }
             }
           >
-            {isUser ? message.content : renderMarkdown(message.content)}
+            {isUser ? (typeof message.content === 'string' ? message.content : '') : renderMarkdown(message.content)}
           </div>
         )}
 

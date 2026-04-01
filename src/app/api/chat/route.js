@@ -1,95 +1,11 @@
+import { streamText, tool, stepCountIs } from 'ai'
+import { groq } from '@ai-sdk/groq'
+import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } from '@/lib/agent-tools'
-import WebSocket from 'ws'
 
 export const maxDuration = 60
-
-const SYSTEM_PROMPT = `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
-
-Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
-
-She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
-
-Event categories: Social/Key Moments, Sponsorships, Corporate Campaign, Corporate Event, Gifting, PR Birthdays, HR & CSR, Coca Cola Arena.
-Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
-
-You help with: scheduling events, reviewing the calendar, drafting content, providing analytics, and strategic advice.
-
-Be professional, concise, and proactive. Never mention OpenClaw or any backend system. You are Sims GPT.`
-
-// Call OpenClaw gateway via WebSocket
-function callOpenClaw(message, sessionId) {
-  return new Promise((resolve, reject) => {
-    const gwUrl = process.env.OPENCLAW_GATEWAY_URL || 'ws://host.docker.internal:18789'
-    const gwToken = process.env.OPENCLAW_GATEWAY_TOKEN || 'simzgpt2026'
-
-    const ws = new WebSocket(`${gwUrl}?auth.token=${gwToken}`)
-    let response = ''
-    let resolved = false
-
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true
-        ws.close()
-        resolve(response || 'I apologize, the request timed out. Please try again.')
-      }
-    }, 50000)
-
-    ws.on('open', () => {
-      ws.send(JSON.stringify({
-        type: 'agent.run',
-        payload: {
-          sessionId: sessionId,
-          message: message,
-          systemPrompt: SYSTEM_PROMPT,
-        }
-      }))
-    })
-
-    ws.on('message', (data) => {
-      try {
-        const msg = JSON.parse(data.toString())
-        if (msg.type === 'agent.text' || msg.type === 'agent.delta') {
-          response += msg.payload?.text || msg.payload?.delta || ''
-        } else if (msg.type === 'agent.done' || msg.type === 'agent.complete') {
-          clearTimeout(timeout)
-          if (!resolved) {
-            resolved = true
-            ws.close()
-            resolve(response || msg.payload?.text || 'Done.')
-          }
-        } else if (msg.type === 'agent.error') {
-          clearTimeout(timeout)
-          if (!resolved) {
-            resolved = true
-            ws.close()
-            reject(new Error(msg.payload?.error || 'Agent error'))
-          }
-        }
-      } catch (e) {
-        // Non-JSON message, accumulate as text
-        response += data.toString()
-      }
-    })
-
-    ws.on('error', (err) => {
-      clearTimeout(timeout)
-      if (!resolved) {
-        resolved = true
-        reject(err)
-      }
-    })
-
-    ws.on('close', () => {
-      clearTimeout(timeout)
-      if (!resolved) {
-        resolved = true
-        resolve(response || 'Connection closed.')
-      }
-    })
-  })
-}
 
 export async function POST(req) {
   const session = await getServerSession(authOptions)
@@ -105,54 +21,110 @@ export async function POST(req) {
   }
 
   const { messages } = body
+
   if (!messages || !Array.isArray(messages)) {
     return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
-  const lastUserMsg = [...messages].reverse().find(m => m.role === 'user')
-  if (!lastUserMsg) {
-    return new Response(JSON.stringify({ error: 'No user message found' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
-  }
-
-  const userText = typeof lastUserMsg.content === 'string' ? lastUserMsg.content : lastUserMsg.content?.map(c => c.text).join(' ') || ''
-
   try {
-    const sessionId = `simzgpt-${session.user.id}`
-    const aiText = await callOpenClaw(userText, sessionId)
+    const result = streamText({
+      model: groq('llama-3.3-70b-versatile'),
+      system: `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
 
-    // Stream the response in Vercel AI SDK UI format
-    const encoder = new TextEncoder()
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(`data: {"type":"start"}\n\n`))
-        controller.enqueue(encoder.encode(`data: {"type":"start-step"}\n\n`))
-        controller.enqueue(encoder.encode(`data: {"type":"text-start","id":"txt-0"}\n\n`))
+Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
 
-        const words = aiText.split(' ')
-        for (let i = 0; i < words.length; i++) {
-          const word = (i > 0 ? ' ' : '') + words[i]
-          const escaped = JSON.stringify(word).slice(1, -1)
-          controller.enqueue(encoder.encode(`data: {"type":"text-delta","id":"txt-0","delta":"${escaped}"}\n\n`))
-        }
+She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
 
-        controller.enqueue(encoder.encode(`data: {"type":"text-end","id":"txt-0"}\n\n`))
-        controller.enqueue(encoder.encode(`data: {"type":"finish-step"}\n\n`))
-        controller.enqueue(encoder.encode(`data: {"type":"finish","finishReason":"stop"}\n\n`))
-        controller.close()
-      }
-    })
+Event categories available: Social/Key Moments, Sponsorships, Corporate Campaign, Corporate Event, Gifting, PR Birthdays, HR & CSR, Coca Cola Arena.
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
+
+When users ask to add events via voice or text, extract the details (title, date, category, priority) and use the create_event tool. Format dates as 'DD Mon YYYY' (e.g. '07 Apr 2026').
+
+When asked about schedule, use search_events or get_today_brief tools.
+
+Be professional, concise, and proactive. Use emojis sparingly. Always confirm actions taken.`,
+      messages,
+      stopWhen: stepCountIs(5),
+      tools: {
+        create_event: tool({
+          description: 'Create a new calendar event for Sima Ved. Use this when the user asks to add, schedule, or create an event.',
+          parameters: z.object({
+            title: z.string().describe('The event title'),
+            date: z.string().describe('Event date in "DD Mon YYYY" format, e.g. "07 Apr 2026"'),
+            category: z.enum([
+              'Social/Key Moments',
+              'Sponsorships',
+              'Corporate Campaign',
+              'Corporate Event',
+              'Gifting',
+              'PR Birthdays',
+              'HR & CSR',
+              'Coca Cola Arena',
+            ]).optional().describe('Event category'),
+            priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional().describe('Event priority level'),
+            opportunityType: z.string().optional().describe('Type of opportunity, e.g. "Instagram Reel", "Press Release"'),
+            platforms: z.string().optional().describe('Target platforms, e.g. "Instagram, LinkedIn"'),
+            notes: z.string().optional().describe('Additional notes for the event'),
+          }),
+          execute: async (params) => {
+            return await createEvent(params)
+          },
+        }),
+
+        search_events: tool({
+          description: 'Search and filter calendar events. Use this when the user asks about upcoming events, schedule, or searches for specific events.',
+          parameters: z.object({
+            query: z.string().optional().describe('Search query to match against event titles and notes'),
+            dateFrom: z.string().optional().describe('Start date filter in "DD Mon YYYY" format'),
+            dateTo: z.string().optional().describe('End date filter in "DD Mon YYYY" format'),
+            category: z.string().optional().describe('Filter by event category'),
+            status: z.string().optional().describe('Filter by status: UPCOMING, IN_PROGRESS, COMPLETED, CANCELLED'),
+            priority: z.string().optional().describe('Filter by priority: CRITICAL, HIGH, MEDIUM, LOW'),
+            limit: z.number().optional().describe('Maximum number of results to return'),
+          }),
+          execute: async (params) => {
+            return await searchEvents(params)
+          },
+        }),
+
+        update_event: tool({
+          description: 'Update an existing calendar event. Use this when the user asks to change status, add notes, or modify an event.',
+          parameters: z.object({
+            eventId: z.string().describe('The ID of the event to update'),
+            status: z.string().optional().describe('New status: UPCOMING, IN_PROGRESS, COMPLETED, CANCELLED'),
+            notes: z.string().optional().describe('Updated notes for the event'),
+            priority: z.string().optional().describe('Updated priority: CRITICAL, HIGH, MEDIUM, LOW'),
+          }),
+          execute: async (params) => {
+            return await updateEvent(params)
+          },
+        }),
+
+        get_today_brief: tool({
+          description: 'Get a brief summary of today\'s events and upcoming priorities. Use this when the user asks "what\'s on today", "daily brief", or similar.',
+          parameters: z.object({}),
+          execute: async () => {
+            return await getTodayBrief()
+          },
+        }),
+
+        get_analytics: tool({
+          description: 'Get analytics and statistics about the calendar events. Use this when the user asks about metrics, stats, or overview numbers.',
+          parameters: z.object({}),
+          execute: async () => {
+            return await getAnalytics()
+          },
+        }),
       },
     })
+
+    return result.toUIMessageStreamResponse()
   } catch (error) {
-    console.error('Sims GPT error:', error?.message || error)
+    console.error('Sims GPT chat error:', error?.message || error)
+    console.error('Stack:', error?.stack)
     return new Response(
-      JSON.stringify({ error: error?.message || 'Failed to process chat request.' }),
+      JSON.stringify({ error: error?.message || 'Failed to process chat request. Please try again.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     )
   }
