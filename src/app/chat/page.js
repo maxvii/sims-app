@@ -218,7 +218,7 @@ export default function ChatPage() {
 
   const {
     messages,
-    input,
+    input: rawInput,
     setInput,
     handleSubmit,
     handleInputChange,
@@ -232,6 +232,9 @@ export default function ChatPage() {
       setChatError(err?.message || 'Something went wrong. Please try again.')
     },
   })
+
+  // Guard against undefined input from useChat (AI SDK v6 race condition)
+  const input = rawInput ?? ''
 
   // ── Auth guard ──────────────────────────────────────────────────────────
   useEffect(() => {
