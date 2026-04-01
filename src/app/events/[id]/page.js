@@ -54,6 +54,9 @@ function computeStatus(event) {
   return 'Not Started'
 }
 
+const CATEGORIES = ['Brand Events', 'Conferences', 'Internal Communications', 'Social Greetings']
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 export default function EventDetailPage() {
   const { data: session } = useSession()
   const router = useRouter()
@@ -66,6 +69,8 @@ export default function EventDetailPage() {
   const [refTitle, setRefTitle] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [media, setMedia] = useState([])
+  const [showEdit, setShowEdit] = useState(false)
+  const [showReschedule, setShowReschedule] = useState(false)
 
   const fetchEvent = () => {
     fetch(`/api/events/${params.id}`)
@@ -167,8 +172,28 @@ export default function EventDetailPage() {
         </div>
       </div>
 
+      {/* ── Action Buttons ── */}
+      <div className="flex gap-2 px-4 pt-4">
+        <button
+          onClick={() => setShowEdit(true)}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+          style={{ background: 'rgba(54,58,71,0.06)', color: '#363A47', border: '1px solid rgba(54,58,71,0.1)' }}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+          Edit
+        </button>
+        <button
+          onClick={() => setShowReschedule(true)}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-95"
+          style={{ background: 'rgba(59,130,246,0.06)', color: '#3B82F6', border: '1px solid rgba(59,130,246,0.15)' }}
+        >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+          Reschedule
+        </button>
+      </div>
+
       {/* ── Tabs ── */}
-      <div className="flex gap-1 px-4 pt-4 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 px-4 pt-3 overflow-x-auto scrollbar-hide">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -344,7 +369,192 @@ export default function EventDetailPage() {
         )}
       </div>
 
+      {/* Edit Modal */}
+      {showEdit && (
+        <EditEventModal
+          event={event}
+          onClose={() => setShowEdit(false)}
+          onSaved={() => { fetchEvent(); setShowEdit(false) }}
+        />
+      )}
+
+      {/* Reschedule Modal */}
+      {showReschedule && (
+        <RescheduleModal
+          event={event}
+          onClose={() => setShowReschedule(false)}
+          onSaved={() => { fetchEvent(); setShowReschedule(false) }}
+        />
+      )}
+
       <Navbar />
+    </div>
+  )
+}
+
+/* ── Edit Event Modal ── */
+function EditEventModal({ event, onClose, onSaved }) {
+  const [title, setTitle] = useState(event.title)
+  const [category, setCategory] = useState(event.category || '')
+  const [priority, setPriority] = useState(event.priority)
+  const [status, setStatus] = useState(event.status)
+  const [platforms, setPlatforms] = useState(event.platforms || '')
+  const [postConcept, setPostConcept] = useState(event.postConcept || '')
+  const [visualDirection, setVisualDirection] = useState(event.visualDirection || '')
+  const [captionDirection, setCaptionDirection] = useState(event.captionDirection || '')
+  const [notes, setNotes] = useState(event.notes || '')
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!title) return
+    setSaving(true)
+    await fetch(`/api/events/${event.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, category, priority, status, platforms, postConcept, visualDirection, captionDirection, notes: notes || null }),
+    })
+    setSaving(false)
+    onSaved()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-end justify-center" onClick={onClose}>
+      <div
+        className="w-full max-w-lg mx-auto rounded-t-3xl p-6 pb-10 animate-slide-up max-h-[85vh] overflow-y-auto"
+        style={{
+          background: 'linear-gradient(145deg, rgba(247,249,250,0.97), rgba(208,217,226,0.3))',
+          backdropFilter: 'blur(40px)',
+          border: '1px solid rgba(255,255,255,0.5)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
+        <h3 className="font-display text-xl font-bold text-gray-800 italic mb-5">Edit Event</h3>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Title</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Priority</label>
+              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                <option value="CRITICAL">Critical</option>
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                <option value="Not Started">Not Started</option>
+                <option value="Planned">Planned</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Approved">Approved</option>
+                <option value="Published">Published</option>
+                <option value="Needs Revision">Needs Revision</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Platforms</label>
+              <input value={platforms} onChange={(e) => setPlatforms(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none" placeholder="Instagram, LinkedIn..." />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Post Concept</label>
+            <textarea value={postConcept} onChange={(e) => setPostConcept(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Describe the post concept..." />
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Visual Direction</label>
+            <textarea value={visualDirection} onChange={(e) => setVisualDirection(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Visual style and tone..." />
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Caption Direction</label>
+            <textarea value={captionDirection} onChange={(e) => setCaptionDirection(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Caption guidelines..." />
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Notes</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Additional notes..." />
+          </div>
+          <button type="submit" disabled={saving || !title} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6B7B8D, #363A47)' }}>
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+/* ── Reschedule Modal ── */
+function RescheduleModal({ event, onClose, onSaved }) {
+  const [newDate, setNewDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!newDate) return
+    setSaving(true)
+    const d = new Date(newDate + 'T00:00:00')
+    const formatted = `${String(d.getDate()).padStart(2, '0')} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`
+    const month = MONTHS_SHORT[d.getMonth()]
+
+    const data = { date: formatted, month }
+    if (endDate) {
+      const ed = new Date(endDate + 'T00:00:00')
+      data.endDate = `${String(ed.getDate()).padStart(2, '0')} ${MONTHS_SHORT[ed.getMonth()]} ${ed.getFullYear()}`
+    }
+
+    await fetch(`/api/events/${event.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    setSaving(false)
+    onSaved()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-end justify-center" onClick={onClose}>
+      <div
+        className="w-full max-w-lg mx-auto rounded-t-3xl p-6 pb-10 animate-slide-up"
+        style={{
+          background: 'linear-gradient(145deg, rgba(247,249,250,0.97), rgba(208,217,226,0.3))',
+          backdropFilter: 'blur(40px)',
+          border: '1px solid rgba(255,255,255,0.5)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
+        <h3 className="font-display text-xl font-bold text-gray-800 italic mb-2">Reschedule Event</h3>
+        <p className="text-sm text-gray-500 mb-5">{event.title}</p>
+        <p className="text-xs text-gray-400 mb-4">Current: <span className="font-semibold text-gray-600">{event.date}{event.endDate ? ` — ${event.endDate}` : ''}</span></p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">New Date *</label>
+            <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
+          </div>
+          <div>
+            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">End Date (optional)</label>
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" />
+          </div>
+          <button type="submit" disabled={saving || !newDate} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #3B82F6, #2563EB)' }}>
+            {saving ? 'Rescheduling...' : 'Reschedule'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

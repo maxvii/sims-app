@@ -48,6 +48,7 @@ export async function POST(req) {
       date,
       endDate: body.endDate || '',
       month,
+      category: body.category || 'Brand Events',
       priority: body.priority || 'MEDIUM',
       opportunityType: body.opportunityType || '',
       platforms: body.platforms || '',

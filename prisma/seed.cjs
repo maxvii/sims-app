@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 const events = [
   {
     number: 1, month: 'Jan', date: '01 Jan 2026', endDate: null,
-    title: "New Year's Day", category: 'Social/Key Moments', opportunityType: 'Holiday Greeting',
+    title: "New Year's Day", category: 'Social Greetings', opportunityType: 'Holiday Greeting',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds holiday greeting post in a styled look from AG',
     visualDirection: 'Festive, celebratory aesthetic',
@@ -17,7 +17,7 @@ const events = [
   },
   {
     number: 2, month: 'Jan', date: '11 Jan 2026', endDate: null,
-    title: 'Dubai Shopping Festival (DSF)', category: 'Corporate Campaign', opportunityType: 'DSF Haul / Shop-With-Me',
+    title: 'Dubai Shopping Festival (DSF)', category: 'Brand Events', opportunityType: 'DSF Haul / Shop-With-Me',
     priority: 'CRITICAL', status: 'Not Started',
     postConcept: 'Mrs Veds shop-with-me across AG brand stores during DSF',
     visualDirection: 'Upbeat, in-mall BTS. Bags, tags, new finds. Energetic.',
@@ -28,7 +28,7 @@ const events = [
   },
   {
     number: 3, month: 'Jan', date: '07 Jan 2026', endDate: null,
-    title: 'Lords of the Sound Orchestra', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Lords of the Sound Orchestra', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -39,7 +39,7 @@ const events = [
   },
   {
     number: 4, month: 'Jan', date: '22 Jan 2026', endDate: null,
-    title: 'Rob Beckett', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Rob Beckett', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -50,7 +50,7 @@ const events = [
   },
   {
     number: 5, month: 'Jan', date: '24 Jan 2026', endDate: null,
-    title: 'International Day of Education', category: 'Social/Key Moments', opportunityType: 'Education & Empowerment Post',
+    title: 'International Day of Education', category: 'Social Greetings', opportunityType: 'Education & Empowerment Post',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds personal story on education, growth, and ambition',
     visualDirection: 'Warm, candid. Book/study aesthetic or aspirational portrait.',
@@ -61,7 +61,7 @@ const events = [
   },
   {
     number: 6, month: 'Jan', date: '24 Jan 2026', endDate: null,
-    title: 'Hamlet by Jesús Herrera', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Hamlet by Jesús Herrera', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -72,7 +72,7 @@ const events = [
   },
   {
     number: 7, month: 'Jan', date: '28 Jan 2026', endDate: null,
-    title: 'Wicked The Musical', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Wicked The Musical', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -83,7 +83,7 @@ const events = [
   },
   {
     number: 8, month: 'Jan', date: '31 Jan 2026', endDate: null,
-    title: 'Sitar For Mental Health', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Sitar For Mental Health', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -94,7 +94,7 @@ const events = [
   },
   {
     number: 9, month: 'Jan', date: '31 Jan 2026', endDate: null,
-    title: 'Harvest Festival Hag Al Laila', category: 'Social/Key Moments', opportunityType: 'Heritage Cultural Moment',
+    title: 'Harvest Festival Hag Al Laila', category: 'Social Greetings', opportunityType: 'Heritage Cultural Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds celebrates Hag Al Laila — cultural styling, traditional treats',
     visualDirection: 'Traditional UAE aesthetic. Warm, nostalgic, cultural.',
@@ -105,7 +105,7 @@ const events = [
   },
   {
     number: 10, month: 'Jan', date: '31 Jan 2026', endDate: null,
-    title: 'Dubai Fashion Week (SS26)', category: 'Corporate Campaign', opportunityType: 'DFW Coverage / GRWM',
+    title: 'Dubai Fashion Week (SS26)', category: 'Brand Events', opportunityType: 'DFW Coverage / GRWM',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds attends/covers Dubai Fashion Week — GRWM, front row moments, trend reports',
     visualDirection: 'Fashion-forward, editorial. Street style aesthetic. Venue BTS.',
@@ -116,7 +116,7 @@ const events = [
   },
   {
     number: 11, month: 'Feb', date: '04 Feb 2026', endDate: null,
-    title: 'World Cancer Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Cancer Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -127,7 +127,7 @@ const events = [
   },
   {
     number: 12, month: 'Feb', date: '07 Feb 2026', endDate: null,
-    title: 'Rewind Fest DXB 2026', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Rewind Fest DXB 2026', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -138,7 +138,7 @@ const events = [
   },
   {
     number: 13, month: 'Feb', date: '08 Feb 2026', endDate: null,
-    title: 'Lunar New Year Celebration', category: 'Social/Key Moments', opportunityType: 'Lunar New Year Lifestyle Post',
+    title: 'Lunar New Year Celebration', category: 'Social Greetings', opportunityType: 'Lunar New Year Lifestyle Post',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds Lunar New Year lifestyle content — celebration, culture, fashion',
     visualDirection: 'Rich reds and golds. Festive, cultural aesthetic.',
@@ -149,7 +149,7 @@ const events = [
   },
   {
     number: 14, month: 'Feb', date: '11 Feb 2026', endDate: null,
-    title: 'Women & Girls in Science', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Women & Girls in Science', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -160,7 +160,7 @@ const events = [
   },
   {
     number: 15, month: 'Feb', date: '12 Feb 2026', endDate: null,
-    title: 'Train Live', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Train Live', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -171,7 +171,7 @@ const events = [
   },
   {
     number: 16, month: 'Feb', date: '13 Feb 2026', endDate: null,
-    title: 'Chinese New Year', category: 'Social/Key Moments', opportunityType: 'CNY Styling / Cultural Moment',
+    title: 'Chinese New Year', category: 'Social Greetings', opportunityType: 'CNY Styling / Cultural Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds Chinese New Year styling — red, gold, Year of the Horse',
     visualDirection: 'Red and gold. Celebratory, editorial feel. Lucky charms aesthetic.',
@@ -182,7 +182,7 @@ const events = [
   },
   {
     number: 17, month: 'Feb', date: '14 Feb 2026', endDate: null,
-    title: "Valentine's Day", category: 'Gifting', opportunityType: 'Gifting Guide / OOTD',
+    title: "Valentine's Day", category: 'Social Greetings', opportunityType: 'Gifting Guide / OOTD',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds shares her top Valentine\'s picks from across AG brands',
     visualDirection: 'Warm tones, roses/pinks. Close-up of styled outfit + gift flatlay.',
@@ -193,7 +193,7 @@ const events = [
   },
   {
     number: 18, month: 'Feb', date: '15 Feb 2026', endDate: null,
-    title: 'Tchaikovsky & Rachmaninoff', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Tchaikovsky & Rachmaninoff', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -204,7 +204,7 @@ const events = [
   },
   {
     number: 19, month: 'Feb', date: '16 Feb 2026', endDate: null,
-    title: 'Hai Ramadan Starts', category: 'Social/Key Moments', opportunityType: 'Cultural Moment',
+    title: 'Hai Ramadan Starts', category: 'Social Greetings', opportunityType: 'Cultural Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds cultural heritage post with AG brand tie-in',
     visualDirection: 'Authentic, culturally grounded aesthetic',
@@ -215,7 +215,7 @@ const events = [
   },
   {
     number: 20, month: 'Feb', date: '18 Feb 2026', endDate: null,
-    title: 'Ramadan Begins', category: 'Corporate Campaign', opportunityType: 'Ramadan Series (Multi-Week)',
+    title: 'Ramadan Begins', category: 'Brand Events', opportunityType: 'Ramadan Series (Multi-Week)',
     priority: 'CRITICAL', status: 'Not Started',
     postConcept: 'Mrs Veds Ramadan series — Iftar looks, suhoor moments, gifting guides',
     visualDirection: 'Warm amber, gold tones. Night market aesthetic. Lifestyle + fashion.',
@@ -226,7 +226,7 @@ const events = [
   },
   {
     number: 21, month: 'Feb', date: '20 Feb 2026', endDate: null,
-    title: 'World Day of Social Justice', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Day of Social Justice', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -237,7 +237,7 @@ const events = [
   },
   {
     number: 22, month: 'Feb', date: '22 Feb 2026', endDate: null,
-    title: 'Desert Palm X-Country Run', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Desert Palm X-Country Run', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -248,7 +248,7 @@ const events = [
   },
   {
     number: 23, month: 'Mar', date: '08 Mar 2026', endDate: null,
-    title: "International Women's Day", category: 'HR & CSR', opportunityType: 'Women Empowerment Feature',
+    title: "International Women's Day", category: 'Internal Communications', opportunityType: 'Women Empowerment Feature',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds shares her empowerment story + spotlights women at AG',
     visualDirection: 'Bold, empowering. Strong portrait. Candid behind-the-scenes.',
@@ -259,7 +259,7 @@ const events = [
   },
   {
     number: 24, month: 'Mar', date: '18 Mar 2026', endDate: null,
-    title: 'Global Recycling Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Global Recycling Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -270,7 +270,7 @@ const events = [
   },
   {
     number: 25, month: 'Mar', date: '20 Mar 2026', endDate: null,
-    title: 'Eid Al Fitr', category: 'Corporate Campaign', opportunityType: 'Eid OOTD Collection Drop',
+    title: 'Eid Al Fitr', category: 'Brand Events', opportunityType: 'Eid OOTD Collection Drop',
     priority: 'CRITICAL', status: 'Not Started',
     postConcept: 'Mrs Veds Eid collection — multiple Eid looks across AG brands, family/celebration',
     visualDirection: 'Festive, joyful, bright. Gold and jewel tones. Family/group setting.',
@@ -281,7 +281,7 @@ const events = [
   },
   {
     number: 26, month: 'Mar', date: '21 Mar 2026', endDate: null,
-    title: "Mother's Day (UAE)", category: 'Gifting', opportunityType: 'Tribute / Gift Guide',
+    title: "Mother's Day (UAE)", category: 'Social Greetings', opportunityType: 'Tribute / Gift Guide',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds shares a personal tribute to motherhood + curated gifting edit',
     visualDirection: 'Soft, emotional. Lifestyle imagery. Video message format ideal.',
@@ -292,7 +292,7 @@ const events = [
   },
   {
     number: 27, month: 'Mar', date: '22 Mar 2026', endDate: null,
-    title: 'World Water Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Water Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -303,7 +303,7 @@ const events = [
   },
   {
     number: 28, month: 'Apr', date: '07 Apr 2026', endDate: null,
-    title: 'World Health Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Health Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -314,7 +314,7 @@ const events = [
   },
   {
     number: 29, month: 'Apr', date: '15 Apr 2026', endDate: null,
-    title: 'Great Online Sale', category: 'Corporate Campaign', opportunityType: 'Online Haul Reveal',
+    title: 'Great Online Sale', category: 'Brand Events', opportunityType: 'Online Haul Reveal',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds online shopping haul from AG e-commerce — unboxing',
     visualDirection: 'Flat lay unboxing. Home setting. Clean and aspirational.',
@@ -325,7 +325,7 @@ const events = [
   },
   {
     number: 30, month: 'Apr', date: '01 Apr 2026', endDate: null,
-    title: 'Token 2049', category: 'Corporate Event', opportunityType: 'Web3 / Event Styling Moment',
+    title: 'Token 2049', category: 'Brand Events', opportunityType: 'Web3 / Event Styling Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds attends Token 2049 — event OOTD, networking aesthetic from AG',
     visualDirection: 'Sleek, modern, tech-forward aesthetic. Event energy.',
@@ -336,7 +336,7 @@ const events = [
   },
   {
     number: 31, month: 'Apr', date: '01 Apr 2026', endDate: null,
-    title: 'Forever Living Rally', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'Forever Living Rally', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -347,7 +347,7 @@ const events = [
   },
   {
     number: 32, month: 'Apr', date: '01 Apr 2026', endDate: null,
-    title: 'UITP Public Transport Summit', category: 'Coca Cola Arena', opportunityType: 'Content Opportunity',
+    title: 'UITP Public Transport Summit', category: 'Brand Events', opportunityType: 'Content Opportunity',
     priority: 'LOW', status: 'Not Started',
     postConcept: 'Mrs Veds content tied to this moment',
     visualDirection: 'Brand-appropriate aesthetic',
@@ -358,7 +358,7 @@ const events = [
   },
   {
     number: 33, month: 'Apr', date: '21 Apr 2026', endDate: null,
-    title: 'Creativity & Innovation Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Creativity & Innovation Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -369,7 +369,7 @@ const events = [
   },
   {
     number: 34, month: 'Apr', date: '22 Apr 2026', endDate: null,
-    title: 'Earth Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Earth Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -380,7 +380,7 @@ const events = [
   },
   {
     number: 35, month: 'May', date: '01 May 2026', endDate: null,
-    title: 'Labour Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Labour Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -391,7 +391,7 @@ const events = [
   },
   {
     number: 36, month: 'May', date: '08 May 2026', endDate: null,
-    title: 'Dubai Esports & Games Festival', category: 'Social/Key Moments', opportunityType: 'Gaming / Esports Fashion Moment',
+    title: 'Dubai Esports & Games Festival', category: 'Social Greetings', opportunityType: 'Gaming / Esports Fashion Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds at the Esports Festival — casual/streetwear styling',
     visualDirection: 'Bold, youthful, colourful. Gaming aesthetic. Fun and energetic.',
@@ -402,7 +402,7 @@ const events = [
   },
   {
     number: 37, month: 'May', date: '22 May 2026', endDate: null,
-    title: '3-Day Super Sale (1st Ed.)', category: 'Corporate Campaign', opportunityType: 'Sale Picks / GRWM',
+    title: '3-Day Super Sale (1st Ed.)', category: 'Brand Events', opportunityType: 'Sale Picks / GRWM',
     priority: 'CRITICAL', status: 'Not Started',
     postConcept: 'Mrs Veds shares her top sale picks + GRWM for the sale',
     visualDirection: 'Bright, urgent energy. Countdown/GRWM format. Product close-ups.',
@@ -413,7 +413,7 @@ const events = [
   },
   {
     number: 38, month: 'May', date: '26 May 2026', endDate: null,
-    title: 'Arafat Day & Eid Al Adha', category: 'Corporate Campaign', opportunityType: 'Eid Al Adha Styling',
+    title: 'Arafat Day & Eid Al Adha', category: 'Brand Events', opportunityType: 'Eid Al Adha Styling',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds Eid Al Adha looks + gifting edit from AG brands',
     visualDirection: 'Rich, warm, traditional-inspired tones. Celebratory styling.',
@@ -424,7 +424,7 @@ const events = [
   },
   {
     number: 39, month: 'Jun', date: '05 Jun 2026', endDate: null,
-    title: 'World Environment Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Environment Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -435,7 +435,7 @@ const events = [
   },
   {
     number: 40, month: 'Jun', date: '08 Jun 2026', endDate: null,
-    title: "World Ocean's Day", category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: "World Ocean's Day", category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -446,7 +446,7 @@ const events = [
   },
   {
     number: 41, month: 'Jun', date: '16 Jun 2026', endDate: null,
-    title: 'Islamic New Year (Hijri)', category: 'Social/Key Moments', opportunityType: 'Holiday Greeting',
+    title: 'Islamic New Year (Hijri)', category: 'Social Greetings', opportunityType: 'Holiday Greeting',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds holiday greeting post in a styled look from AG',
     visualDirection: 'Festive, celebratory aesthetic',
@@ -457,7 +457,7 @@ const events = [
   },
   {
     number: 42, month: 'Jun', date: '21 Jun 2026', endDate: null,
-    title: 'International Day of Yoga', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'International Day of Yoga', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -468,7 +468,7 @@ const events = [
   },
   {
     number: 43, month: 'Jun', date: '30 Jun 2026', endDate: null,
-    title: 'World Social Media Day', category: 'Social/Key Moments', opportunityType: 'Behind-the-Scenes Creator Moment',
+    title: 'World Social Media Day', category: 'Social Greetings', opportunityType: 'Behind-the-Scenes Creator Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds shares a BTS moment of her content creation process',
     visualDirection: 'Candid, authentic. Creator desk/studio aesthetic. Light, fun.',
@@ -479,7 +479,7 @@ const events = [
   },
   {
     number: 44, month: 'Jul', date: '03 Jul 2026', endDate: null,
-    title: 'Dubai Summer Surprises (DSS)', category: 'Corporate Campaign', opportunityType: 'Summer Edit / DSS Style Guide',
+    title: 'Dubai Summer Surprises (DSS)', category: 'Brand Events', opportunityType: 'Summer Edit / DSS Style Guide',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds seasonal summer edit — fashion, beauty, lifestyle picks from AG',
     visualDirection: 'Bright, summery, vibrant. Poolside or city lifestyle. Editorial.',
@@ -490,7 +490,7 @@ const events = [
   },
   {
     number: 45, month: 'Jul', date: '15 Jul 2026', endDate: null,
-    title: 'World Youth Skills Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Youth Skills Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -501,7 +501,7 @@ const events = [
   },
   {
     number: 46, month: 'Jul', date: '30 Jul 2026', endDate: null,
-    title: 'International Friendship Day', category: 'Social/Key Moments', opportunityType: 'Friends & Fashion Collab',
+    title: 'International Friendship Day', category: 'Social Greetings', opportunityType: 'Friends & Fashion Collab',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds + friend(s) styling moment — group OOTD from AG',
     visualDirection: 'Joyful, fun, group aesthetic. Bright and colourful.',
@@ -512,7 +512,7 @@ const events = [
   },
   {
     number: 47, month: 'Aug', date: '12 Aug 2026', endDate: null,
-    title: 'International Youth Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'International Youth Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -523,7 +523,7 @@ const events = [
   },
   {
     number: 48, month: 'Aug', date: '19 Aug 2026', endDate: null,
-    title: 'World Humanitarian Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'World Humanitarian Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -534,7 +534,7 @@ const events = [
   },
   {
     number: 49, month: 'Aug', date: '21 Aug 2026', endDate: null,
-    title: 'World Entrepreneurs Day', category: 'Social/Key Moments', opportunityType: 'Entrepreneur Story',
+    title: 'World Entrepreneurs Day', category: 'Social Greetings', opportunityType: 'Entrepreneur Story',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds shares her entrepreneurship/creator journey',
     visualDirection: 'Confident, aspirational. Power pose or workspace aesthetic.',
@@ -545,7 +545,7 @@ const events = [
   },
   {
     number: 50, month: 'Aug', date: '24 Aug 2026', endDate: null,
-    title: "Prophet's Birthday", category: 'Social/Key Moments', opportunityType: 'Holiday Greeting',
+    title: "Prophet's Birthday", category: 'Social Greetings', opportunityType: 'Holiday Greeting',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds holiday greeting post in a styled look from AG',
     visualDirection: 'Festive, celebratory aesthetic',
@@ -556,7 +556,7 @@ const events = [
   },
   {
     number: 51, month: 'Aug', date: '25 Aug 2026', endDate: null,
-    title: 'Back to School', category: 'Corporate Campaign', opportunityType: 'Back to School OOTD / Styling Guide',
+    title: 'Back to School', category: 'Brand Events', opportunityType: 'Back to School OOTD / Styling Guide',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds styles back-to-school looks from AG brands — relatable, aspirational',
     visualDirection: 'Clean, fresh, school/campus aesthetic. Multiple outfit options.',
@@ -567,7 +567,7 @@ const events = [
   },
   {
     number: 52, month: 'Aug', date: '28 Aug 2026', endDate: null,
-    title: "Emirati Women's Day", category: 'HR & CSR', opportunityType: 'Emirati Heritage Styling',
+    title: "Emirati Women's Day", category: 'Internal Communications', opportunityType: 'Emirati Heritage Styling',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds celebrates Emirati Women\'s Day — styled in traditional-inspired looks',
     visualDirection: 'Rich, proud aesthetics. Traditional colour palette. Portrait/editorial.',
@@ -578,7 +578,7 @@ const events = [
   },
   {
     number: 53, month: 'Sep', date: '05 Sep 2026', endDate: null,
-    title: 'International Day of Charity', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'International Day of Charity', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -589,7 +589,7 @@ const events = [
   },
   {
     number: 54, month: 'Sep', date: '16 Sep 2026', endDate: null,
-    title: 'Intl. Day of Ozone Layer', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'Intl. Day of Ozone Layer', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -600,7 +600,7 @@ const events = [
   },
   {
     number: 55, month: 'Sep', date: '23 Sep 2026', endDate: null,
-    title: 'Saudi National Day', category: 'Social/Key Moments', opportunityType: 'Saudi National Day Feature',
+    title: 'Saudi National Day', category: 'Social Greetings', opportunityType: 'Saudi National Day Feature',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds Saudi National Day content — Saudi pride, AG regional',
     visualDirection: 'Green and white tones. Saudi cultural references.',
@@ -611,7 +611,7 @@ const events = [
   },
   {
     number: 56, month: 'Oct', date: '01 Oct 2026', endDate: null,
-    title: 'Pinktober (Breast Cancer)', category: 'HR & CSR', opportunityType: 'Pinktober Month-Long Series',
+    title: 'Pinktober (Breast Cancer)', category: 'Internal Communications', opportunityType: 'Pinktober Month-Long Series',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds wears pink across AG brands all October — awareness, support',
     visualDirection: 'Pink across all content. Soft, supportive aesthetic.',
@@ -622,7 +622,7 @@ const events = [
   },
   {
     number: 57, month: 'Oct', date: '10 Oct 2026', endDate: null,
-    title: 'World Mental Health Day', category: 'Social/Key Moments', opportunityType: 'Mental Health Check-In',
+    title: 'World Mental Health Day', category: 'Social Greetings', opportunityType: 'Mental Health Check-In',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds shares a candid, authentic mental health moment',
     visualDirection: 'Soft, quiet aesthetic. Natural light. No heavy branding.',
@@ -633,7 +633,7 @@ const events = [
   },
   {
     number: 58, month: 'Oct', date: '16 Oct 2026', endDate: null,
-    title: 'Dubai Home Festival', category: 'Social/Key Moments', opportunityType: 'Home Styling / Lifestyle Edit',
+    title: 'Dubai Home Festival', category: 'Social Greetings', opportunityType: 'Home Styling / Lifestyle Edit',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds home lifestyle edit — interiors-inspired fashion + home picks',
     visualDirection: 'Cosy, aesthetic interior shots. Lifestyle fashion context.',
@@ -644,7 +644,7 @@ const events = [
   },
   {
     number: 59, month: 'Oct', date: '31 Oct 2026', endDate: null,
-    title: 'Halloween', category: 'Social/Key Moments', opportunityType: 'Costume / Fashion Moment',
+    title: 'Halloween', category: 'Social Greetings', opportunityType: 'Costume / Fashion Moment',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds in a creative Halloween look styled from AG brands — fun, on-trend',
     visualDirection: 'Dark/moody aesthetic. Dramatic look. BTS + final reveal format.',
@@ -655,7 +655,7 @@ const events = [
   },
   {
     number: 60, month: 'Oct', date: '31 Oct 2026', endDate: null,
-    title: 'Dubai Fitness Challenge (30x30)', category: 'Social/Key Moments', opportunityType: 'DFC Fitness Style Series',
+    title: 'Dubai Fitness Challenge (30x30)', category: 'Social Greetings', opportunityType: 'DFC Fitness Style Series',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds 30x30 challenge journey — activewear styling from AG brands',
     visualDirection: 'Active, energetic, outdoor. Workout aesthetic, bright and healthy.',
@@ -666,7 +666,7 @@ const events = [
   },
   {
     number: 61, month: 'Nov', date: '02 Nov 2026', endDate: null,
-    title: 'Diwali', category: 'Gifting', opportunityType: 'Diwali Fashion & Gifting',
+    title: 'Diwali', category: 'Social Greetings', opportunityType: 'Diwali Fashion & Gifting',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds Diwali styling — festive, colourful looks + gifting from AG',
     visualDirection: 'Jewel tones, candles, festive diyas. Rich and celebratory.',
@@ -677,7 +677,7 @@ const events = [
   },
   {
     number: 62, month: 'Nov', date: '03 Nov 2026', endDate: null,
-    title: 'UAE Flag Day', category: 'Social/Key Moments', opportunityType: 'Awareness Moment',
+    title: 'UAE Flag Day', category: 'Social Greetings', opportunityType: 'Awareness Moment',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds marks the awareness day with a personal authentic post',
     visualDirection: 'Clean, purposeful aesthetic',
@@ -688,7 +688,7 @@ const events = [
   },
   {
     number: 63, month: 'Nov', date: '27 Nov 2026', endDate: null,
-    title: 'Black Friday (White Friday)', category: 'Corporate Campaign', opportunityType: 'White Friday Wishlist Drop',
+    title: 'Black Friday (White Friday)', category: 'Brand Events', opportunityType: 'White Friday Wishlist Drop',
     priority: 'CRITICAL', status: 'Not Started',
     postConcept: 'Mrs Veds reveals her White Friday wishlist live — countdown to deals',
     visualDirection: 'Bold sale aesthetics. Black/white tones. Countdown + haul format.',
@@ -699,7 +699,7 @@ const events = [
   },
   {
     number: 64, month: 'Nov', date: '30 Nov 2026', endDate: null,
-    title: 'Commemoration Day', category: 'Social/Key Moments', opportunityType: 'Holiday Greeting',
+    title: 'Commemoration Day', category: 'Social Greetings', opportunityType: 'Holiday Greeting',
     priority: 'MEDIUM', status: 'Not Started',
     postConcept: 'Mrs Veds holiday greeting post in a styled look from AG',
     visualDirection: 'Festive, celebratory aesthetic',
@@ -710,7 +710,7 @@ const events = [
   },
   {
     number: 65, month: 'Dec', date: '02 Dec 2026', endDate: null,
-    title: 'UAE National Day', category: 'Social/Key Moments', opportunityType: 'UAE Pride / National Day OOTD',
+    title: 'UAE National Day', category: 'Social Greetings', opportunityType: 'UAE Pride / National Day OOTD',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds National Day look — UAE flag colours, patriotic styling',
     visualDirection: 'Red, white, green, black. UAE flag backdrop. Pride and celebration.',
@@ -721,7 +721,7 @@ const events = [
   },
   {
     number: 66, month: 'Dec', date: '25 Dec 2026', endDate: null,
-    title: 'Christmas Day', category: 'Gifting', opportunityType: 'Gifting Haul / Christmas OOTD',
+    title: 'Christmas Day', category: 'Social Greetings', opportunityType: 'Gifting Haul / Christmas OOTD',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds Christmas gifting haul + festive OOTD across AG brands',
     visualDirection: 'Festive, warm, cosy. Home setting with gifting. Unboxing style.',
@@ -732,7 +732,7 @@ const events = [
   },
   {
     number: 67, month: 'Dec', date: '31 Dec 2026', endDate: null,
-    title: "New Year's Eve", category: 'Social/Key Moments', opportunityType: 'Brand Campaign Feature',
+    title: "New Year's Eve", category: 'Social Greetings', opportunityType: 'Brand Campaign Feature',
     priority: 'HIGH', status: 'Not Started',
     postConcept: 'Mrs Veds styled look tied to the campaign theme',
     visualDirection: 'On-brand aesthetic matching campaign',
@@ -743,7 +743,7 @@ const events = [
   },
   {
     number: 68, month: 'Jan', date: '19 Jan 2026', endDate: '23 Jan 2026',
-    title: 'World Economic Forum (Davos)', category: 'Sponsorships', opportunityType: 'Thought Leadership',
+    title: 'World Economic Forum (Davos)', category: 'Conferences', opportunityType: 'Thought Leadership',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'LinkedIn article: Mrs Veds on retail resilience and the future of MENA commerce',
     visualDirection: 'Professional backdrop or branded graphic. WEF/Forbes visual context.',
@@ -754,7 +754,7 @@ const events = [
   },
   {
     number: 69, month: 'Feb', date: '03 Feb 2026', endDate: '04 Feb 2026',
-    title: 'RLC Global Forum (Riyadh)', category: 'Sponsorships', opportunityType: 'Thought Leadership / Speaking',
+    title: 'RLC Global Forum (Riyadh)', category: 'Conferences', opportunityType: 'Thought Leadership / Speaking',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'Speaking moment or post-event recap reel at the RLC Global Forum',
     visualDirection: 'Stage photography branded event backdrop candid leadership shots.',
@@ -765,7 +765,7 @@ const events = [
   },
   {
     number: 70, month: 'Feb', date: '11 Feb 2026', endDate: null,
-    title: 'New York Fashion Week', category: 'Social/Key Moments', opportunityType: 'Trend Commentary',
+    title: 'New York Fashion Week', category: 'Social Greetings', opportunityType: 'Trend Commentary',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Reel or Carousel: Mrs Veds NYFW trend picks — what to watch for AW26/27',
     visualDirection: 'Mood board aesthetic: fashion week energy, editorial palette.',
@@ -776,7 +776,7 @@ const events = [
   },
   {
     number: 71, month: 'Feb', date: '11 Feb 2026', endDate: null,
-    title: 'Retail Reboot Summit', category: 'Sponsorships', opportunityType: 'Speaking / Panel',
+    title: 'Retail Reboot Summit', category: 'Conferences', opportunityType: 'Speaking / Panel',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Recap post from Address Sky View summit — retail innovation',
     visualDirection: 'Event photography panel moments branded summit backdrop.',
@@ -787,7 +787,7 @@ const events = [
   },
   {
     number: 72, month: 'Feb', date: '19 Feb 2026', endDate: null,
-    title: 'London Fashion Week', category: 'Social/Key Moments', opportunityType: 'Trend Commentary / OOTD',
+    title: 'London Fashion Week', category: 'Social Greetings', opportunityType: 'Trend Commentary / OOTD',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Style reaction post or LFW trend review',
     visualDirection: 'Editorial tones: grey/black/white fashion week aesthetic.',
@@ -798,7 +798,7 @@ const events = [
   },
   {
     number: 73, month: 'Mar', date: '02 Mar 2026', endDate: '10 Mar 2026',
-    title: 'Milan Fashion Week', category: 'Social/Key Moments', opportunityType: 'Trend Commentary / OOTD',
+    title: 'Milan Fashion Week', category: 'Social Greetings', opportunityType: 'Trend Commentary / OOTD',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Milan MFW highlights reel — luxury heritage brands, craftsmanship',
     visualDirection: 'Rich, warm tones. Duomo backdrop or luxury editorial styling.',
@@ -809,7 +809,7 @@ const events = [
   },
   {
     number: 74, month: 'Mar', date: '06 Mar 2026', endDate: '08 Mar 2026',
-    title: 'F1 Australian Grand Prix', category: 'Corporate Event', opportunityType: 'Lifestyle / Brand Activation',
+    title: 'F1 Australian Grand Prix', category: 'Brand Events', opportunityType: 'Lifestyle / Brand Activation',
     priority: 'MEDIUM', status: 'Planned',
     postConcept: 'F1 season opener lifestyle content — Mrs Veds OOTD at a watch party',
     visualDirection: 'Racing glamour aesthetic. Bold colours, speed-inspired styling.',
@@ -820,7 +820,7 @@ const events = [
   },
   {
     number: 75, month: 'Mar', date: '09 Mar 2026', endDate: '19 Mar 2026',
-    title: 'UN CSW70', category: 'HR & CSR', opportunityType: 'Women Empowerment / Advocacy',
+    title: 'UN CSW70', category: 'Internal Communications', opportunityType: 'Women Empowerment / Advocacy',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'LinkedIn article aligned with IWD momentum — women in leadership',
     visualDirection: 'Empowerment graphic or branded quote card. UN CSW theme colours.',
@@ -831,7 +831,7 @@ const events = [
   },
   {
     number: 76, month: 'Mar', date: '28 Mar 2026', endDate: null,
-    title: 'Dubai World Cup (30th Anniversary)', category: 'Social/Key Moments', opportunityType: 'Lifestyle / Fashion Moment',
+    title: 'Dubai World Cup (30th Anniversary)', category: 'Social Greetings', opportunityType: 'Lifestyle / Fashion Moment',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'Mrs Veds OOTD + Dubai World Cup 30th anniversary — elite fashion at Meydan',
     visualDirection: 'Glamorous raceday styling. Bold hats, florals, luxury looks.',
@@ -842,7 +842,7 @@ const events = [
   },
   {
     number: 77, month: 'Apr', date: '08 Apr 2026', endDate: '10 Apr 2026',
-    title: 'Paris Fashion Week', category: 'Social/Key Moments', opportunityType: 'Trend Commentary / OOTD',
+    title: 'Paris Fashion Week', category: 'Social Greetings', opportunityType: 'Trend Commentary / OOTD',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'PFW couture moment — Mrs Veds top picks, OOTD, brand commentary',
     visualDirection: 'Parisian aesthetic: Eiffel Tower, haute couture styling, editorial palette.',
@@ -853,7 +853,7 @@ const events = [
   },
   {
     number: 78, month: 'Apr', date: '10 Apr 2026', endDate: '12 Apr 2026',
-    title: 'F1 Bahrain Grand Prix', category: 'Corporate Event', opportunityType: 'Lifestyle / Brand Activation',
+    title: 'F1 Bahrain Grand Prix', category: 'Brand Events', opportunityType: 'Lifestyle / Brand Activation',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Bahrain F1 — hospitality suite or paddock fashion content',
     visualDirection: 'Racing day glamour. Bahrain circuit aesthetic, branded corporate hospitality.',
@@ -864,7 +864,7 @@ const events = [
   },
   {
     number: 79, month: 'Apr', date: '13 Apr 2026', endDate: '16 Apr 2026',
-    title: 'LEAP Tech Conference', category: 'Sponsorships', opportunityType: 'Thought Leadership',
+    title: 'LEAP Tech Conference', category: 'Conferences', opportunityType: 'Thought Leadership',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'LEAP keynote or panel recap — retail technology, AI, future of commerce',
     visualDirection: 'Tech conference aesthetics. Riyadh skyline, stage photography.',
@@ -875,7 +875,7 @@ const events = [
   },
   {
     number: 80, month: 'Apr', date: '14 Apr 2026', endDate: '18 Apr 2026',
-    title: 'Arab Women Week & Summit (London)', category: 'HR & CSR', opportunityType: 'Women Empowerment / Speaking',
+    title: 'Arab Women Week & Summit (London)', category: 'Internal Communications', opportunityType: 'Women Empowerment / Speaking',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'Lancaster House speaking engagement — Arab women in global leadership',
     visualDirection: 'Prestigious venue photography. Lancaster House interior, polished styling.',
@@ -886,7 +886,7 @@ const events = [
   },
   {
     number: 81, month: 'Apr', date: '17 Apr 2026', endDate: '19 Apr 2026',
-    title: 'F1 Saudi Arabian GP', category: 'Corporate Event', opportunityType: 'Lifestyle / Brand Activation',
+    title: 'F1 Saudi Arabian GP', category: 'Brand Events', opportunityType: 'Lifestyle / Brand Activation',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Jeddah F1 — corporate hospitality + luxury automotive synergy',
     visualDirection: 'Bold Saudi national spirit meets luxury fashion. Jeddah corniche backdrop.',
@@ -897,7 +897,7 @@ const events = [
   },
   {
     number: 82, month: 'May', date: '04 May 2026', endDate: '07 May 2026',
-    title: 'Arabian Travel Market (ATM)', category: 'Sponsorships', opportunityType: 'Brand Visibility / Retail Tie-in',
+    title: 'Arabian Travel Market (ATM)', category: 'Conferences', opportunityType: 'Brand Visibility / Retail Tie-in',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'ATM walkthrough content — Mrs Veds on travel retail and AG global footprint',
     visualDirection: 'ATM DWTC event backdrop. Polished, travel-inspired styling.',
@@ -908,7 +908,7 @@ const events = [
   },
   {
     number: 83, month: 'May', date: '26 May 2026', endDate: null,
-    title: 'Day of Arafah', category: 'Social/Key Moments', opportunityType: 'Cultural / Spiritual Reflection',
+    title: 'Day of Arafah', category: 'Social Greetings', opportunityType: 'Cultural / Spiritual Reflection',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Heartfelt reflective post — spiritual or gratitude message ahead of Eid Al Adha',
     visualDirection: 'Serene, warm tones. Soft lighting, minimal aesthetic.',
@@ -919,7 +919,7 @@ const events = [
   },
   {
     number: 84, month: 'Sep', date: '01 Sep 2026', endDate: '06 Sep 2026',
-    title: 'Dubai Fashion Week (SS27)', category: 'Social/Key Moments', opportunityType: 'Fashion / Brand Moment',
+    title: 'Dubai Fashion Week (SS27)', category: 'Social Greetings', opportunityType: 'Fashion / Brand Moment',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'DFW SS27 — front row, backstage access, OOTD series, brand showcase',
     visualDirection: 'Dubai d3 aesthetic. Front-row fashion photography, designer encounters.',
@@ -930,7 +930,7 @@ const events = [
   },
   {
     number: 85, month: 'Oct', date: '05 Oct 2026', endDate: '06 Oct 2026',
-    title: 'Retail Congress MENA', category: 'Sponsorships', opportunityType: 'Thought Leadership / Speaking',
+    title: 'Retail Congress MENA', category: 'Conferences', opportunityType: 'Thought Leadership / Speaking',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Retail Congress panel or keynote recap — future of MENA retail strategy',
     visualDirection: 'Conference photography. Dubai skyline backdrop, professional styling.',
@@ -941,7 +941,7 @@ const events = [
   },
   {
     number: 86, month: 'Oct', date: '06 Oct 2026', endDate: '08 Oct 2026',
-    title: 'ME Women Leaders Summit & Awards (KSA)', category: 'HR & CSR', opportunityType: 'Women Empowerment / Award',
+    title: 'ME Women Leaders Summit & Awards (KSA)', category: 'Internal Communications', opportunityType: 'Women Empowerment / Award',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'Summit attendance + award recognition. Mrs Veds speech moment',
     visualDirection: 'Award gala photography. Elegant KSA venue, red carpet or stage moment.',
@@ -952,7 +952,7 @@ const events = [
   },
   {
     number: 87, month: 'Oct', date: '26 Oct 2026', endDate: '28 Oct 2026',
-    title: 'Gifts & Lifestyle Middle East', category: 'Sponsorships', opportunityType: 'B2B / Brand Partnership',
+    title: 'Gifts & Lifestyle Middle East', category: 'Conferences', opportunityType: 'B2B / Brand Partnership',
     priority: 'MEDIUM', status: 'Planned',
     postConcept: 'Trade show walkthrough — discovering premium gifting partners',
     visualDirection: 'Trade show aesthetic. DWTC venue, product flat lays, brand discovery.',
@@ -963,7 +963,7 @@ const events = [
   },
   {
     number: 88, month: 'Nov', date: '04 Nov 2026', endDate: null,
-    title: 'EcoNext ESG Conference', category: 'Sponsorships', opportunityType: 'ESG / Sustainability',
+    title: 'EcoNext ESG Conference', category: 'Conferences', opportunityType: 'ESG / Sustainability',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Mrs Veds on AG sustainability journey — ESG commitments',
     visualDirection: 'Clean, green aesthetic. Sustainability-themed visual language.',
@@ -974,7 +974,7 @@ const events = [
   },
   {
     number: 89, month: 'Nov', date: '11 Nov 2026', endDate: null,
-    title: "Singles Day (11.11)", category: 'Corporate Campaign', opportunityType: 'E-Commerce / Campaign',
+    title: "Singles Day (11.11)", category: 'Brand Events', opportunityType: 'E-Commerce / Campaign',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Mrs Veds curated 11.11 picks across AG brands — style guide and deals',
     visualDirection: 'Bold graphic with 11.11 branding. Energetic, deal-focused aesthetic.',
@@ -985,7 +985,7 @@ const events = [
   },
   {
     number: 90, month: 'Nov', date: '27 Nov 2026', endDate: '29 Nov 2026',
-    title: 'F1 Qatar Grand Prix', category: 'Corporate Event', opportunityType: 'Lifestyle / Brand Activation',
+    title: 'F1 Qatar Grand Prix', category: 'Brand Events', opportunityType: 'Lifestyle / Brand Activation',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Qatar F1 — championship finale energy. Fashion content at Lusail.',
     visualDirection: 'Night race glamour. Lusail Circuit lights, bold luxury styling.',
@@ -996,7 +996,7 @@ const events = [
   },
   {
     number: 91, month: 'Nov', date: '30 Nov 2026', endDate: null,
-    title: 'Cyber Monday', category: 'Corporate Campaign', opportunityType: 'E-Commerce / Campaign',
+    title: 'Cyber Monday', category: 'Brand Events', opportunityType: 'E-Commerce / Campaign',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'Last-chance campaign post — Cyber Monday picks across AG brands',
     visualDirection: 'Bold, digital aesthetic. Screen-focused or tech-forward styling.',
@@ -1007,7 +1007,7 @@ const events = [
   },
   {
     number: 92, month: 'Dec', date: '04 Dec 2026', endDate: '06 Dec 2026',
-    title: 'F1 Abu Dhabi Grand Prix', category: 'Corporate Event', opportunityType: 'Lifestyle / Hospitality',
+    title: 'F1 Abu Dhabi Grand Prix', category: 'Brand Events', opportunityType: 'Lifestyle / Hospitality',
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'Season finale on Yas Island — OOTD + corporate hospitality',
     visualDirection: 'Yas Island luxury aesthetic. Sunset over the circuit, glamour hospitality.',
@@ -1018,7 +1018,7 @@ const events = [
   },
   {
     number: 93, month: 'Dec', date: '07 Dec 2026', endDate: '11 Dec 2026',
-    title: 'GITEX Global', category: 'Sponsorships', opportunityType: 'Tech / Thought Leadership',
+    title: 'GITEX Global', category: 'Conferences', opportunityType: 'Tech / Thought Leadership',
     priority: 'HIGH', status: 'Planned',
     postConcept: 'GITEX walkthrough — retail tech, AI in fashion, AG digital future',
     visualDirection: 'Tech expo energy. Dubai Expo City venue, innovation-focused visual.',
@@ -1029,7 +1029,7 @@ const events = [
   },
   {
     number: 94, month: 'Dec', date: '14 Dec 2026', endDate: '15 Dec 2026',
-    title: "Forbes ME Women's Summit (Riyadh)", category: 'HR & CSR', opportunityType: "Women Empowerment / Speaking",
+    title: "Forbes ME Women's Summit (Riyadh)", category: 'Internal Communications', opportunityType: "Women Empowerment / Speaking",
     priority: 'CRITICAL', status: 'Planned',
     postConcept: 'Forbes ME Women Summit 4th edition — speaker or honoree',
     visualDirection: 'Forbes summit stage photography. Elegant Riyadh venue, award-night styling.',
@@ -1040,7 +1040,7 @@ const events = [
   },
   {
     number: 95, month: 'Dec', date: '18 Dec 2026', endDate: null,
-    title: 'Qatar National Day', category: 'Social/Key Moments', opportunityType: 'Cultural / Brand Acknowledgement',
+    title: 'Qatar National Day', category: 'Social Greetings', opportunityType: 'Cultural / Brand Acknowledgement',
     priority: 'MEDIUM', status: 'Planned',
     postConcept: 'Qatar National Day greeting — acknowledging AG presence in Qatar',
     visualDirection: 'Qatar maroon and white palette. National pride visual.',

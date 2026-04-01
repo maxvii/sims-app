@@ -5,14 +5,10 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 
 const CATEGORY_COLORS = {
-  'Social/Key Moments': '#6B7B8D',
-  'Sponsorships': '#363A47',
-  'Corporate Campaign': '#C9956B',
-  'Corporate Event': '#5A7A8C',
-  'Gifting': '#9AAAB8',
-  'PR Birthdays': '#96B4C3',
-  'HR & CSR': '#6B8E6B',
-  'Coca Cola Arena': '#D4365C',
+  'Brand Events': '#363A47',
+  'Conferences': '#6B7B8D',
+  'Internal Communications': '#6B8E6B',
+  'Social Greetings': '#C9956B',
 }
 
 const MONTHS = [

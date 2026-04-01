@@ -128,7 +128,7 @@ export default function CalendarPage() {
         <div className="px-5 pt-14 pb-5 relative z-10">
           {/* Top bar */}
           <div className="flex items-center justify-between mb-5">
-            <img src="/logo.png" alt="The Sims App" className="h-10" />
+            <img src="/logo.png" alt="The Sims App" className="h-10" style={{ filter: 'brightness(0) invert(1)', opacity: 0.95 }} />
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/60 shadow-md">
               <img src="/images/sima-portrait.jpg" alt="Sima" className="w-full h-full object-cover" />
             </div>
@@ -164,7 +164,7 @@ export default function CalendarPage() {
           />
           <QuickAction
             icon={<svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>}
-            label="Analytics"
+            label="Simulate"
             href="/analytics"
             gradient="linear-gradient(135deg, #5C6B7A, #7A8D9E)"
           />
@@ -276,6 +276,7 @@ function AddEventModal({ onClose, onCreated }) {
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
   const [priority, setPriority] = useState('MEDIUM')
+  const [category, setCategory] = useState('Brand Events')
   const [opportunityType, setOpportunityType] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -288,7 +289,7 @@ function AddEventModal({ onClose, onCreated }) {
     await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, date: formatted, priority, opportunityType }),
+      body: JSON.stringify({ title, date: formatted, priority, category, opportunityType }),
     })
     setSaving(false)
     onCreated()
@@ -319,6 +320,15 @@ function AddEventModal({ onClose, onCreated }) {
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Category</label>
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                <option value="Brand Events">Brand Events</option>
+                <option value="Conferences">Conferences</option>
+                <option value="Internal Communications">Internal Comms</option>
+                <option value="Social Greetings">Social Greetings</option>
+              </select>
+            </div>
+            <div className="flex-1">
               <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Priority</label>
               <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
                 <option value="CRITICAL">Critical</option>
@@ -326,10 +336,6 @@ function AddEventModal({ onClose, onCreated }) {
                 <option value="MEDIUM">Medium</option>
                 <option value="LOW">Low</option>
               </select>
-            </div>
-            <div className="flex-1">
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</label>
-              <input value={opportunityType} onChange={(e) => setOpportunityType(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none" placeholder="e.g. Holiday" />
             </div>
           </div>
           <button type="submit" disabled={saving || !title || !date} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6B7B8D, #363A47)' }}>

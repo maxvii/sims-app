@@ -43,7 +43,7 @@ export default function LoginPage() {
         <img
           src="/logo.png"
           alt="The Sims App"
-          className="h-16 w-auto mx-auto"
+          className="h-36 w-auto mx-auto"
           style={{ filter: 'drop-shadow(0 12px 50px rgba(0,0,0,0.5))' }}
         />
       </div>

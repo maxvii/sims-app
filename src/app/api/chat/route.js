@@ -1,5 +1,7 @@
 import { streamText, tool, stepCountIs } from 'ai'
-import { google } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
+
+const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -52,14 +54,14 @@ export async function POST(req) {
 
   try {
     const result = streamText({
-      model: google('gemini-2.0-flash'),
+      model: groq('llama-3.3-70b-versatile'),
       system: `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
 
 Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
 
 She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
 
-Event categories available: Social/Key Moments, Sponsorships, Corporate Campaign, Corporate Event, Gifting, PR Birthdays, HR & CSR, Coca Cola Arena.
+Event categories available: Brand Events, Conferences, Internal Communications, Social Greetings.
 
 Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
 
@@ -77,14 +79,10 @@ Be professional, concise, and proactive. Use emojis sparingly. Always confirm ac
             title: z.string().describe('The event title'),
             date: z.string().describe('Event date in "DD Mon YYYY" format, e.g. "07 Apr 2026"'),
             category: z.enum([
-              'Social/Key Moments',
-              'Sponsorships',
-              'Corporate Campaign',
-              'Corporate Event',
-              'Gifting',
-              'PR Birthdays',
-              'HR & CSR',
-              'Coca Cola Arena',
+              'Brand Events',
+              'Conferences',
+              'Internal Communications',
+              'Social Greetings',
             ]).optional().describe('Event category'),
             priority: z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']).optional().describe('Event priority level'),
             opportunityType: z.string().optional().describe('Type of opportunity, e.g. "Instagram Reel", "Press Release"'),
