@@ -1,4 +1,4 @@
-import { streamText, tool, stepCountIs } from 'ai'
+import { streamText, tool, stepCountIs, convertToModelMessages } from 'ai'
 import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
@@ -20,10 +20,19 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
-  const { messages } = body
+  const { messages: rawMessages } = body
 
-  if (!messages || !Array.isArray(messages)) {
+  if (!rawMessages || !Array.isArray(rawMessages)) {
     return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+  }
+
+  // AI SDK v6: client sends UIMessage[] (parts array), convert to ModelMessage[]
+  let messages
+  try {
+    messages = convertToModelMessages(rawMessages)
+  } catch {
+    // Fallback: already in legacy format
+    messages = rawMessages
   }
 
   try {
