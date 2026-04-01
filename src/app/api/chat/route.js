@@ -1,4 +1,4 @@
-import { streamText, tool, stepCountIs, convertToModelMessages } from 'ai'
+import { streamText, tool, stepCountIs } from 'ai'
 import { groq } from '@ai-sdk/groq'
 import { z } from 'zod'
 import { getServerSession } from 'next-auth'
@@ -26,39 +26,29 @@ export async function POST(req) {
     return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
   }
 
-  // AI SDK v6: client sends UIMessage[] (parts array), convert to ModelMessage[]
-  let messages
-  try {
-    messages = convertToModelMessages(rawMessages)
-  } catch (convErr) {
-    // Manual fallback: convert UIMessage parts to simple {role, content} format
-    try {
-      messages = rawMessages.map(msg => {
-        // Already in legacy format
-        if (typeof msg.content === 'string') {
-          return { role: msg.role, content: msg.content }
-        }
-        // UIMessage with parts array
-        if (Array.isArray(msg.parts)) {
-          const text = msg.parts
-            .filter(p => p.type === 'text')
-            .map(p => p.text || '')
-            .join('')
-          return { role: msg.role, content: text || '' }
-        }
-        // Array content (older format)
-        if (Array.isArray(msg.content)) {
-          const text = msg.content
-            .map(p => typeof p === 'string' ? p : p?.text || '')
-            .join('')
-          return { role: msg.role, content: text || '' }
-        }
-        return { role: msg.role, content: '' }
-      })
-    } catch {
-      messages = rawMessages
+  // AI SDK v6: client sends UIMessage[] with parts array — convert to clean ModelMessage[]
+  const messages = rawMessages.map(msg => {
+    // Extract text from parts array (AI SDK v6 format)
+    if (Array.isArray(msg.parts)) {
+      const text = msg.parts
+        .filter(p => p.type === 'text')
+        .map(p => p.text || '')
+        .join('')
+      return { role: msg.role, content: text || '' }
     }
-  }
+    // Legacy string content
+    if (typeof msg.content === 'string') {
+      return { role: msg.role, content: msg.content }
+    }
+    // Legacy array content
+    if (Array.isArray(msg.content)) {
+      const text = msg.content
+        .map(p => typeof p === 'string' ? p : p?.text || '')
+        .join('')
+      return { role: msg.role, content: text || '' }
+    }
+    return { role: msg.role, content: '' }
+  })
 
   try {
     const result = streamText({
