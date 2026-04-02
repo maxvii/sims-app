@@ -5,10 +5,14 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 
 const CATEGORY_COLORS = {
-  'Brand Events': '#363A47',
-  'Conferences': '#6B7B8D',
-  'Internal Communications': '#6B8E6B',
-  'Social Greetings': '#C9956B',
+  'Social/Key Moments': '#363A47',
+  'Corporate Campaign': '#6B7B8D',
+  'Corporate Event': '#4A6FA5',
+  'Sponsorships': '#8B6BA5',
+  'Gifting': '#C9956B',
+  'PR Birthdays': '#D4365C',
+  'HR & CSR': '#6B8E6B',
+  'Coca Cola Arena': '#CC4444',
 }
 
 const MONTHS = [
@@ -16,10 +20,10 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 
-const PRIORITY_STYLES = {
-  HIGH: { bg: 'rgba(211,54,92,0.12)', text: '#D4365C', label: 'High' },
-  MEDIUM: { bg: 'rgba(201,149,107,0.15)', text: '#C9956B', label: 'Med' },
-  LOW: { bg: 'rgba(107,142,107,0.12)', text: '#6B8E6B', label: 'Low' },
+const STATUS_STYLES = {
+  'Approved': { bg: 'rgba(107,142,107,0.15)', text: '#6B8E6B', label: 'Approved' },
+  'Rescheduled': { bg: 'rgba(201,149,107,0.15)', text: '#C9956B', label: 'Rescheduled' },
+  'Cancelled': { bg: 'rgba(211,54,92,0.12)', text: '#D4365C', label: 'Cancelled' },
 }
 
 function getCategoryColor(category) {
@@ -171,7 +175,7 @@ export default function EventsCalendarPage() {
                     <div className="mt-2 space-y-2 animate-fade-in">
                       {monthEvents.map((ev) => {
                         const catColor = getCategoryColor(ev.category)
-                        const priority = PRIORITY_STYLES[ev.priority] || PRIORITY_STYLES.MEDIUM
+                        const statusStyle = STATUS_STYLES[ev.status]
 
                         return (
                           <button
@@ -196,12 +200,12 @@ export default function EventsCalendarPage() {
                                 <h4 className="text-sm font-semibold text-gray-800 leading-tight truncate">
                                   {ev.title}
                                 </h4>
-                                {ev.priority && (
+                                {statusStyle && (
                                   <span
                                     className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                                    style={{ background: priority.bg, color: priority.text }}
+                                    style={{ background: statusStyle.bg, color: statusStyle.text }}
                                   >
-                                    {priority.label}
+                                    {statusStyle.label}
                                   </span>
                                 )}
                               </div>
