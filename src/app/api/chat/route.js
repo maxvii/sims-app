@@ -90,9 +90,15 @@ export async function POST(req) {
     const response = await callOpenClaw(prompt)
     const text = response || 'I received your message but got an empty response. Please try again.'
 
+    const messageId = 'msg-' + Date.now()
+    const partId = 'text-' + Date.now()
+
     const stream = createUIMessageStream({
       execute: ({ writer }) => {
-        writer.write({ type: 'text', text })
+        writer.write({ type: 'start', messageId })
+        writer.write({ type: 'text-start', id: partId })
+        writer.write({ type: 'text-delta', id: partId, delta: text })
+        writer.write({ type: 'text-end', id: partId })
         writer.write({ type: 'finish', finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })
       },
     })
