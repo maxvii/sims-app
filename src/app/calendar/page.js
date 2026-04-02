@@ -100,29 +100,31 @@ export default function CalendarPage() {
         <p className="text-sm text-white/80 mt-0.5">Hi, <span className="font-semibold text-white">{session?.user?.name || 'Sima'}</span></p>
       </div>
 
-      {/* ── Icon Grid — all sections ── */}
-      <div className="px-4 py-4">
-        <div className="flex justify-between items-center">
+      {/* ── App Icons — full width iPhone style ── */}
+      <div className="px-4 py-5">
+        <div className="grid grid-cols-3 gap-4">
           {[
-            { icon: '👤', href: '/about', label: 'About' },
-            { icon: '🖼', href: '/gallery', label: 'Gallery' },
-            { icon: '📋', href: '/media-kit', label: 'Kit' },
-            { icon: '📊', href: '/analytics', label: 'Simulate' },
-            { icon: '👗', href: '/try-on', label: 'Try-On' },
-            ...(session?.user?.role === 'ADMIN' ? [{ icon: '👥', href: '/admin', label: 'Team' }] : []),
+            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>, href: '/about', label: 'About', gradient: 'linear-gradient(135deg, #363A47, #5A6070)' },
+            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>, href: '/gallery', label: 'Gallery', gradient: 'linear-gradient(135deg, #6B7B8D, #9AAAB8)' },
+            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>, href: '/media-kit', label: 'Media Kit', gradient: 'linear-gradient(135deg, #C9956B, #D4A574)' },
+            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>, href: '/analytics', label: 'Simulate', gradient: 'linear-gradient(135deg, #4A6FA5, #6B8DC4)' },
+            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>, href: '/try-on', label: 'Try-On', gradient: 'linear-gradient(135deg, #8B6BA5, #A88BC4)' },
+            ...(session?.user?.role === 'ADMIN' ? [
+              { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>, href: '/admin', label: 'Team', gradient: 'linear-gradient(135deg, #6B8E6B, #88B088)' },
+            ] : []),
           ].map((item) => (
             <button
               key={item.href}
               onClick={() => router.push(item.href)}
-              className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+              className="flex flex-col items-center gap-2 active:scale-90 transition-all"
             >
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center text-lg"
-                style={{ background: 'rgba(54,58,71,0.06)' }}
+                className="w-full aspect-square rounded-[22px] flex items-center justify-center text-white shadow-lg"
+                style={{ background: item.gradient }}
               >
                 {item.icon}
               </div>
-              <span className="text-[9px] font-medium text-gray-500">{item.label}</span>
+              <span className="text-[11px] font-semibold text-gray-600">{item.label}</span>
             </button>
           ))}
         </div>
