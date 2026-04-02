@@ -90,11 +90,9 @@ export default function SimulatePage() {
 
   const [format, setFormat] = useState('')
   const [platform, setPlatform] = useState('instagram')
-  const [topic, setTopic] = useState('')
   const [caption, setCaption] = useState('')
   const [mediaPreview, setMediaPreview] = useState(null)
   const [mediaName, setMediaName] = useState('')
-  const [postDate, setPostDate] = useState(() => new Date().toISOString().split('T')[0])
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -113,7 +111,7 @@ export default function SimulatePage() {
   }
 
   async function handleSimulate() {
-    if (!topic && !caption) { setError('Add a topic or caption.'); return }
+    if (!caption) { setError('Add a caption.'); return }
     if (!format) { setError('Pick a format.'); return }
     setLoading(true); setError(null); setResult(null)
 
@@ -123,10 +121,10 @@ export default function SimulatePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           format, platform,
-          topic: topic || undefined,
-          caption: caption || undefined,
+          topic: caption,
+          caption,
           category: 'fashion_personal',
-          postDate,
+          postDate: new Date().toISOString().split('T')[0],
           description: mediaName ? `Uploaded: ${mediaName}` : undefined,
         }),
       })
@@ -188,34 +186,14 @@ export default function SimulatePage() {
               <PillSelector options={PLATFORMS} value={platform} onChange={setPlatform} />
             </div>
 
-            {/* Topic */}
-            <div>
-              <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block mb-1.5">Topic</label>
-              <input
-                value={topic} onChange={e => setTopic(e.target.value)}
-                placeholder="e.g. Ramadan, Store Opening, OOTD..."
-                className="w-full px-4 py-2.5 text-sm rounded-xl outline-none"
-                style={{ background: 'rgba(54,58,71,0.04)', border: '1px solid rgba(54,58,71,0.08)', color: '#363A47' }}
-              />
-            </div>
-
             {/* Caption */}
             <div>
               <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block mb-1.5">Caption</label>
               <textarea
                 value={caption} onChange={e => setCaption(e.target.value)}
                 placeholder="Write or paste your caption..."
-                rows={2}
+                rows={3}
                 className="w-full px-4 py-2.5 text-sm rounded-xl outline-none resize-none"
-                style={{ background: 'rgba(54,58,71,0.04)', border: '1px solid rgba(54,58,71,0.08)', color: '#363A47' }}
-              />
-            </div>
-
-            {/* Date */}
-            <div>
-              <label className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider block mb-1.5">Post Date</label>
-              <input type="date" value={postDate} onChange={e => setPostDate(e.target.value)}
-                className="w-full px-4 py-2.5 text-sm rounded-xl outline-none"
                 style={{ background: 'rgba(54,58,71,0.04)', border: '1px solid rgba(54,58,71,0.08)', color: '#363A47' }}
               />
             </div>
