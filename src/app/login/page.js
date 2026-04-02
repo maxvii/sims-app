@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Background Image */}
+      {/* Background Image — BG-12 */}
       <div
         className="absolute inset-0 z-0"
         style={{
@@ -32,39 +32,30 @@ export default function LoginPage() {
           backgroundRepeat: 'no-repeat',
         }}
       />
-      {/* Overlay for extra depth */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{ background: 'radial-gradient(ellipse at 50% 30%, rgba(54,58,71,0.15) 0%, rgba(20,22,30,0.6) 100%)' }}
-      />
 
       {/* Logo */}
-      <div className="relative z-10 mb-14 animate-fade-in">
+      <div className="relative z-10 mb-14">
         <img
           src="/logo.png"
           alt="The Sims App"
           className="h-36 w-auto mx-auto"
-          style={{ filter: 'drop-shadow(0 12px 50px rgba(0,0,0,0.5))' }}
         />
       </div>
 
-      {/* Login Card */}
+      {/* Login Card — clean, no shadows, no blur */}
       <div
-        className="w-full max-w-sm relative z-10 animate-slide-up p-7 rounded-3xl"
+        className="w-full max-w-sm relative z-10 p-7 rounded-3xl"
         style={{
-          background: 'rgba(20,22,30,0.45)',
-          backdropFilter: 'blur(40px) saturate(1.6)',
-          WebkitBackdropFilter: 'blur(40px) saturate(1.6)',
-          border: '1px solid rgba(247,249,250,0.08)',
-          boxShadow: '0 12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(247,249,250,0.06)',
+          background: 'rgba(54,58,71,0.45)',
+          border: '1px solid rgba(208,217,226,0.12)',
         }}
       >
         {error && (
           <div
             className="text-sm p-3 rounded-2xl text-center font-medium mb-5"
             style={{
-              background: 'rgba(212,54,92,0.2)',
-              border: '1px solid rgba(212,54,92,0.3)',
+              background: 'rgba(212,54,92,0.15)',
+              border: '1px solid rgba(212,54,92,0.25)',
               color: '#D0D9E2',
             }}
           >
@@ -81,7 +72,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full py-3.5 px-5 rounded-2xl text-[15px] outline-none transition-all placeholder:text-white/20"
               style={{
-                background: 'rgba(247,249,250,0.05)',
+                background: 'rgba(247,249,250,0.06)',
                 border: '1.5px solid rgba(247,249,250,0.1)',
                 color: '#F7F9FA',
               }}
@@ -99,7 +90,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full py-3.5 px-5 pr-12 rounded-2xl text-[15px] outline-none transition-all placeholder:text-white/20"
                 style={{
-                  background: 'rgba(247,249,250,0.05)',
+                  background: 'rgba(247,249,250,0.06)',
                   border: '1.5px solid rgba(247,249,250,0.1)',
                   color: '#F7F9FA',
                 }}
@@ -126,9 +117,8 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-4 rounded-2xl font-semibold text-[15px] disabled:opacity-50 transition-all mt-2"
             style={{
-              background: 'linear-gradient(135deg, #D0D9E2, #B8C8D5)',
+              background: '#D0D9E2',
               color: '#2B2E38',
-              boxShadow: '0 4px 24px rgba(208,217,226,0.25)',
               letterSpacing: '0.05em',
             }}
           >
@@ -143,7 +133,7 @@ export default function LoginPage() {
       </div>
 
       {/* Bottom text */}
-      <p className="relative z-10 mt-10 text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(208,217,226,0.15)' }}>
+      <p className="relative z-10 mt-10 text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(54,58,71,0.3)' }}>
         The Sims App
       </p>
     </div>
