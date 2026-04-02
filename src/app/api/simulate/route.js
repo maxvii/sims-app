@@ -1,7 +1,18 @@
-import { generateText } from 'ai'
-import { createGroq } from '@ai-sdk/groq'
+// ─── OpenClaw gateway caller ───
+async function callOpenClaw(message) {
+  const url = process.env.OPENCLAW_URL || 'https://fool.khlije.app/agent'
+  const token = process.env.OPENCLAW_TOKEN
+  if (!token) throw new Error('OPENCLAW_TOKEN not configured')
 
-const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ message, agent: 'main' }),
+  })
+  if (!res.ok) throw new Error(`OpenClaw returned ${res.status}: ${await res.text().catch(() => res.statusText)}`)
+  const data = await res.json()
+  return data.output || data.result || ''
+}
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -429,19 +440,19 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
 
     let qualitative = {}
     try {
-      const result = await generateText({
-        model: groq('llama-3.3-70b-versatile'),
-        prompt: geminiPrompt,
-        maxTokens: 1500,
-      })
-
-      let text = result.text.trim()
+      const rawText = await callOpenClaw(geminiPrompt)
+      let text = (rawText || '').trim()
       if (text.startsWith('```')) {
         text = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
       }
-      qualitative = JSON.parse(text)
-    } catch (groqErr) {
-      console.error('Groq qualitative analysis failed:', groqErr?.message)
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        qualitative = JSON.parse(jsonMatch[0])
+      } else if (text) {
+        qualitative = { strengths: [text], improvements: [], captionSuggestion: null }
+      }
+    } catch (openclawErr) {
+      console.error('OpenClaw qualitative analysis failed:', openclawErr?.message)
       // Non-fatal — we still return the mathematical predictions
       qualitative = {
         strengths: ['Mathematical prediction completed successfully'],
@@ -513,7 +524,7 @@ Given these predictions and the content calendar context, provide QUALITATIVE an
         version: '2.0',
         baseFollowers: FOLLOWERS,
         variancePercent: 15,
-        engine: 'mathematical_prediction + groq_qualitative',
+        engine: 'mathematical_prediction + openclaw_qualitative',
       },
     }
 
