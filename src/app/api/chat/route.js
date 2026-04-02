@@ -112,10 +112,7 @@ export async function POST(req) {
       },
     })
 
-    return new Response(stream, {
-      status: 200,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    })
+    return createUIMessageStreamResponse({ stream, status: 200 })
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
     return new Response(
