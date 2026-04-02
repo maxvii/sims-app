@@ -5,8 +5,11 @@ import { authOptions } from '@/lib/auth'
 import { notifyOthers } from '@/lib/notify'
 
 export async function GET(req, { params }) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = req.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.OPENCLAW_TOKEN}`) {
+    const session = await getServerSession(authOptions)
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const event = await prisma.event.findUnique({
     where: { id: params.id },
@@ -21,8 +24,11 @@ export async function GET(req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = req.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.OPENCLAW_TOKEN}`) {
+    const session = await getServerSession(authOptions)
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   const data = await req.json()
   const oldEvent = await prisma.event.findUnique({ where: { id: params.id }, select: { status: true, title: true } })

@@ -3,10 +3,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 
-export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req) {
+  const authHeader = req.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.OPENCLAW_TOKEN}`) {
+    const session = await getServerSession(authOptions)
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const allEvents = await prisma.event.findMany({
