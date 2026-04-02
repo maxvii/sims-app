@@ -5,17 +5,7 @@ import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } f
 
 export const maxDuration = 120
 
-const SYSTEM_PROMPT = `You are Sims GPT, the personal AI assistant for Sima Ganwani Ved — Founder & Chairwoman of Apparel Group, Dubai. You manage her brand calendar, create content, and provide strategic insights.
-
-Sima's brand portfolio includes: Guess, Tommy Hilfiger, Calvin Klein, DKNY, Aeropostale, Nine West, Aldo, Skechers, Charles & Keith, Tim Hortons, Victoria's Secret, and many more across 2,200+ stores in 14 countries with 22,000+ employees.
-
-She is @thesimaved on Instagram and LinkedIn. She appeared on Shark Tank Dubai Season 2, is Forbes Top 100 (#12), and YPO MENA STAR.
-
-Event categories available: Brand Events, Conferences, Internal Communications, Social Greetings.
-Priority levels: CRITICAL, HIGH, MEDIUM, LOW.
-
-When users ask about schedule or events, include relevant data from the calendar.
-Be professional, concise, and proactive. Use emojis sparingly. Always confirm actions taken.`
+// System prompt lives in OpenClaw's IDENTITY.md — not sent per request
 
 // ─── Call OpenClaw gateway ───
 async function callOpenClaw(message) {
@@ -90,19 +80,14 @@ export async function POST(req) {
     const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content || ''
     const toolResult = await executeToolsIfNeeded(lastUserMsg)
 
-    let fullPrompt = SYSTEM_PROMPT + '\n\n'
+    // Only send user message + DB context — system prompt lives in OpenClaw's IDENTITY.md
+    let prompt = ''
     if (toolResult) {
-      fullPrompt += `[CALENDAR DATA from ${toolResult.toolName}]:\n${JSON.stringify(toolResult.result, null, 2)}\n\nUse the calendar data above to answer the user's question.\n\n`
+      prompt += `[CALENDAR DATA from ${toolResult.toolName}]:\n${JSON.stringify(toolResult.result, null, 2)}\n\n`
     }
+    prompt += lastUserMsg
 
-    const recentMessages = messages.slice(-10)
-    fullPrompt += 'Conversation:\n'
-    for (const msg of recentMessages) {
-      fullPrompt += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`
-    }
-    fullPrompt += '\nAssistant:'
-
-    const response = await callOpenClaw(fullPrompt)
+    const response = await callOpenClaw(prompt)
     const text = response || 'I received your message but got an empty response. Please try again.'
 
     const stream = createUIMessageStream({
