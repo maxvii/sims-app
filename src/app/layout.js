@@ -1,5 +1,6 @@
 import './globals.css'
 import Providers from './providers'
+import ThemeLoader from '@/components/ThemeLoader'
 
 export const metadata = {
   title: 'The SMZ - Sima Ved',
@@ -22,7 +23,10 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          <ThemeLoader />
+          {children}
+        </Providers>
       </body>
     </html>
   )

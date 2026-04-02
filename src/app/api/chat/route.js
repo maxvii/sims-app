@@ -18,8 +18,12 @@ CALENDAR ENDPOINTS:
 - GET /api/analytics — calendar stats (totals, by category/priority/status/month)
 
 MEDIA ENDPOINTS:
-- GET /api/uploads/{filename} — download any uploaded media file (images, videos). No auth needed for this endpoint.
-- Media URLs look like: https://sims.ai-gcc.com/api/uploads/{hex}.mp4 or .jpg
+- GET /api/uploads/{filename} — download any uploaded media file (images, videos). No auth needed.
+
+THEME ENDPOINTS (live color changes, no redeploy needed):
+- GET /api/theme — read current theme colors
+- POST /api/theme — update colors. Body example: {"violet-deep":"#363A47","cream":"#F7F9FA"}
+  Valid keys: violet-deep, violet-dark, mauve-rose, peach, cream, cream-dark, body-bg-start, body-bg-mid, body-bg-end, body-text
 
 When a user shares a video or image URL from the app, you can fetch and analyze it directly.
 When asked to analyze a video, fetch it and use your local video/vision analysis tools.
