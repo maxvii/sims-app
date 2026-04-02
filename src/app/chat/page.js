@@ -219,6 +219,10 @@ export default function ChatPage() {
   // Local input state (AI SDK v6 removed input management from useChat)
   const [input, setInput] = useState('')
 
+  // Media attachment state
+  const [attachment, setAttachment] = useState(null) // { file, preview, uploading }
+  const fileInputRef = useRef(null)
+
   // Voice state
   const [isListening, setIsListening] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
@@ -260,12 +264,45 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, status])
 
+  // ── Handle file selection ───────────────────────────────────────────────
+  function handleFileSelect(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const preview = file.type.startsWith('video/')
+      ? null
+      : URL.createObjectURL(file)
+    setAttachment({ file, preview, type: file.type.startsWith('video/') ? 'video' : 'image' })
+  }
+
   // ── Send message handler ───────────────────────────────────────────────
-  function handleSend(text) {
+  async function handleSend(text) {
     const trimmed = (text || '').trim()
-    if (!trimmed || isLoading) return
+    if ((!trimmed && !attachment) || isLoading) return
     setInput('')
-    sendMessage({ text: trimmed })
+
+    let mediaUrl = ''
+    if (attachment?.file) {
+      setAttachment(prev => ({ ...prev, uploading: true }))
+      try {
+        const formData = new FormData()
+        formData.append('file', attachment.file)
+        const res = await fetch('/api/chat/upload', { method: 'POST', body: formData })
+        const data = await res.json()
+        mediaUrl = data.fullUrl || data.url || ''
+      } catch (err) {
+        console.error('Upload failed:', err)
+      }
+      setAttachment(null)
+    }
+
+    // Build message with media URL if present
+    let msg = trimmed
+    if (mediaUrl) {
+      const prefix = attachment?.type === 'video' ? '[Video attached]' : '[Image attached]'
+      msg = mediaUrl + (trimmed ? `\n${trimmed}` : `\n${prefix} Please analyze this.`)
+    }
+
+    sendMessage({ text: msg })
   }
 
   // ── Voice input logic ───────────────────────────────────────────────────
@@ -455,6 +492,37 @@ export default function ChatPage() {
           </div>
         )}
 
+        {/* Attachment preview */}
+        {attachment && (
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <div className="relative rounded-xl overflow-hidden" style={{ background: 'rgba(54,58,71,0.08)' }}>
+              {attachment.type === 'video' ? (
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="#6B7B8D" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                </div>
+              ) : (
+                <img src={attachment.preview} alt="" className="w-16 h-16 object-cover" />
+              )}
+              {attachment.uploading && (
+                <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
+                  <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                </div>
+              )}
+            </div>
+            <span className="text-xs truncate max-w-[150px]" style={{ color: '#6B7B8D' }}>{attachment.file.name}</span>
+            <button type="button" onClick={() => setAttachment(null)} className="text-xs" style={{ color: '#e53e3e' }}>Remove</button>
+          </div>
+        )}
+
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -491,6 +559,18 @@ export default function ChatPage() {
               }}
             />
 
+            {/* Attach media button */}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="ml-2 shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+              style={{ background: 'rgba(54,58,71,0.08)', color: '#6B7B8D' }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+              </svg>
+            </button>
+
             {/* Mic button */}
             {speechSupported && (
               <button
@@ -516,16 +596,16 @@ export default function ChatPage() {
           {/* Send button */}
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={(!input.trim() && !attachment) || isLoading}
             className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40"
             style={{
-              background: input.trim()
+              background: (input.trim() || attachment)
                 ? 'linear-gradient(135deg, #363A47, #6B7B8D)'
                 : 'rgba(54,58,71,0.12)',
-              boxShadow: input.trim() ? '0 4px 16px rgba(54,58,71,0.3)' : 'none',
+              boxShadow: (input.trim() || attachment) ? '0 4px 16px rgba(54,58,71,0.3)' : 'none',
             }}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke={input.trim() ? '#fff' : '#6B7B8D'} strokeWidth={2}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke={(input.trim() || attachment) ? '#fff' : '#6B7B8D'} strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
             </svg>
           </button>
