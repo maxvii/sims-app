@@ -47,11 +47,58 @@ function getToolInvocations(message) {
   return message.toolInvocations || []
 }
 
-/** Very lightweight "markdown" — handles **bold**, *italic*, `code`, and lists */
+/** Check if a string is a media URL */
+function isMediaUrl(str) {
+  const trimmed = str.trim()
+  return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov)/i.test(trimmed) ||
+    /\/api\/uploads\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov)/i.test(trimmed)
+}
+
+function isVideoUrl(str) {
+  return /\.(mp4|webm|mov)/i.test(str.trim())
+}
+
+/** Render a media URL as a thumbnail */
+function MediaThumbnail({ url }) {
+  const fullUrl = url.startsWith('/') ? url : url
+  if (isVideoUrl(url)) {
+    return (
+      <div className="my-2 rounded-2xl overflow-hidden" style={{ maxWidth: 280 }}>
+        <video
+          src={fullUrl}
+          controls
+          preload="metadata"
+          className="w-full rounded-2xl"
+          style={{ maxHeight: 200, objectFit: 'cover' }}
+        />
+      </div>
+    )
+  }
+  return (
+    <div className="my-2 rounded-2xl overflow-hidden" style={{ maxWidth: 280 }}>
+      <img
+        src={fullUrl}
+        alt="Shared media"
+        className="w-full rounded-2xl cursor-pointer"
+        style={{ maxHeight: 200, objectFit: 'cover' }}
+        onClick={() => window.open(fullUrl, '_blank')}
+      />
+    </div>
+  )
+}
+
+/** Very lightweight "markdown" — handles **bold**, *italic*, `code`, lists, and media URLs */
 function renderMarkdown(text) {
   if (!text) return null
   const lines = text.split('\n')
   return lines.map((line, i) => {
+    const trimmed = line.trim()
+
+    // Media URL → thumbnail
+    if (isMediaUrl(trimmed)) {
+      return <MediaThumbnail key={i} url={trimmed} />
+    }
+
     // Bullet lists
     if (/^\s*[-*]\s/.test(line)) {
       const content = line.replace(/^\s*[-*]\s/, '')
@@ -81,7 +128,8 @@ function renderMarkdown(text) {
 }
 
 function formatInline(text) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/)
+  // Split on markdown formatting AND URLs
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|https?:\/\/\S+)/)
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**'))
       return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>
@@ -89,6 +137,12 @@ function formatInline(text) {
       return <em key={i}>{part.slice(1, -1)}</em>
     if (part.startsWith('`') && part.endsWith('`'))
       return <code key={i} className="px-1 py-0.5 rounded text-xs" style={{ background: 'rgba(54,58,71,0.08)' }}>{part.slice(1, -1)}</code>
+    // Inline media URL → thumbnail
+    if (isMediaUrl(part))
+      return <MediaThumbnail key={i} url={part.trim()} />
+    // Regular URL → clickable link
+    if (/^https?:\/\//.test(part))
+      return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: '#6B7B8D' }}>{part.length > 50 ? part.slice(0, 47) + '...' : part}</a>
     return part
   })
 }
