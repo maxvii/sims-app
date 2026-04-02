@@ -46,7 +46,6 @@ model Event {
   title            String
   category         String?
   opportunityType  String?
-  priority         String      @default("MEDIUM")
   postConcept      String?
   visualDirection  String?
   captionDirection String?
@@ -55,7 +54,6 @@ model Event {
   round1Due        String?
   round2Due        String?
   finalCreativeDue String?
-  creativeDue      String?
   status           String      @default("Not Started")
   notes            String?
   comments         Comment[]
