@@ -1,3 +1,4 @@
+import { createUIMessageStreamResponse } from 'ai'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } from '@/lib/agent-tools'
@@ -102,18 +103,15 @@ export async function POST(req) {
     fullPrompt += '\nAssistant:'
 
     const response = await callOpenClaw(fullPrompt)
+    const text = response || 'I received your message but got an empty response. Please try again.'
 
-    const encoder = new TextEncoder()
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(`0:${JSON.stringify(response || 'I received your message but got an empty response. Please try again.')}\n`))
-        controller.enqueue(encoder.encode(`e:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 }, isContinued: false })}\n`))
-        controller.enqueue(encoder.encode(`d:${JSON.stringify({ finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })}\n`))
-        controller.close()
-      },
+    return createUIMessageStreamResponse({
+      status: 200,
+      stream: (async function* () {
+        yield { type: 'text', text }
+        yield { type: 'finish', finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } }
+      })(),
     })
-
-    return new Response(stream, { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
     return new Response(
