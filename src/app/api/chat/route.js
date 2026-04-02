@@ -1,4 +1,4 @@
-import { createUIMessageStreamResponse } from 'ai'
+import { createUIMessageStream, createUIMessageStreamResponse } from 'ai'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createEvent, searchEvents, updateEvent, getTodayBrief, getAnalytics } from '@/lib/agent-tools'
@@ -105,12 +105,16 @@ export async function POST(req) {
     const response = await callOpenClaw(fullPrompt)
     const text = response || 'I received your message but got an empty response. Please try again.'
 
-    return createUIMessageStreamResponse({
+    const stream = createUIMessageStream({
+      execute: ({ writer }) => {
+        writer.write({ type: 'text', text })
+        writer.write({ type: 'finish', finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } })
+      },
+    })
+
+    return new Response(stream, {
       status: 200,
-      stream: (async function* () {
-        yield { type: 'text', text }
-        yield { type: 'finish', finishReason: 'stop', usage: { promptTokens: 0, completionTokens: 0 } }
-      })(),
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     })
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
