@@ -273,6 +273,11 @@ export default function ChatPage() {
   // Local input state (AI SDK v6 removed input management from useChat)
   const [input, setInput] = useState('')
 
+  // Chat session persistence
+  const [chatSessionId, setChatSessionId] = useState(null)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
+  const prevMessageCountRef = useRef(0)
+
   // Media attachment state
   const [attachment, setAttachment] = useState(null) // { file, preview, uploading }
   const fileInputRef = useRef(null)
@@ -284,12 +289,13 @@ export default function ChatPage() {
 
   const [chatError, setChatError] = useState(null)
 
-  // AI SDK v6 useChat — returns sendMessage, status, messages, error
+  // AI SDK v6 useChat — returns sendMessage, status, messages, error, setMessages
   const {
     messages,
     sendMessage,
     status,
     error,
+    setMessages,
   } = useChat({
     api: '/api/chat',
     onError: (err) => {
@@ -304,6 +310,69 @@ export default function ChatPage() {
   useEffect(() => {
     if (authStatus === 'unauthenticated') router.push('/login')
   }, [authStatus, router])
+
+  // ── Load chat history on mount (per-user) ─────────────────────────────
+  useEffect(() => {
+    if (authStatus !== 'authenticated' || historyLoaded) return
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/chat/history')
+        const data = await res.json()
+        if (data.sessionId && data.messages?.length > 0) {
+          setChatSessionId(data.sessionId)
+          // Convert DB messages to useChat format
+          const restored = data.messages.map(m => ({
+            id: m.id,
+            role: m.role,
+            content: m.content,
+            parts: [{ type: 'text', text: m.content }],
+          }))
+          setMessages(restored)
+          prevMessageCountRef.current = restored.length
+        } else {
+          // No history — start fresh session
+          setChatSessionId('session-' + Date.now())
+        }
+      } catch {
+        setChatSessionId('session-' + Date.now())
+      }
+      setHistoryLoaded(true)
+    }
+    loadHistory()
+  }, [authStatus, historyLoaded, setMessages])
+
+  // ── Save new messages to DB ──────────────────────────────────────────
+  useEffect(() => {
+    if (!chatSessionId || !historyLoaded || status === 'submitted' || status === 'streaming') return
+    const newCount = messages.length
+    if (newCount <= prevMessageCountRef.current) return
+
+    // Save only the new messages
+    const newMessages = messages.slice(prevMessageCountRef.current)
+    prevMessageCountRef.current = newCount
+
+    for (const msg of newMessages) {
+      const content = getMessageText(msg)
+      if (!content) continue
+      fetch('/api/chat/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: chatSessionId,
+          role: msg.role,
+          content,
+        }),
+      }).catch(() => {})
+    }
+  }, [messages, status, chatSessionId, historyLoaded])
+
+  // ── New Chat handler ───────────────────────────────────────────────────
+  function handleNewChat() {
+    setMessages([])
+    setChatSessionId('session-' + Date.now())
+    prevMessageCountRef.current = 0
+    setChatError(null)
+  }
 
   // ── Check SpeechRecognition support ─────────────────────────────────────
   useEffect(() => {
@@ -431,10 +500,23 @@ export default function ChatPage() {
           >
             S
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="font-display text-2xl font-black italic text-gray-800">Sims GPT</h1>
             <p className="text-xs text-gray-500 -mt-0.5">Your AI assistant</p>
           </div>
+          {/* New Chat button */}
+          {messages.length > 0 && (
+            <button
+              onClick={handleNewChat}
+              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95"
+              style={{
+                background: 'rgba(54,58,71,0.08)',
+                color: '#363A47',
+              }}
+            >
+              + New
+            </button>
+          )}
         </div>
       </div>
 
