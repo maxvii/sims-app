@@ -14,12 +14,9 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url)
   const month = searchParams.get('month')
   const status = searchParams.get('status')
-  const priority = searchParams.get('priority')
-
   const where = {}
   if (month) where.month = month
   if (status) where.status = status
-  if (priority) where.priority = priority
 
   const events = await prisma.event.findMany({
     where,
@@ -58,7 +55,7 @@ export async function POST(req) {
       endDate: body.endDate || '',
       month,
       category: body.category || 'Brand Events',
-      priority: body.priority || 'MEDIUM',
+      status: body.status || 'Not Started',
       opportunityType: body.opportunityType || '',
       platforms: body.platforms || '',
       status: body.status || 'Not Started',

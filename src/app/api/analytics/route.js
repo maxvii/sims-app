@@ -33,14 +33,6 @@ export async function GET(req) {
     byCategory[cat] = (byCategory[cat] || 0) + 1
   })
 
-  // By priority
-  const byPriority = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 }
-  allEvents.forEach(e => {
-    const p = (e.priority || 'MEDIUM').toUpperCase()
-    if (byPriority.hasOwnProperty(p)) byPriority[p] += 1
-    else byPriority[p] = 1
-  })
-
   // By month
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
   const byMonth = {}
@@ -64,9 +56,9 @@ export async function GET(req) {
   const totalApprovals = allEvents.reduce((sum, e) => sum + e.approvals.length, 0)
   const approvedCount = allEvents.reduce((sum, e) => sum + e.approvals.filter(a => a.status === 'APPROVED').length, 0)
 
-  // Critical events
-  const criticalEvents = allEvents
-    .filter(e => e.priority === 'CRITICAL')
+  // Upcoming events
+  const upcomingEvents = allEvents
+    .filter(e => e.status === 'Not Started')
     .map(e => ({ id: e.id, title: e.title, date: e.date, month: e.month, status: e.status, category: e.category }))
 
   // Top categories (sorted)

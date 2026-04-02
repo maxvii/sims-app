@@ -381,7 +381,7 @@ export async function POST(req) {
       select: {
         title: true,
         category: true,
-        priority: true,
+        status: true,
         postConcept: true,
         visualDirection: true,
         captionDirection: true,
@@ -396,7 +396,7 @@ export async function POST(req) {
 
     const knowledgebase = events
       .filter(e => e.postConcept || e.captionDirection || e.visualDirection)
-      .map(e => `- "${e.title}" (${e.category || 'General'}, ${e.priority}): Concept: ${e.postConcept || 'N/A'} | Visual: ${e.visualDirection || 'N/A'} | Caption: ${e.captionDirection || 'N/A'} | Platforms: ${e.platforms || 'N/A'}`)
+      .map(e => `- "${e.title}" (${e.category || 'General'}, ${e.status}): Concept: ${e.postConcept || 'N/A'} | Visual: ${e.visualDirection || 'N/A'} | Caption: ${e.captionDirection || 'N/A'} | Platforms: ${e.platforms || 'N/A'}`)
       .join('\n')
 
     // ─── STEP 3: Gemini qualitative analysis ───

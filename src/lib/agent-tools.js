@@ -41,7 +41,7 @@ function deriveMonth(dateStr) {
  * Create a new event in the database.
  */
 export async function createEvent(params) {
-  const { title, date, category, priority, opportunityType, platforms, notes } = params || {};
+  const { title, date, category, opportunityType, platforms, notes } = params || {};
   // Auto-derive month from date
   const month = deriveMonth(date);
 
@@ -60,7 +60,6 @@ export async function createEvent(params) {
       title,
       category: category || null,
       opportunityType: opportunityType || null,
-      priority: priority || 'MEDIUM',
       platforms: platforms || null,
       notes: notes || null,
       status: 'Not Started',
@@ -74,7 +73,7 @@ export async function createEvent(params) {
  * Search events with flexible filters.
  */
 export async function searchEvents(params) {
-  const { query, dateFrom, dateTo, category, status, priority, limit } = params || {};
+  const { query, dateFrom, dateTo, category, status, limit } = params || {};
   const take = limit || 10;
 
   // Build Prisma where clause
@@ -90,10 +89,6 @@ export async function searchEvents(params) {
 
   if (status) {
     where.status = status;
-  }
-
-  if (priority) {
-    where.priority = priority;
   }
 
   // Fetch events (apply date filtering in-memory since dates are stored as strings)
@@ -126,12 +121,11 @@ export async function searchEvents(params) {
  * Update an existing event's fields.
  */
 export async function updateEvent(params) {
-  const { eventId, status, notes, priority } = params || {};
+  const { eventId, status, notes } = params || {};
   const data = {};
 
   if (status !== undefined && status !== null) data.status = status;
   if (notes !== undefined && notes !== null) data.notes = notes;
-  if (priority !== undefined && priority !== null) data.priority = priority;
 
   const event = await prisma.event.update({
     where: { id: eventId },
@@ -142,7 +136,7 @@ export async function updateEvent(params) {
 }
 
 /**
- * Get today's briefing: current events, upcoming events, status/priority counts.
+ * Get today's briefing: current events, upcoming events, status counts.
  */
 export async function getTodayBrief() {
   const now = new Date();
@@ -171,12 +165,6 @@ export async function getTodayBrief() {
     statusCounts[e.status] = (statusCounts[e.status] || 0) + 1;
   });
 
-  // Count by priority
-  const priorityCounts = {};
-  allEvents.forEach((e) => {
-    priorityCounts[e.priority] = (priorityCounts[e.priority] || 0) + 1;
-  });
-
   // Pending approvals
   const pendingApprovals = allEvents.filter(
     (e) => e.status === 'Needs Revision' || e.status === 'Planned'
@@ -192,13 +180,12 @@ export async function getTodayBrief() {
     }),
     totalEvents: allEvents.length,
     statusCounts,
-    priorityCounts,
     pendingApprovals,
   };
 }
 
 /**
- * Get full analytics: totals, breakdowns by category/priority/status/month.
+ * Get full analytics: totals, breakdowns by category/status/month.
  */
 export async function getAnalytics() {
   const allEvents = await prisma.event.findMany();
@@ -208,12 +195,6 @@ export async function getAnalytics() {
   allEvents.forEach((e) => {
     const cat = e.category || 'Uncategorized';
     byCategory[cat] = (byCategory[cat] || 0) + 1;
-  });
-
-  // By priority
-  const byPriority = {};
-  allEvents.forEach((e) => {
-    byPriority[e.priority] = (byPriority[e.priority] || 0) + 1;
   });
 
   // By status
@@ -236,7 +217,6 @@ export async function getAnalytics() {
   return {
     totalEvents: allEvents.length,
     byCategory,
-    byPriority,
     byStatus,
     byMonth,
   };
