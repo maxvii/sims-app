@@ -39,19 +39,6 @@ COPY --from=builder /app/node_modules/bn.js ./node_modules/bn.js
 COPY --from=builder /app/node_modules/minimist ./node_modules/minimist
 COPY --from=builder /app/node_modules/inherits ./node_modules/inherits
 COPY --from=builder /app/node_modules/safer-buffer ./node_modules/safer-buffer
-COPY --from=builder /app/node_modules/pdfkit ./node_modules/pdfkit
-COPY --from=builder /app/node_modules/fontkit ./node_modules/fontkit
-COPY --from=builder /app/node_modules/restructure ./node_modules/restructure
-COPY --from=builder /app/node_modules/brotli ./node_modules/brotli
-COPY --from=builder /app/node_modules/clone ./node_modules/clone
-COPY --from=builder /app/node_modules/deep-equal ./node_modules/deep-equal
-COPY --from=builder /app/node_modules/png-js ./node_modules/png-js
-COPY --from=builder /app/node_modules/unicode-trie ./node_modules/unicode-trie
-COPY --from=builder /app/node_modules/tiny-inflate ./node_modules/tiny-inflate
-COPY --from=builder /app/node_modules/unicode-properties ./node_modules/unicode-properties
-COPY --from=builder /app/node_modules/dfa ./node_modules/dfa
-COPY --from=builder /app/node_modules/linebreak ./node_modules/linebreak
-COPY --from=builder /app/node_modules/base64-js ./node_modules/base64-js
 COPY start.sh ./start.sh
 
 RUN mkdir -p /app/public/uploads && chmod 777 /app/public/uploads
