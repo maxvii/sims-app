@@ -33,7 +33,17 @@ Example:
 <div class="slide"><h2>Key Point</h2><ul><li>First point</li><li>Second point</li></ul></div>
 <div class="slide"><h2>Thank You</h2><p>Contact info</p></div>
 [/SLIDES]
-The server saves this as an interactive HTML deck with navigation, keyboard controls, and swipe support. The user gets a link to open it fullscreen.
+The server generates a styled PDF deck from these slides. User gets a download link.
+
+SOCIAL MEDIA SIZES (use when asked to create posts, stories, or social content):
+When creating visual content, use these [SLIDES] sizes by adding a size attribute:
+- Instagram Post: <div class="slide" data-size="post"> (1080x1080, square)
+- Instagram Story / Reel: <div class="slide" data-size="story"> (1080x1920, 9:16 vertical)
+- LinkedIn Post: <div class="slide" data-size="linkedin"> (1200x627, landscape)
+- Twitter/X Post: <div class="slide" data-size="twitter"> (1600x900, 16:9)
+- Facebook Cover: <div class="slide" data-size="fbcover"> (820x312, wide banner)
+If no size specified, defaults to presentation (landscape A4).
+Multiple slides can mix sizes. Each becomes a separate page in the PDF.
 
 FILE SHARING:
 For other files, embed base64 in [FILE:name.ext:mimetype]...[/FILE] tags.
@@ -88,19 +98,31 @@ async function extractAndSaveContent(text) {
       const PDFDocument = (await import('pdfkit')).default
       const slides = slidesContent.trim()
 
+      // Social media sizes in points (72 DPI)
+      const SIZES = {
+        post: [1080 * 0.72, 1080 * 0.72],       // 1080x1080 square
+        story: [1080 * 0.72, 1920 * 0.72],       // 1080x1920 vertical
+        linkedin: [1200 * 0.72, 627 * 0.72],     // 1200x627
+        twitter: [1600 * 0.72, 900 * 0.72],      // 1600x900
+        fbcover: [820 * 0.72, 312 * 0.72],       // 820x312
+      }
+
       // Parse slide divs into text blocks
       const slideBlocks = []
-      const slideRegex = /<div[^>]*class="slide"[^>]*>([\s\S]*?)<\/div>/gi
+      const slideRegex = /<div[^>]*class="slide"([^>]*)>([\s\S]*?)<\/div>/gi
       let slideMatch
       while ((slideMatch = slideRegex.exec(slides)) !== null) {
-        const inner = slideMatch[1]
+        const attrs = slideMatch[1]
+        const inner = slideMatch[2]
+        const sizeMatch = attrs.match(/data-size="([^"]+)"/)
+        const size = sizeMatch ? sizeMatch[1] : null
         const title = inner.match(/<h[12][^>]*>([\s\S]*?)<\/h[12]>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
         const bullets = []
         const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi
         let li
         while ((li = liRegex.exec(inner)) !== null) bullets.push(li[1].replace(/<[^>]+>/g, '').trim())
         const para = inner.match(/<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
-        slideBlocks.push({ title, bullets, para })
+        slideBlocks.push({ title, bullets, para, size })
       }
 
       // If no slide divs found, treat whole content as one slide
@@ -109,16 +131,24 @@ async function extractAndSaveContent(text) {
         slideBlocks.push({ title: 'Presentation', bullets: [], para: plainText })
       }
 
-      // Generate PDF — landscape A4
-      const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 60 })
+      // Generate PDF — first slide determines initial size
+      const firstSize = slideBlocks[0]?.size
+      const initSize = firstSize && SIZES[firstSize] ? SIZES[firstSize] : 'A4'
+      const initLayout = firstSize ? undefined : 'landscape'
+      const doc = new PDFDocument({
+        size: initSize,
+        layout: initLayout,
+        margin: 60,
+      })
       const chunks = []
       doc.on('data', c => chunks.push(c))
 
       const pdfDone = new Promise(resolve => doc.on('end', resolve))
 
       for (let i = 0; i < slideBlocks.length; i++) {
-        if (i > 0) doc.addPage()
         const s = slideBlocks[i]
+        const pageSize = s.size && SIZES[s.size] ? SIZES[s.size] : (firstSize && SIZES[firstSize] ? SIZES[firstSize] : 'A4')
+        if (i > 0) doc.addPage({ size: pageSize, layout: !s.size ? 'landscape' : undefined })
 
         // Dark background
         doc.rect(0, 0, doc.page.width, doc.page.height).fill('#363A47')
