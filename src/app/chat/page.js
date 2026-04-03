@@ -263,11 +263,8 @@ function MessageBubble({ message }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
       {!isUser && (
-        <div
-          className="w-6 h-6 rounded-full shrink-0 mt-1 mr-2 flex items-center justify-center text-white text-[10px] font-bold"
-          style={{ background: '#363A47' }}
-        >
-          S
+        <div className="w-7 h-7 rounded-full shrink-0 mt-1 mr-2 overflow-hidden" style={{ background: '#000' }}>
+          <img src="/images/sims-eye.gif" alt="" className="w-full h-full object-cover" />
         </div>
       )}
 
@@ -536,8 +533,8 @@ export default function ChatPage() {
           >
             <svg className="w-5 h-5" style={{ color: '#363A47' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0" style={{ background: '#000' }}>
-            <img src="/images/sims-eye.gif" alt="" className="w-full h-full object-cover" />
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: '#363A47' }}>
+            S
           </div>
           <div className="flex-1">
             <h1 className="font-display text-2xl font-black italic text-gray-800">Sims GPT</h1>
