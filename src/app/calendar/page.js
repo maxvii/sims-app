@@ -185,7 +185,7 @@ export default function CalendarPage() {
                 <path d="M8 36 L22 26 L30 32 L38 22 L48 34 L48 38 C48 41.3 45.3 44 42 44 L14 44 C10.7 44 8 41.3 8 38 Z" fill="#F7F9FA" opacity="0.15"/>
               </svg>
             )},
-            { href: '/media-kit', label: 'Media Kit', shape: (
+            { href: '/media-kit', label: 'Simz Card', shape: (
               <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
                 <rect x="14" y="6" width="28" height="44" rx="4" fill="#363A47"/>
                 <rect x="18" y="12" width="20" height="3" rx="1.5" fill="#F7F9FA" opacity="0.2"/>
