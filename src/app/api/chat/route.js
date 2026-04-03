@@ -79,21 +79,92 @@ async function extractAndSaveContent(text) {
   const uploadDir = path.default.join(process.cwd(), 'public', 'uploads')
   let result = text
 
-  // Extract [SLIDES]...[/SLIDES] — save as HTML presentation
+  // Extract [SLIDES]...[/SLIDES] — generate PDF presentation
   const slidesRegex = /\[SLIDES\]([\s\S]*?)\[\/SLIDES\]/g
   let match
   while ((match = slidesRegex.exec(text)) !== null) {
     const [fullMatch, slidesContent] = match
     try {
+      const PDFDocument = (await import('pdfkit')).default
       const slides = slidesContent.trim()
-      const html = wrapSlidesHTML(slides)
-      const name = 'deck-' + crypto.default.randomBytes(8).toString('hex') + '.html'
+
+      // Parse slide divs into text blocks
+      const slideBlocks = []
+      const slideRegex = /<div[^>]*class="slide"[^>]*>([\s\S]*?)<\/div>/gi
+      let slideMatch
+      while ((slideMatch = slideRegex.exec(slides)) !== null) {
+        const inner = slideMatch[1]
+        const title = inner.match(/<h[12][^>]*>([\s\S]*?)<\/h[12]>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
+        const bullets = []
+        const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi
+        let li
+        while ((li = liRegex.exec(inner)) !== null) bullets.push(li[1].replace(/<[^>]+>/g, '').trim())
+        const para = inner.match(/<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
+        slideBlocks.push({ title, bullets, para })
+      }
+
+      // If no slide divs found, treat whole content as one slide
+      if (slideBlocks.length === 0) {
+        const plainText = slides.replace(/<[^>]+>/g, '').trim()
+        slideBlocks.push({ title: 'Presentation', bullets: [], para: plainText })
+      }
+
+      // Generate PDF — landscape A4
+      const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 60 })
+      const chunks = []
+      doc.on('data', c => chunks.push(c))
+
+      const pdfDone = new Promise(resolve => doc.on('end', resolve))
+
+      for (let i = 0; i < slideBlocks.length; i++) {
+        if (i > 0) doc.addPage()
+        const s = slideBlocks[i]
+
+        // Dark background
+        doc.rect(0, 0, doc.page.width, doc.page.height).fill('#363A47')
+
+        // Slide number
+        doc.fontSize(10).fillColor('#6B7B8D').text(`${i + 1} / ${slideBlocks.length}`, doc.page.width - 120, doc.page.height - 40, { width: 80, align: 'right' })
+
+        // Title
+        if (s.title) {
+          doc.fontSize(36).fillColor('#D0D9E2').text(s.title, 60, 80, { width: doc.page.width - 120 })
+        }
+
+        // Divider line
+        const yAfterTitle = doc.y + 15
+        doc.moveTo(60, yAfterTitle).lineTo(doc.page.width - 60, yAfterTitle).strokeColor('#6B7B8D').lineWidth(0.5).stroke()
+
+        let contentY = yAfterTitle + 25
+
+        // Bullets
+        if (s.bullets.length > 0) {
+          for (const b of s.bullets) {
+            doc.fontSize(18).fillColor('#B0B8C4').text(`→  ${b}`, 70, contentY, { width: doc.page.width - 140 })
+            contentY = doc.y + 10
+          }
+        }
+
+        // Paragraph
+        if (s.para) {
+          doc.fontSize(16).fillColor('#9AAAB8').text(s.para, 60, contentY, { width: doc.page.width - 120, lineGap: 6 })
+        }
+
+        // SIMS branding
+        doc.fontSize(8).fillColor('#4A5060').text('SIMS', 60, doc.page.height - 40)
+      }
+
+      doc.end()
+      await pdfDone
+
+      const pdfBuffer = Buffer.concat(chunks)
+      const name = 'deck-' + crypto.default.randomBytes(8).toString('hex') + '.pdf'
       try { await mkdir(uploadDir, { recursive: true }) } catch {}
-      await writeFile(path.default.join(uploadDir, name), html)
-      const url = `/api/uploads/${name}`
-      result = result.replace(fullMatch, `\n\n/api/uploads/${name}\n\nOpen the link above to view the presentation.`)
+      await writeFile(path.default.join(uploadDir, name), pdfBuffer)
+      result = result.replace(fullMatch, `/api/uploads/${name}`)
     } catch (err) {
-      result = result.replace(fullMatch, `[Presentation save failed: ${err.message}]`)
+      console.error('PDF generation failed:', err)
+      result = result.replace(fullMatch, `[PDF generation failed: ${err.message}]`)
     }
   }
 
@@ -116,72 +187,6 @@ async function extractAndSaveContent(text) {
   }
 
   return result
-}
-
-// ─── Wrap slides content into a standalone HTML presentation ───
-function wrapSlidesHTML(content) {
-  // If content already has <html>, return as-is
-  if (content.includes('<html') || content.includes('<!DOCTYPE')) return content
-
-  // Otherwise wrap slide blocks into a fullscreen deck
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sims Presentation</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', system-ui, sans-serif; background: #1a1a2e; color: #f0f0f0; overflow: hidden; }
-  .slide { width: 100vw; height: 100vh; display: none; flex-direction: column; justify-content: center; align-items: center; padding: 60px; text-align: center; }
-  .slide.active { display: flex; }
-  .slide h1 { font-size: 3em; font-weight: 800; margin-bottom: 20px; background: linear-gradient(135deg, #D0D9E2, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .slide h2 { font-size: 2em; font-weight: 700; margin-bottom: 16px; color: #D0D9E2; }
-  .slide p, .slide li { font-size: 1.3em; line-height: 1.8; color: #b0b8c4; max-width: 800px; }
-  .slide ul { list-style: none; text-align: left; }
-  .slide li::before { content: "→ "; color: #6B7B8D; }
-  .slide img { max-width: 60%; max-height: 50vh; border-radius: 16px; margin: 20px 0; }
-  .nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
-  .nav button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 24px; border-radius: 12px; cursor: pointer; font-size: 14px; backdrop-filter: blur(10px); }
-  .nav button:hover { background: rgba(255,255,255,0.2); }
-  .counter { position: fixed; bottom: 30px; right: 30px; color: rgba(255,255,255,0.3); font-size: 14px; }
-  .branding { position: fixed; top: 20px; left: 30px; color: rgba(255,255,255,0.15); font-size: 12px; font-weight: 600; letter-spacing: 2px; }
-</style>
-</head>
-<body>
-<div class="branding">SIMS</div>
-${content}
-<div class="nav">
-  <button onclick="prev()">← Prev</button>
-  <button onclick="next()">Next →</button>
-</div>
-<div class="counter" id="counter"></div>
-<script>
-  const slides = document.querySelectorAll('.slide');
-  let current = 0;
-  function show(n) {
-    slides.forEach(s => s.classList.remove('active'));
-    current = Math.max(0, Math.min(n, slides.length - 1));
-    slides[current].classList.add('active');
-    document.getElementById('counter').textContent = (current+1) + ' / ' + slides.length;
-  }
-  function next() { show(current + 1); }
-  function prev() { show(current - 1); }
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === ' ') next();
-    if (e.key === 'ArrowLeft') prev();
-  });
-  // Touch swipe
-  let startX;
-  document.addEventListener('touchstart', e => startX = e.touches[0].clientX);
-  document.addEventListener('touchend', e => {
-    const diff = startX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) diff > 0 ? next() : prev();
-  });
-  show(0);
-</script>
-</body>
-</html>`
 }
 
 // ─── Call OpenClaw gateway ───
