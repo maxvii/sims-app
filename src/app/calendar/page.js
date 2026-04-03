@@ -29,6 +29,13 @@ const CATEGORY_DOTS = {
   'Coca Cola Arena': '#CC4444',
 }
 
+function getDayNightIcon(hour) {
+  if (hour >= 6 && hour < 12) return { icon: '☀️', label: 'Morning' }
+  if (hour >= 12 && hour < 17) return { icon: '🌤', label: 'Afternoon' }
+  if (hour >= 17 && hour < 20) return { icon: '🌅', label: 'Evening' }
+  return { icon: '🌙', label: 'Night' }
+}
+
 export default function CalendarPage() {
   const { data: session, status: authStatus } = useSession()
   const router = useRouter()
@@ -81,56 +88,36 @@ export default function CalendarPage() {
 
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
   const dateStr = `${DAY_NAMES[now.getDay()]}, ${now.getDate()} ${MONTH_FULL[now.getMonth()]}`
+  const dayNight = getDayNightIcon(now.getHours())
+  const avatarUrl = session?.user?.avatar || '/images/sima-portrait.jpg'
 
   return (
     <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
 
-      {/* ── Compact Header ── */}
-      <div className="px-5 pt-12 pb-4" style={{ background: 'linear-gradient(165deg, #363A47 0%, #4A5060 40%, #6B7B8D 100%)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <img src="/logo.png" alt="The Sims App" className="h-8" style={{ filter: 'brightness(0) invert(1)', opacity: 0.9 }} />
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-white/60 font-medium">{timeStr}</span>
-            <div className="w-8 h-8 rounded-full overflow-hidden border border-white/40">
-              <img src="/images/sima-portrait.jpg" alt="" className="w-full h-full object-cover" />
+      {/* ── Light Header — no dark background ── */}
+      <div className="px-5 pt-14 pb-3">
+        {/* Top row: logo + avatar */}
+        <div className="flex items-center justify-between mb-4">
+          <img src="/logo.png" alt="The Sims App" className="h-12" />
+          <button onClick={() => router.push('/profile')} className="active:scale-95 transition-transform">
+            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
             </div>
+          </button>
+        </div>
+
+        {/* Date, time, day/night icon */}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-2xl">{dayNight.icon}</span>
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em]">{dateStr}</p>
+            <p className="text-lg font-bold text-gray-800">{timeStr}</p>
           </div>
         </div>
-        <p className="text-[10px] text-white/50 uppercase tracking-[0.15em]">{dateStr}</p>
-        <p className="text-sm text-white/80 mt-0.5">Hi, <span className="font-semibold text-white">{session?.user?.name || 'Sima'}</span></p>
+        <p className="text-sm text-gray-500">Hi, <span className="font-semibold text-gray-800">{session?.user?.name || 'Sima'}</span></p>
       </div>
 
-      {/* ── App Icons — full width iPhone style ── */}
-      <div className="px-4 py-5">
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>, href: '/about', label: 'About', gradient: 'linear-gradient(135deg, #363A47, #5A6070)' },
-            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>, href: '/gallery', label: 'Gallery', gradient: 'linear-gradient(135deg, #6B7B8D, #9AAAB8)' },
-            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>, href: '/media-kit', label: 'Media Kit', gradient: 'linear-gradient(135deg, #C9956B, #D4A574)' },
-            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>, href: '/analytics', label: 'Simulate', gradient: 'linear-gradient(135deg, #4A6FA5, #6B8DC4)' },
-            { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>, href: '/try-on', label: 'Try-On', gradient: 'linear-gradient(135deg, #8B6BA5, #A88BC4)' },
-            ...(session?.user?.role === 'ADMIN' ? [
-              { icon: <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>, href: '/admin', label: 'Team', gradient: 'linear-gradient(135deg, #6B8E6B, #88B088)' },
-            ] : []),
-          ].map((item) => (
-            <button
-              key={item.href}
-              onClick={() => router.push(item.href)}
-              className="flex flex-col items-center gap-2 active:scale-90 transition-all"
-            >
-              <div
-                className="w-full aspect-square rounded-[22px] flex items-center justify-center text-white shadow-lg"
-                style={{ background: item.gradient }}
-              >
-                {item.icon}
-              </div>
-              <span className="text-[11px] font-semibold text-gray-600">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Date Sweeper ── */}
+      {/* ── Date Sweeper — above icons ── */}
       <DateSweeper
         days={calendarDays}
         today={now}
@@ -141,44 +128,72 @@ export default function CalendarPage() {
       />
 
       {/* ── Selected Date Events ── */}
-      <div className="px-4 pt-3">
-        {selectedDate && (
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-700">
-                {selectedDate.getDate()} {MONTH_FULL[selectedDate.getMonth()]}
-                {isSameDay(selectedDate, now) && <span className="text-xs text-gray-400 ml-1">Today</span>}
-              </h3>
-              <button onClick={() => setSelectedDate(null)} className="text-[10px] font-medium text-gray-400">Clear</button>
-            </div>
-            {selectedEvents.length === 0 ? (
-              <p className="text-xs text-gray-400 py-4 text-center">No events</p>
-            ) : (
-              <div className="space-y-2">
-                {selectedEvents.map(e => (
-                  <button
-                    key={e.id}
-                    onClick={() => router.push(`/events/${e.id}`)}
-                    className="w-full text-left p-3 rounded-xl flex items-center gap-3 active:scale-[0.98] transition-transform"
-                    style={{ background: 'rgba(54,58,71,0.04)', border: '1px solid rgba(54,58,71,0.06)' }}
-                  >
-                    <div className="w-1 h-8 rounded-full" style={{ background: CATEGORY_DOTS[e.category] || '#6B7B8D' }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 truncate">{e.title}</p>
-                      <p className="text-[10px] text-gray-400">{e.category}</p>
-                    </div>
-                    {e.status !== 'Not Started' && (
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{
-                        background: e.status === 'Approved' ? 'rgba(107,142,107,0.15)' : e.status === 'Cancelled' ? 'rgba(211,54,92,0.12)' : 'rgba(201,149,107,0.15)',
-                        color: e.status === 'Approved' ? '#6B8E6B' : e.status === 'Cancelled' ? '#D4365C' : '#C9956B',
-                      }}>{e.status}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
+      {selectedDate && (
+        <div className="px-4 pt-3 pb-2">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-gray-700">
+              {selectedDate.getDate()} {MONTH_FULL[selectedDate.getMonth()]}
+              {isSameDay(selectedDate, now) && <span className="text-xs text-gray-400 ml-1">Today</span>}
+            </h3>
+            <button onClick={() => setSelectedDate(null)} className="text-[10px] font-medium text-gray-400">Clear</button>
           </div>
-        )}
+          {selectedEvents.length === 0 ? (
+            <p className="text-xs text-gray-400 py-3 text-center">No events</p>
+          ) : (
+            <div className="space-y-2">
+              {selectedEvents.map(e => (
+                <button
+                  key={e.id}
+                  onClick={() => router.push(`/events/${e.id}`)}
+                  className="w-full text-left p-3 rounded-xl flex items-center gap-3 active:scale-[0.98] transition-transform"
+                  style={{ background: 'rgba(54,58,71,0.04)', border: '1px solid rgba(54,58,71,0.06)' }}
+                >
+                  <div className="w-1 h-8 rounded-full" style={{ background: CATEGORY_DOTS[e.category] || '#6B7B8D' }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 truncate">{e.title}</p>
+                    <p className="text-[10px] text-gray-400">{e.category}</p>
+                  </div>
+                  {e.status !== 'Not Started' && (
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{
+                      background: e.status === 'Approved' ? 'rgba(107,142,107,0.15)' : e.status === 'Cancelled' ? 'rgba(211,54,92,0.12)' : 'rgba(201,149,107,0.15)',
+                      color: e.status === 'Approved' ? '#6B8E6B' : e.status === 'Cancelled' ? '#D4365C' : '#C9956B',
+                    }}>{e.status}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── App Icons — 2 column grid ── */}
+      <div className="px-4 py-4">
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { icon: <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>, href: '/about', label: 'About Sima', gradient: 'linear-gradient(135deg, #363A47, #5A6070)' },
+            { icon: <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg>, href: '/gallery', label: 'Gallery', gradient: 'linear-gradient(135deg, #6B7B8D, #9AAAB8)' },
+            { icon: <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>, href: '/media-kit', label: 'Media Kit', gradient: 'linear-gradient(135deg, #C9956B, #D4A574)' },
+            { icon: <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>, href: '/analytics', label: 'Simulate', gradient: 'linear-gradient(135deg, #4A6FA5, #6B8DC4)' },
+            { icon: <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>, href: '/try-on', label: 'Try-On', gradient: 'linear-gradient(135deg, #8B6BA5, #A88BC4)' },
+            ...(session?.user?.role === 'ADMIN' ? [
+              { icon: <svg className="w-9 h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}><path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>, href: '/admin', label: 'Team', gradient: 'linear-gradient(135deg, #6B8E6B, #88B088)' },
+            ] : []),
+          ].map((item) => (
+            <button
+              key={item.href}
+              onClick={() => router.push(item.href)}
+              className="flex flex-col items-center gap-2 active:scale-90 transition-all"
+            >
+              <div
+                className="w-full aspect-square rounded-[26px] flex items-center justify-center text-white"
+                style={{ background: item.gradient }}
+              >
+                {item.icon}
+              </div>
+              <span className="text-[12px] font-semibold text-gray-600">{item.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* FAB — Add Event */}
@@ -214,7 +229,7 @@ function DateSweeper({ days, today, selectedDate, setSelectedDate, getEventsForD
   let currentMonth = -1
 
   return (
-    <div className="px-0">
+    <div className="px-0 pb-2">
       <div ref={scrollRef} style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity' }}>
         <div className="flex gap-0 px-4 min-w-max">
           {days.map((day, i) => {
