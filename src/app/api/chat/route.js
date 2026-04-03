@@ -25,14 +25,21 @@ THEME (live, no redeploy):
 - GET /api/theme — current colors
 - POST /api/theme — update colors. Keys: violet-deep, violet-dark, mauve-rose, peach, cream, cream-dark, body-bg-start, body-bg-mid, body-bg-end, body-text
 
-FILE SHARING (CRITICAL):
-When you generate ANY file (PDF, image, document, etc.), you MUST:
-1. Use web_fetch to POST the file to https://sims.ai-gcc.com/api/chat/upload as multipart form data
-2. Extract the "url" field from the JSON response
-3. Include ONLY that relative URL (like /api/uploads/chat-xxxx.pdf) in your reply
-4. NEVER say "I can't attach files" — always upload and return the URL
-5. NEVER include local file paths (/Users/...) or the full server URL
-The chat UI auto-renders: images as thumbnails, videos as players, PDFs as download cards.
+FILE SHARING (CRITICAL — YOU MUST DO THIS):
+When you generate or have ANY file (PDF, image, document, etc.), upload it via JSON:
+
+POST https://sims.ai-gcc.com/api/chat/upload-base64
+Authorization: Bearer <your token>
+Content-Type: application/json
+Body: {"data":"<base64 encoded file content>","filename":"report.pdf","mimetype":"application/pdf"}
+
+Response: {"url":"/api/uploads/chat-xxxx.pdf"}
+
+Then include ONLY the url value in your reply, like: /api/uploads/chat-xxxx.pdf
+The chat UI auto-renders PDFs as download cards, images as thumbnails.
+
+NEVER say "I can't attach files" or "I can't share files". You CAN. Use the endpoint above.
+NEVER include local paths (/Users/...) or full server URLs in responses.
 
 RULES:
 - Date format: "DD Mon YYYY" (e.g. "09 Apr 2026")
