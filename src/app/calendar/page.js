@@ -166,29 +166,79 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* ── App Icons — 2 column, one color, filled icons ── */}
+      {/* ── App Icons — 2 column, neumorphic style with creative SVG shapes ── */}
       <div className="px-5 py-4">
         <div className="grid grid-cols-2 gap-5">
           {[
-            { emoji: '👤', href: '/about', label: 'About Sima' },
-            { emoji: '🖼️', href: '/gallery', label: 'Gallery' },
-            { emoji: '📄', href: '/media-kit', label: 'Media Kit' },
-            { emoji: '📊', href: '/analytics', label: 'Simulate' },
-            { emoji: '👗', href: '/try-on', label: 'Try-On' },
-            ...(session?.user?.role === 'ADMIN' ? [{ emoji: '👥', href: '/admin', label: 'Team' }] : []),
+            { href: '/about', label: 'About Sima', shape: (
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <circle cx="28" cy="20" r="10" fill="#363A47"/>
+                <ellipse cx="28" cy="42" rx="16" ry="10" fill="#363A47" opacity="0.7"/>
+                <circle cx="28" cy="20" r="6" fill="#F7F9FA" opacity="0.15"/>
+              </svg>
+            )},
+            { href: '/gallery', label: 'Gallery', shape: (
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <rect x="8" y="12" width="40" height="32" rx="6" fill="#363A47"/>
+                <circle cx="20" cy="24" r="5" fill="#F7F9FA" opacity="0.2"/>
+                <path d="M8 36 L22 26 L30 32 L38 22 L48 34 L48 38 C48 41.3 45.3 44 42 44 L14 44 C10.7 44 8 41.3 8 38 Z" fill="#363A47"/>
+                <path d="M8 36 L22 26 L30 32 L38 22 L48 34 L48 38 C48 41.3 45.3 44 42 44 L14 44 C10.7 44 8 41.3 8 38 Z" fill="#F7F9FA" opacity="0.15"/>
+              </svg>
+            )},
+            { href: '/media-kit', label: 'Media Kit', shape: (
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <rect x="14" y="6" width="28" height="44" rx="4" fill="#363A47"/>
+                <rect x="18" y="12" width="20" height="3" rx="1.5" fill="#F7F9FA" opacity="0.2"/>
+                <rect x="18" y="18" width="14" height="3" rx="1.5" fill="#F7F9FA" opacity="0.15"/>
+                <rect x="18" y="24" width="18" height="3" rx="1.5" fill="#F7F9FA" opacity="0.12"/>
+                <rect x="18" y="30" width="10" height="3" rx="1.5" fill="#F7F9FA" opacity="0.1"/>
+                <circle cx="36" cy="40" r="6" fill="#F7F9FA" opacity="0.12"/>
+                <path d="M34 40 L39 37 L39 43 Z" fill="#F7F9FA" opacity="0.2"/>
+              </svg>
+            )},
+            { href: '/analytics', label: 'Simulate', shape: (
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <rect x="10" y="30" width="8" height="16" rx="3" fill="#363A47" opacity="0.5"/>
+                <rect x="21" y="22" width="8" height="24" rx="3" fill="#363A47" opacity="0.7"/>
+                <rect x="32" y="14" width="8" height="32" rx="3" fill="#363A47" opacity="0.85"/>
+                <rect x="43" y="8" width="8" height="38" rx="3" fill="#363A47"/>
+                <path d="M12 28 C18 20 26 16 34 12 C38 10 44 7 48 6" stroke="#363A47" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.4"/>
+                <circle cx="48" cy="6" r="3" fill="#363A47" opacity="0.5"/>
+              </svg>
+            )},
+            { href: '/try-on', label: 'Try-On', shape: (
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <path d="M28 8 C28 8 22 8 20 14 C18 20 16 24 12 28 C8 32 10 40 16 42 C20 43.5 24 42 28 38 C32 42 36 43.5 40 42 C46 40 48 32 44 28 C40 24 38 20 36 14 C34 8 28 8 28 8 Z" fill="#363A47"/>
+                <path d="M22 22 C22 22 24 28 28 28 C32 28 34 22 34 22" stroke="#F7F9FA" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.2"/>
+                <circle cx="22" cy="20" r="2" fill="#F7F9FA" opacity="0.15"/>
+                <circle cx="34" cy="20" r="2" fill="#F7F9FA" opacity="0.15"/>
+              </svg>
+            )},
+            ...(session?.user?.role === 'ADMIN' ? [{ href: '/admin', label: 'Team', shape: (
+              <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                <circle cx="20" cy="18" r="7" fill="#363A47" opacity="0.7"/>
+                <ellipse cx="20" cy="34" rx="11" ry="8" fill="#363A47" opacity="0.5"/>
+                <circle cx="38" cy="16" r="8" fill="#363A47"/>
+                <ellipse cx="38" cy="34" rx="12" ry="9" fill="#363A47" opacity="0.7"/>
+                <circle cx="38" cy="16" r="4" fill="#F7F9FA" opacity="0.1"/>
+              </svg>
+            )}] : []),
           ].map((item) => (
             <button
               key={item.href}
               onClick={() => router.push(item.href)}
-              className="flex flex-col items-center gap-2.5 active:scale-93 transition-all"
+              className="flex flex-col items-center gap-2.5 active:scale-90 transition-all"
             >
               <div
                 className="w-full aspect-square rounded-[28px] flex items-center justify-center"
-                style={{ background: '#363A47' }}
+                style={{
+                  background: 'linear-gradient(145deg, #F0F3F6, #D8DEE5)',
+                  boxShadow: '8px 8px 20px rgba(166,180,200,0.4), -8px -8px 20px rgba(255,255,255,0.9), inset 0 1px 0 rgba(255,255,255,0.8)',
+                }}
               >
-                <span className="text-4xl">{item.emoji}</span>
+                {item.shape}
               </div>
-              <span className="text-[13px] font-semibold text-gray-700">{item.label}</span>
+              <span className="text-[13px] font-semibold text-gray-600">{item.label}</span>
             </button>
           ))}
         </div>
