@@ -50,8 +50,12 @@ function getToolInvocations(message) {
 /** Check if a string is a media URL */
 function isMediaUrl(str) {
   const trimmed = str.trim()
-  return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|pdf)/i.test(trimmed) ||
-    /\/api\/uploads\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|pdf)/i.test(trimmed)
+  return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|pdf|html)/i.test(trimmed) ||
+    /\/api\/uploads\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|pdf|html)/i.test(trimmed)
+}
+
+function isHtmlUrl(str) {
+  return /\.(html)/i.test(str.trim())
 }
 
 function isPdfUrl(str) {
@@ -65,6 +69,23 @@ function isVideoUrl(str) {
 /** Render a media URL as a thumbnail or download link */
 function MediaThumbnail({ url }) {
   const fullUrl = url.startsWith('/') ? url : url
+  if (isHtmlUrl(url)) {
+    const filename = url.split('/').pop() || 'presentation.html'
+    return (
+      <a href={fullUrl} target="_blank" rel="noopener noreferrer"
+        className="my-2 flex items-center gap-3 p-3 rounded-xl active:scale-95 transition-transform"
+        style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)', maxWidth: 280 }}
+      >
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.15)' }}>
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5" /></svg>
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white">Open Presentation</p>
+          <p className="text-[10px] text-white/50">Tap to view fullscreen slides</p>
+        </div>
+      </a>
+    )
+  }
   if (isPdfUrl(url)) {
     const filename = url.split('/').pop() || 'document.pdf'
     return (
