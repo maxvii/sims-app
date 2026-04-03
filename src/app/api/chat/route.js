@@ -89,112 +89,75 @@ async function extractAndSaveContent(text) {
   const uploadDir = path.default.join(process.cwd(), 'public', 'uploads')
   let result = text
 
-  // Extract [SLIDES]...[/SLIDES] — generate PDF presentation
+  // Extract [SLIDES]...[/SLIDES] — save as styled HTML presentation
   const slidesRegex = /\[SLIDES\]([\s\S]*?)\[\/SLIDES\]/g
   let match
   while ((match = slidesRegex.exec(text)) !== null) {
     const [fullMatch, slidesContent] = match
     try {
-      const PDFDocument = (await import('pdfkit')).default
       const slides = slidesContent.trim()
 
-      // Social media sizes in points (72 DPI)
-      const SIZES = {
-        post: [1080 * 0.72, 1080 * 0.72],       // 1080x1080 square
-        story: [1080 * 0.72, 1920 * 0.72],       // 1080x1920 vertical
-        linkedin: [1200 * 0.72, 627 * 0.72],     // 1200x627
-        twitter: [1600 * 0.72, 900 * 0.72],      // 1600x900
-        fbcover: [820 * 0.72, 312 * 0.72],       // 820x312
-      }
-
-      // Parse slide divs into text blocks
+      // Parse slides into text blocks
       const slideBlocks = []
-      const slideRegex = /<div[^>]*class="slide"([^>]*)>([\s\S]*?)<\/div>/gi
-      let slideMatch
-      while ((slideMatch = slideRegex.exec(slides)) !== null) {
-        const attrs = slideMatch[1]
-        const inner = slideMatch[2]
+      const slideRegex2 = /<div[^>]*class="slide"([^>]*)>([\s\S]*?)<\/div>/gi
+      let sm
+      while ((sm = slideRegex2.exec(slides)) !== null) {
+        const attrs = sm[1]
+        const inner = sm[2]
         const sizeMatch = attrs.match(/data-size="([^"]+)"/)
         const size = sizeMatch ? sizeMatch[1] : null
         const title = inner.match(/<h[12][^>]*>([\s\S]*?)<\/h[12]>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
         const bullets = []
-        const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi
+        const liRx = /<li[^>]*>([\s\S]*?)<\/li>/gi
         let li
-        while ((li = liRegex.exec(inner)) !== null) bullets.push(li[1].replace(/<[^>]+>/g, '').trim())
+        while ((li = liRx.exec(inner)) !== null) bullets.push(li[1].replace(/<[^>]+>/g, '').trim())
         const para = inner.match(/<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
         slideBlocks.push({ title, bullets, para, size })
       }
 
-      // If no slide divs found, treat whole content as one slide
       if (slideBlocks.length === 0) {
-        const plainText = slides.replace(/<[^>]+>/g, '').trim()
-        slideBlocks.push({ title: 'Presentation', bullets: [], para: plainText })
+        slideBlocks.push({ title: 'Presentation', bullets: [], para: slides.replace(/<[^>]+>/g, '').trim() })
       }
 
-      // Generate PDF — first slide determines initial size
-      const firstSize = slideBlocks[0]?.size
-      const initSize = firstSize && SIZES[firstSize] ? SIZES[firstSize] : 'A4'
-      const initLayout = firstSize ? undefined : 'landscape'
-      const doc = new PDFDocument({
-        size: initSize,
-        layout: initLayout,
-        margin: 60,
-      })
-      const chunks = []
-      doc.on('data', c => chunks.push(c))
+      // Build a single-page HTML with all slides as printable pages
+      const slidePages = slideBlocks.map((s, i) => {
+        const sizeClass = s.size || 'landscape'
+        let content = ''
+        if (s.title) content += `<h1>${s.title}</h1>`
+        if (s.bullets.length) content += `<ul>${s.bullets.map(b => `<li>${b}</li>`).join('')}</ul>`
+        if (s.para) content += `<p>${s.para}</p>`
+        content += `<div class="slide-num">${i + 1} / ${slideBlocks.length}</div>`
+        return `<div class="page ${sizeClass}">${content}</div>`
+      }).join('\n')
 
-      const pdfDone = new Promise(resolve => doc.on('end', resolve))
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,-apple-system,sans-serif;background:#F7F9FA}
+.page{background:#363A47;color:#D0D9E2;padding:48px;margin:16px auto;border-radius:16px;break-inside:avoid;position:relative;overflow:hidden}
+.page.landscape{width:min(100%,800px);min-height:450px}
+.page.post{width:min(100%,500px);min-height:500px}
+.page.story{width:min(100%,360px);min-height:640px}
+.page.linkedin{width:min(100%,700px);min-height:366px}
+.page.twitter{width:min(100%,700px);min-height:394px}
+.page.fbcover{width:min(100%,700px);min-height:266px}
+h1{font-size:28px;font-weight:800;margin-bottom:20px;color:#F7F9FA}
+ul{list-style:none;margin:12px 0}
+li{font-size:18px;line-height:2;color:#B0B8C4}
+li::before{content:"→ ";color:#6B7B8D}
+p{font-size:16px;line-height:1.7;color:#9AAAB8;margin-top:12px}
+.slide-num{position:absolute;bottom:16px;right:24px;font-size:11px;color:#6B7B8D}
+.brand{position:absolute;bottom:16px;left:24px;font-size:10px;color:#4A5060;letter-spacing:2px;font-weight:700}
+@media print{body{background:#fff}.page{margin:0;border-radius:0;page-break-after:always;width:100%;height:100vh}}
+</style></head><body>${slidePages.replace(/<\/div>$/g, '<div class="brand">SIMS</div></div>')}</body></html>`
 
-      for (let i = 0; i < slideBlocks.length; i++) {
-        const s = slideBlocks[i]
-        const pageSize = s.size && SIZES[s.size] ? SIZES[s.size] : (firstSize && SIZES[firstSize] ? SIZES[firstSize] : 'A4')
-        if (i > 0) doc.addPage({ size: pageSize, layout: !s.size ? 'landscape' : undefined })
-
-        // Dark background
-        doc.rect(0, 0, doc.page.width, doc.page.height).fill('#363A47')
-
-        // Slide number
-        doc.fontSize(10).fillColor('#6B7B8D').text(`${i + 1} / ${slideBlocks.length}`, doc.page.width - 120, doc.page.height - 40, { width: 80, align: 'right' })
-
-        // Title
-        if (s.title) {
-          doc.fontSize(36).fillColor('#D0D9E2').text(s.title, 60, 80, { width: doc.page.width - 120 })
-        }
-
-        // Divider line
-        const yAfterTitle = doc.y + 15
-        doc.moveTo(60, yAfterTitle).lineTo(doc.page.width - 60, yAfterTitle).strokeColor('#6B7B8D').lineWidth(0.5).stroke()
-
-        let contentY = yAfterTitle + 25
-
-        // Bullets
-        if (s.bullets.length > 0) {
-          for (const b of s.bullets) {
-            doc.fontSize(18).fillColor('#B0B8C4').text(`→  ${b}`, 70, contentY, { width: doc.page.width - 140 })
-            contentY = doc.y + 10
-          }
-        }
-
-        // Paragraph
-        if (s.para) {
-          doc.fontSize(16).fillColor('#9AAAB8').text(s.para, 60, contentY, { width: doc.page.width - 120, lineGap: 6 })
-        }
-
-        // SIMS branding
-        doc.fontSize(8).fillColor('#4A5060').text('SIMS', 60, doc.page.height - 40)
-      }
-
-      doc.end()
-      await pdfDone
-
-      const pdfBuffer = Buffer.concat(chunks)
-      const name = 'deck-' + crypto.default.randomBytes(8).toString('hex') + '.pdf'
+      const name = 'deck-' + crypto.default.randomBytes(8).toString('hex') + '.html'
       try { await mkdir(uploadDir, { recursive: true }) } catch {}
-      await writeFile(path.default.join(uploadDir, name), pdfBuffer)
+      await writeFile(path.default.join(uploadDir, name), html)
       result = result.replace(fullMatch, `/api/uploads/${name}`)
     } catch (err) {
-      console.error('PDF generation failed:', err)
-      result = result.replace(fullMatch, `[PDF generation failed: ${err.message}]`)
+      console.error('Presentation failed:', err)
+      result = result.replace(fullMatch, `[Presentation failed: ${err.message}]`)
     }
   }
 
