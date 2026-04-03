@@ -263,11 +263,8 @@ function MessageBubble({ message }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
       {!isUser && (
-        <div
-          className="w-7 h-7 rounded-full shrink-0 mt-1 mr-2 flex items-center justify-center text-white text-xs font-bold"
-          style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
-        >
-          S
+        <div className="w-8 h-8 rounded-full shrink-0 mt-1 mr-2 overflow-hidden" style={{ background: '#000' }}>
+          <img src="/images/sims-eye.gif" alt="" className="w-full h-full object-cover" />
         </div>
       )}
 
@@ -595,13 +592,8 @@ export default function ChatPage() {
         {/* Welcome state */}
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center pt-12 animate-fade-in">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D, #D0D9E2)' }}
-            >
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L13.09 8.26L18 6L14.74 10.91L21 12L14.74 13.09L18 18L13.09 15.74L12 22L10.91 15.74L6 18L9.26 13.09L3 12L9.26 10.91L6 6L10.91 8.26L12 2Z" />
-              </svg>
+            <div className="w-20 h-20 rounded-2xl overflow-hidden mb-4" style={{ background: '#000' }}>
+              <img src="/images/sims-eye.gif" alt="Sims GPT" className="w-full h-full object-cover" />
             </div>
             <h2 className="font-display text-xl font-bold italic text-gray-800 mb-1">
               Hi, how can I help?
