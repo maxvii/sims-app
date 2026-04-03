@@ -6,13 +6,11 @@ import Navbar from '@/components/Navbar'
 import MediaGallery from '@/components/MediaGallery'
 import GradientSpheres from '@/components/GradientSpheres'
 
-const priorityColors = { CRITICAL: 'bg-priority-critical/90 text-white', HIGH: 'bg-priority-high/90 text-white', MEDIUM: 'bg-priority-medium/90 text-gray-800', LOW: 'bg-priority-low/90 text-white' }
 const statusColors = {
   'Not Started': 'bg-gray-100/80 text-gray-500',
-  'Planned': 'bg-blue-50/80 text-blue-600',
-  'In Progress': 'bg-amber-50/80 text-amber-600',
   'Approved': 'bg-emerald-50/80 text-emerald-600',
-  'Needs Revision': 'bg-red-50/80 text-red-500',
+  'Rescheduled': 'bg-amber-50/80 text-amber-600',
+  'Cancelled': 'bg-red-50/80 text-red-500',
   'Published': 'bg-purple-50/80 text-purple-600',
 }
 
@@ -54,7 +52,7 @@ function computeStatus(event) {
   return 'Not Started'
 }
 
-const CATEGORIES = ['Brand Events', 'Conferences', 'Internal Communications', 'Social Greetings']
+const CATEGORIES = ['Social/Key Moments', 'Corporate Campaign', 'Corporate Event', 'Sponsorships', 'Gifting', 'PR Birthdays', 'HR & CSR', 'Coca Cola Arena']
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 export default function EventDetailPage() {
@@ -159,7 +157,6 @@ export default function EventDetailPage() {
         <div className="flex items-start justify-between gap-3 relative z-10">
           <div>
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <span className={`pill-tag text-[10px] ${priorityColors[event.priority]}`}>{event.priority}</span>
               <span className={`pill-tag text-[10px] ${statusColors[computedStatus] || 'bg-gray-100/80 text-gray-500'}`}>{computedStatus}</span>
               {event.category && (
                 <span className="pill-tag text-[10px] bg-[#6B7B8D]/10 text-[#6B7B8D]">{event.category}</span>
@@ -396,7 +393,6 @@ export default function EventDetailPage() {
 function EditEventModal({ event, onClose, onSaved }) {
   const [title, setTitle] = useState(event.title)
   const [category, setCategory] = useState(event.category || '')
-  const [priority, setPriority] = useState(event.priority)
   const [status, setStatus] = useState(event.status)
   const [platforms, setPlatforms] = useState(event.platforms || '')
   const [postConcept, setPostConcept] = useState(event.postConcept || '')
@@ -412,7 +408,7 @@ function EditEventModal({ event, onClose, onSaved }) {
     await fetch(`/api/events/${event.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, category, priority, status, platforms, postConcept, visualDirection, captionDirection, notes: notes || null }),
+      body: JSON.stringify({ title, category, status, platforms, postConcept, visualDirection, captionDirection, notes: notes || null }),
     })
     setSaving(false)
     onSaved()
@@ -445,27 +441,16 @@ function EditEventModal({ event, onClose, onSaved }) {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Priority</label>
-              <select value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
-                <option value="CRITICAL">Critical</option>
-                <option value="HIGH">High</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="LOW">Low</option>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                <option value="Not Started">Not Started</option>
+                <option value="Approved">Approved</option>
+                <option value="Rescheduled">Rescheduled</option>
+                <option value="Cancelled">Cancelled</option>
               </select>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
-                <option value="Not Started">Not Started</option>
-                <option value="Planned">Planned</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Approved">Approved</option>
-                <option value="Published">Published</option>
-                <option value="Needs Revision">Needs Revision</option>
-              </select>
-            </div>
             <div>
               <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Platforms</label>
               <input value={platforms} onChange={(e) => setPlatforms(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none" placeholder="Instagram, LinkedIn..." />
@@ -510,7 +495,7 @@ function RescheduleModal({ event, onClose, onSaved }) {
     const formatted = `${String(d.getDate()).padStart(2, '0')} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`
     const month = MONTHS_SHORT[d.getMonth()]
 
-    const data = { date: formatted, month }
+    const data = { date: formatted, month, status: 'Rescheduled' }
     if (endDate) {
       const ed = new Date(endDate + 'T00:00:00')
       data.endDate = `${String(ed.getDate()).padStart(2, '0')} ${MONTHS_SHORT[ed.getMonth()]} ${ed.getFullYear()}`

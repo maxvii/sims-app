@@ -94,8 +94,10 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
 
-      {/* ── Light Header — no dark background ── */}
-      <div className="px-5 pt-14 pb-3">
+      {/* ── Light Header — matching SIMS Calendar style ── */}
+      <div className="px-5 pt-14 pb-3 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(247,249,250,0.8) 0%, rgba(208,217,226,0.35) 50%, rgba(247,249,250,0.75) 100%)' }}>
+        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #6B7B8D, transparent 70%)' }} />
+        <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #363A47, transparent 70%)' }} />
         {/* Top row: logo + avatar */}
         <div className="flex items-center justify-between mb-4">
           <img src="/logo.png" alt="The Sims App" className="h-12" />
