@@ -6,6 +6,9 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
   '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
   '.mp4': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/quicktime',
+  '.html': 'text/html', '.pdf': 'application/pdf',
+  '.json': 'application/json', '.txt': 'text/plain', '.css': 'text/css',
+  '.js': 'application/javascript',
 }
 
 export async function GET(req, { params }) {

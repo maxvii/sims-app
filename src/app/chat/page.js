@@ -405,12 +405,42 @@ export default function ChatPage() {
     }
   }, [messages, status, chatSessionId, historyLoaded])
 
+  // ── Chat history state ──────────────────────────────────────────────────
+  const [showHistory, setShowHistory] = useState(false)
+  const [chatSessions, setChatSessions] = useState([])
+
+  async function loadChatSessions() {
+    try {
+      const res = await fetch('/api/chat/history?list=true')
+      const data = await res.json()
+      setChatSessions(data.sessions || [])
+    } catch {}
+  }
+
+  async function loadSession(sessionId) {
+    try {
+      const res = await fetch(`/api/chat/history?sessionId=${sessionId}`)
+      const data = await res.json()
+      if (data.messages?.length > 0) {
+        setChatSessionId(data.sessionId)
+        const restored = data.messages.map(m => ({
+          id: m.id, role: m.role, content: m.content,
+          parts: [{ type: 'text', text: m.content }],
+        }))
+        setMessages(restored)
+        prevMessageCountRef.current = restored.length
+      }
+      setShowHistory(false)
+    } catch {}
+  }
+
   // ── New Chat handler ───────────────────────────────────────────────────
   function handleNewChat() {
     setMessages([])
     setChatSessionId('session-' + Date.now())
     prevMessageCountRef.current = 0
     setChatError(null)
+    setShowHistory(false)
   }
 
   // ── Check SpeechRecognition support ─────────────────────────────────────
@@ -540,21 +570,54 @@ export default function ChatPage() {
             <h1 className="font-display text-2xl font-black italic text-gray-800">Sims GPT</h1>
             <p className="text-xs text-gray-500 -mt-0.5">Your AI assistant</p>
           </div>
-          {/* New Chat button */}
-          {messages.length > 0 && (
+          {/* History + New buttons */}
+          <div className="flex gap-2 shrink-0">
             <button
-              onClick={handleNewChat}
-              className="shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95"
-              style={{
-                background: 'rgba(54,58,71,0.08)',
-                color: '#363A47',
-              }}
+              onClick={() => { loadChatSessions(); setShowHistory(!showHistory) }}
+              className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95"
+              style={{ background: 'rgba(54,58,71,0.08)', color: '#363A47' }}
             >
-              + New
+              History
             </button>
-          )}
+            {messages.length > 0 && (
+              <button
+                onClick={handleNewChat}
+                className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-95"
+                style={{ background: 'rgba(54,58,71,0.08)', color: '#363A47' }}
+              >
+                + New
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* ── Chat History Drawer ── */}
+      {showHistory && (
+        <div className="shrink-0 px-4 py-3 max-h-60 overflow-y-auto" style={{ background: 'rgba(54,58,71,0.03)', borderBottom: '1px solid rgba(54,58,71,0.06)' }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Past Chats</span>
+            <button onClick={() => setShowHistory(false)} className="text-[10px] text-gray-400">Close</button>
+          </div>
+          {chatSessions.length === 0 ? (
+            <p className="text-xs text-gray-400 py-2">No past conversations</p>
+          ) : (
+            <div className="space-y-1.5">
+              {chatSessions.map(s => (
+                <button
+                  key={s.sessionId}
+                  onClick={() => loadSession(s.sessionId)}
+                  className="w-full text-left p-2.5 rounded-xl active:scale-[0.98] transition-transform"
+                  style={{ background: s.sessionId === chatSessionId ? 'rgba(54,58,71,0.1)' : 'rgba(255,255,255,0.6)', border: '1px solid rgba(54,58,71,0.06)' }}
+                >
+                  <p className="text-sm font-medium text-gray-700 truncate">{s.title || 'Untitled chat'}</p>
+                  <p className="text-[10px] text-gray-400">{new Date(s.lastMessageAt).toLocaleDateString()}</p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Quick Action Chips ──────────────────────────────────────────── */}
       <div className="shrink-0 px-4 pt-3 pb-1">
