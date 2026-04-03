@@ -29,7 +29,7 @@ FILE SHARING (CRITICAL — YOU MUST DO THIS):
 When you generate or have ANY file (PDF, image, document, etc.), upload it via JSON:
 
 POST https://sims.ai-gcc.com/api/chat/upload-base64
-Authorization: Bearer <your token>
+Authorization: Bearer ${process.env.OPENCLAW_TOKEN}
 Content-Type: application/json
 Body: {"data":"<base64 encoded file content>","filename":"report.pdf","mimetype":"application/pdf"}
 
