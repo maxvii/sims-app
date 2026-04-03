@@ -8,11 +8,16 @@ export async function PATCH(req) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { name, currentPassword, newPassword } = await req.json()
+  const { name, avatar, currentPassword, newPassword } = await req.json()
 
   // Update name
   if (name) {
     await prisma.user.update({ where: { id: session.user.id }, data: { name } })
+  }
+
+  // Update avatar
+  if (avatar) {
+    await prisma.user.update({ where: { id: session.user.id }, data: { avatar } })
   }
 
   // Update password
@@ -26,7 +31,7 @@ export async function PATCH(req) {
 
   const updated = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { id: true, name: true, email: true },
+    select: { id: true, name: true, email: true, avatar: true },
   })
   return NextResponse.json(updated)
 }

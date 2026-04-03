@@ -16,13 +16,13 @@ export const authOptions = {
         if (!user) return null
         const isValid = await bcrypt.compare(credentials.password, user.password)
         if (!isValid) return null
-        return { id: user.id, name: user.name, email: user.email, role: user.role }
+        return { id: user.id, name: user.name, email: user.email, role: user.role, avatar: user.avatar }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if (user) { token.role = user.role; token.id = user.id }
+      if (user) { token.role = user.role; token.id = user.id; token.avatar = user.avatar }
       // When update() is called from client, refresh the token with new data
       if (trigger === 'update') {
         // Fetch fresh user data from DB to ensure accuracy
@@ -31,6 +31,7 @@ export const authOptions = {
           token.name = freshUser.name
           token.email = freshUser.email
           token.role = freshUser.role
+          token.avatar = freshUser.avatar
         }
       }
       return token
@@ -40,6 +41,7 @@ export const authOptions = {
       session.user.id = token.id
       session.user.name = token.name
       session.user.email = token.email
+      session.user.avatar = token.avatar
       return session
     },
   },
