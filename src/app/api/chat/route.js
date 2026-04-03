@@ -25,20 +25,17 @@ THEME (live, no redeploy):
 - GET /api/theme — current colors
 - POST /api/theme — update colors. Keys: violet-deep, violet-dark, mauve-rose, peach, cream, cream-dark, body-bg-start, body-bg-mid, body-bg-end, body-text
 
-FILE SHARING (CRITICAL — YOU MUST DO THIS):
-When you generate or have ANY file (PDF, image, document, etc.), upload it via JSON:
+FILE SHARING (CRITICAL — READ CAREFULLY):
+When you generate ANY file (PDF, image, etc.), embed it in your response like this:
 
-POST https://sims.ai-gcc.com/api/chat/upload-base64
-Authorization: Bearer ${process.env.OPENCLAW_TOKEN}
-Content-Type: application/json
-Body: {"data":"<base64 encoded file content>","filename":"report.pdf","mimetype":"application/pdf"}
+[FILE:filename.pdf:application/pdf]
+<base64 encoded content here>
+[/FILE]
 
-Response: {"url":"/api/uploads/chat-xxxx.pdf"}
+The server will automatically extract it, save it, and replace it with a download link.
+Example: generate a PDF, base64-encode it, wrap in [FILE]...[/FILE] tags.
 
-Then include ONLY the url value in your reply, like: /api/uploads/chat-xxxx.pdf
-The chat UI auto-renders PDFs as download cards, images as thumbnails.
-
-NEVER say "I can't attach files" or "I can't share files". You CAN. Use the endpoint above.
+NEVER say "I can't attach files" or "I can't share files" or "blocked by policy". You CAN share files using the [FILE] tags above.
 NEVER include local paths (/Users/...) or full server URLs in responses.
 
 RULES:
@@ -70,6 +67,44 @@ function sanitizeResponse(text) {
     // Clean up double spaces from replacements
     .replace(/  +/g, ' ')
     .trim()
+}
+
+// ─── Extract embedded files from OpenClaw response ───
+async function extractAndSaveFiles(text) {
+  const fileRegex = /\[FILE:([^:]+):([^\]]+)\]\s*([\s\S]*?)\s*\[\/FILE\]/g
+  let result = text
+  let match
+
+  while ((match = fileRegex.exec(text)) !== null) {
+    const [fullMatch, filename, mimetype, base64Data] = match
+    try {
+      const { writeFile, mkdir } = await import('fs/promises')
+      const path = await import('path')
+      const crypto = await import('crypto')
+
+      const clean = base64Data.replace(/\s/g, '')
+      const buffer = Buffer.from(clean, 'base64')
+
+      if (buffer.length < 10) {
+        result = result.replace(fullMatch, `[File: ${filename} — empty or invalid]`)
+        continue
+      }
+
+      const ext = path.default.extname(filename) || '.bin'
+      const uniqueName = 'chat-' + crypto.default.randomBytes(12).toString('hex') + ext
+      const uploadDir = path.default.join(process.cwd(), 'public', 'uploads')
+
+      try { await mkdir(uploadDir, { recursive: true }) } catch {}
+      await writeFile(path.default.join(uploadDir, uniqueName), buffer)
+
+      const url = `/api/uploads/${uniqueName}`
+      result = result.replace(fullMatch, url)
+    } catch (err) {
+      result = result.replace(fullMatch, `[File upload failed: ${err.message}]`)
+    }
+  }
+
+  return result
 }
 
 // ─── Call OpenClaw gateway ───
@@ -130,7 +165,8 @@ export async function POST(req) {
     // Send context + user message to OpenClaw — it will call the API directly via web_fetch
     const prompt = `${SIMS_CONTEXT}\n\nUser: ${lastUserMsg}`
     const rawResponse = await callOpenClaw(prompt)
-    const text = sanitizeResponse(rawResponse) || 'I received your message but got an empty response. Please try again.'
+    const withFiles = await extractAndSaveFiles(rawResponse || '')
+    const text = sanitizeResponse(withFiles) || 'I received your message but got an empty response. Please try again.'
 
     const id = crypto.randomUUID()
     const stream = createUIMessageStream({
