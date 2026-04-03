@@ -13,6 +13,11 @@ const photos = [
   { id: 5, src: '/images/sima-teal.jpg', alt: 'Teal outfit luxury portrait', span: 'normal' },
   { id: 6, src: '/images/sima-sofa.jpg', alt: 'Sofa portrait in leopard print', span: 'tall' },
   { id: 7, src: '/images/sima-event.jpg', alt: 'Full body event photo', span: 'normal' },
+  { id: 8, src: '/images/sima-dune-event.jpg', alt: 'Dune London event', span: 'tall' },
+  { id: 9, src: '/images/sima-portrait-formal.jpg', alt: 'Formal portrait in black blazer', span: 'normal' },
+  { id: 10, src: '/images/sima-riyadh-event.jpg', alt: 'Riyadh Saudi Arabia gala', span: 'tall' },
+  { id: 11, src: '/images/sima-rlc-stage.jpg', alt: 'Retail Leaders Circle MENA stage', span: 'normal' },
+  { id: 12, src: '/images/sima-rlc-speaking.jpg', alt: 'Speaking at RLC MENA', span: 'normal' },
 ]
 
 export default function GalleryPage() {
