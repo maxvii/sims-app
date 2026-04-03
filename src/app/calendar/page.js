@@ -30,10 +30,10 @@ const CATEGORY_DOTS = {
 }
 
 function getDayNightIcon(hour) {
-  if (hour >= 6 && hour < 12) return { icon: '☀️', label: 'Morning' }
-  if (hour >= 12 && hour < 17) return { icon: '🌤', label: 'Afternoon' }
-  if (hour >= 17 && hour < 20) return { icon: '🌅', label: 'Evening' }
-  return { icon: '🌙', label: 'Night' }
+  if (hour >= 6 && hour < 12) return { icon: '☀️', label: 'Morning', gradient: 'linear-gradient(135deg, rgba(255,236,210,0.15) 0%, rgba(255,220,180,0.08) 50%, transparent 100%)' }
+  if (hour >= 12 && hour < 17) return { icon: '🌤', label: 'Afternoon', gradient: 'linear-gradient(135deg, rgba(220,230,240,0.12) 0%, rgba(200,215,230,0.06) 50%, transparent 100%)' }
+  if (hour >= 17 && hour < 20) return { icon: '🌅', label: 'Evening', gradient: 'linear-gradient(135deg, rgba(255,180,130,0.15) 0%, rgba(200,150,180,0.1) 50%, transparent 100%)' }
+  return { icon: '🌙', label: 'Night', gradient: 'linear-gradient(135deg, rgba(100,120,180,0.12) 0%, rgba(80,90,140,0.08) 50%, transparent 100%)' }
 }
 
 export default function CalendarPage() {
@@ -96,10 +96,11 @@ export default function CalendarPage() {
 
       {/* ── Light Header — matching SIMS Calendar style ── */}
       <div className="px-5 pt-14 pb-3 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(247,249,250,0.8) 0%, rgba(208,217,226,0.35) 50%, rgba(247,249,250,0.75) 100%)' }}>
+        <div className="absolute inset-0 z-0" style={{ background: dayNight.gradient }} />
         <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #6B7B8D, transparent 70%)' }} />
         <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #363A47, transparent 70%)' }} />
         {/* Top row: logo + avatar */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 relative z-10">
           <img src="/logo.png" alt="The Sims App" className="h-12" />
           <button onClick={() => router.push('/profile')} className="active:scale-95 transition-transform">
             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200">
@@ -109,14 +110,14 @@ export default function CalendarPage() {
         </div>
 
         {/* Date, time, day/night icon */}
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1 relative z-10">
           <span className="text-2xl">{dayNight.icon}</span>
           <div>
             <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em]">{dateStr}</p>
             <p className="text-lg font-bold text-gray-800">{timeStr}</p>
           </div>
         </div>
-        <p className="text-sm text-gray-500">Hi, <span className="font-semibold text-gray-800">{session?.user?.name || 'Sima'}</span></p>
+        <p className="text-sm text-gray-500 relative z-10">Hi, <span className="font-semibold text-gray-800">{session?.user?.name || 'Sima'}</span></p>
       </div>
 
       {/* ── Date Sweeper — above icons ── */}
