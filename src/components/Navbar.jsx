@@ -105,14 +105,14 @@ export default function Navbar() {
               return (
                 <Link key={item.href} href={item.href} className="flex flex-col items-center -mt-6 px-1">
                   <div
-                    className={`w-[54px] h-[54px] rounded-full flex items-center justify-center mb-0.5 transition-all active:scale-95 ${item.active ? 'scale-105' : ''}`}
+                    className={`w-[54px] h-[54px] rounded-full overflow-hidden mb-0.5 transition-all active:scale-95 ${item.active ? 'scale-105' : ''}`}
                     style={{
-                      background: 'linear-gradient(135deg, #363A47, #6B7B8D)',
-                      boxShadow: '0 6px 24px rgba(54,58,71,0.45), inset 0 1px 0 rgba(208,217,226,0.3)',
+                      background: '#000',
+                      boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
                       border: '2.5px solid rgba(247,249,250,0.6)',
                     }}
                   >
-                    <span className="text-white">{item.icon}</span>
+                    <img src="/images/sims-eye.gif" alt="Sims GPT" className="w-full h-full object-cover" />
                   </div>
                   <span className="text-[8px] font-bold tracking-wide bg-gradient-to-r from-[#363A47] to-[#6B7B8D] bg-clip-text text-transparent">
                     {item.label}
