@@ -263,8 +263,11 @@ function MessageBubble({ message }) {
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full shrink-0 mt-1 mr-2 overflow-hidden" style={{ background: '#000' }}>
-          <img src="/images/sims-eye.gif" alt="" className="w-full h-full object-cover" />
+        <div
+          className="w-6 h-6 rounded-full shrink-0 mt-1 mr-2 flex items-center justify-center text-white text-[10px] font-bold"
+          style={{ background: '#363A47' }}
+        >
+          S
         </div>
       )}
 
@@ -533,11 +536,8 @@ export default function ChatPage() {
           >
             <svg className="w-5 h-5" style={{ color: '#363A47' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-            style={{ background: 'linear-gradient(135deg, #363A47, #6B7B8D)' }}
-          >
-            S
+          <div className="w-10 h-10 rounded-full overflow-hidden shrink-0" style={{ background: '#000' }}>
+            <img src="/images/sims-eye.gif" alt="" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1">
             <h1 className="font-display text-2xl font-black italic text-gray-800">Sims GPT</h1>
@@ -592,8 +592,11 @@ export default function ChatPage() {
         {/* Welcome state */}
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center pt-12 animate-fade-in">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden mb-4" style={{ background: '#000' }}>
-              <img src="/images/sims-eye.gif" alt="Sims GPT" className="w-full h-full object-cover" />
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+              style={{ background: '#363A47' }}
+            >
+              <span className="text-2xl font-black text-white">S</span>
             </div>
             <h2 className="font-display text-xl font-bold italic text-gray-800 mb-1">
               Hi, how can I help?
