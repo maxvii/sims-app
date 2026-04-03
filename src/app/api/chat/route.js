@@ -37,7 +37,31 @@ RULES:
 - When creating events, call POST /api/events directly. Confirm what you created.
 - When asked about schedule/upcoming/brief, call GET /api/events and summarize.
 - When analyzing media, fetch it and provide: visual quality assessment, brand alignment score, content recommendations, predicted engagement.
+- NEVER include local file paths, server URLs, API tokens, or internal system paths in your responses. Only share clean relative URLs like /api/uploads/filename.jpg.
 - Be concise and professional.`
+
+// ─── Sanitize OpenClaw response — strip local paths, server URLs, tokens ───
+function sanitizeResponse(text) {
+  if (!text) return text
+  return text
+    // Strip Mac/Linux local paths
+    .replace(/\/Users\/[^\s"')\]}>]+/g, '[file]')
+    .replace(/\/home\/[^\s"')\]}>]+/g, '[file]')
+    .replace(/\/tmp\/[^\s"')\]}>]+/g, '[file]')
+    .replace(/C:\\[^\s"')\]}>]+/g, '[file]')
+    // Strip server domain
+    .replace(/https?:\/\/sims\.ai-gcc\.com/g, '')
+    .replace(/https?:\/\/82\.25\.101\.166[:\d]*/g, '')
+    // Strip API tokens/secrets (anything that looks like a long hex/base64 string in auth context)
+    .replace(/Bearer\s+[a-zA-Z0-9_-]{20,}/g, 'Bearer [redacted]')
+    .replace(/Authorization:\s*[^\s"']+/gi, 'Authorization: [redacted]')
+    // Strip OpenClaw internal paths
+    .replace(/\/Users\/gts\/[^\s"')\]}>]+/g, '[internal]')
+    .replace(/\.openclaw\/[^\s"')\]}>]+/g, '[internal]')
+    // Clean up double spaces from replacements
+    .replace(/  +/g, ' ')
+    .trim()
+}
 
 // ─── Call OpenClaw gateway ───
 async function callOpenClaw(message) {
@@ -96,8 +120,8 @@ export async function POST(req) {
 
     // Send context + user message to OpenClaw — it will call the API directly via web_fetch
     const prompt = `${SIMS_CONTEXT}\n\nUser: ${lastUserMsg}`
-    const response = await callOpenClaw(prompt)
-    const text = response || 'I received your message but got an empty response. Please try again.'
+    const rawResponse = await callOpenClaw(prompt)
+    const text = sanitizeResponse(rawResponse) || 'I received your message but got an empty response. Please try again.'
 
     const id = crypto.randomUUID()
     const stream = createUIMessageStream({
