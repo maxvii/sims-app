@@ -37,7 +37,9 @@ RULES:
 - When creating events, call POST /api/events directly. Confirm what you created.
 - When asked about schedule/upcoming/brief, call GET /api/events and summarize.
 - When analyzing media, fetch it and provide: visual quality assessment, brand alignment score, content recommendations, predicted engagement.
-- NEVER include local file paths, server URLs, API tokens, or internal system paths in your responses. Only share clean relative URLs like /api/uploads/filename.jpg.
+- SHARING FILES: To share a file with the user, use web_fetch to POST the file to /api/chat/upload as multipart form data. The response gives you a URL like /api/uploads/chat-xxxx.pdf — include ONLY that relative path in your response. The chat UI will render images/videos as thumbnails and PDFs as download links.
+- NEVER include local file paths, server URLs, API tokens, or internal system paths in your responses. Only share clean relative URLs like /api/uploads/filename.pdf.
+- If you cannot upload a file, tell the user you're generating the content and include it as text instead.
 - Be concise and professional.`
 
 // ─── Sanitize OpenClaw response — strip local paths, server URLs, tokens ───

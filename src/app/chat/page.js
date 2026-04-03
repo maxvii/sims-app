@@ -50,17 +50,38 @@ function getToolInvocations(message) {
 /** Check if a string is a media URL */
 function isMediaUrl(str) {
   const trimmed = str.trim()
-  return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov)/i.test(trimmed) ||
-    /\/api\/uploads\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov)/i.test(trimmed)
+  return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|pdf)/i.test(trimmed) ||
+    /\/api\/uploads\/.+\.(jpg|jpeg|png|gif|webp|mp4|webm|mov|pdf)/i.test(trimmed)
+}
+
+function isPdfUrl(str) {
+  return /\.(pdf)/i.test(str.trim())
 }
 
 function isVideoUrl(str) {
   return /\.(mp4|webm|mov)/i.test(str.trim())
 }
 
-/** Render a media URL as a thumbnail */
+/** Render a media URL as a thumbnail or download link */
 function MediaThumbnail({ url }) {
   const fullUrl = url.startsWith('/') ? url : url
+  if (isPdfUrl(url)) {
+    const filename = url.split('/').pop() || 'document.pdf'
+    return (
+      <a href={fullUrl} download={filename} target="_blank" rel="noopener noreferrer"
+        className="my-2 flex items-center gap-3 p-3 rounded-xl active:scale-95 transition-transform"
+        style={{ background: 'rgba(54,58,71,0.06)', border: '1px solid rgba(54,58,71,0.08)', maxWidth: 280 }}
+      >
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: '#DC2626' }}>
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-gray-700 truncate" style={{ maxWidth: 180 }}>{filename}</p>
+          <p className="text-[10px] text-gray-400">Tap to download PDF</p>
+        </div>
+      </a>
+    )
+  }
   if (isVideoUrl(url)) {
     return (
       <div className="my-2 rounded-2xl overflow-hidden" style={{ maxWidth: 280 }}>
