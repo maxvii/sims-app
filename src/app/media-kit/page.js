@@ -45,7 +45,7 @@ export default function BusinessCardPage() {
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           Back
         </button>
-        <h1 className="text-xl font-bold text-gray-800">Simz Card</h1>
+        <h1 className="text-xl font-bold text-gray-800">Sims Card</h1>
       </div>
 
       <div className="px-5 pt-2">
@@ -122,7 +122,7 @@ export default function BusinessCardPage() {
             <p className="text-[10px] text-gray-300 mt-1">Contains vCard — no server links</p>
             <a
               href={qrUrl}
-              download="simz-card-qr.png"
+              download="sims-card-qr.png"
               className="inline-block mt-3 px-4 py-2 rounded-xl text-xs font-semibold active:scale-95 transition-all"
               style={{ background: 'rgba(54,58,71,0.08)', color: '#363A47' }}
             >

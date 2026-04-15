@@ -18,7 +18,7 @@ export async function notifyOthers({ actorId, type, message, eventId, eventTitle
 
   // Push notifications
   await sendPushToUsers(userIds, {
-    title: 'Simz App',
+    title: 'Sims App',
     body: message,
     tag: `${type}-${eventId || 'general'}`,
     url: eventId ? `/events/${eventId}` : '/notifications',

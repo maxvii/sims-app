@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const [showForm, setShowForm] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e) => {
@@ -21,120 +21,117 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Background Image — BG-12 */}
+    <div className="min-h-screen flex flex-col items-center justify-center px-8 relative" style={{ background: '#F7F9FA' }}>
+
+      {/* Subtle cream-dark radial accent */}
       <div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'url(/images/BG-12.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
+          background: 'radial-gradient(ellipse at 50% 40%, rgba(208,217,226,0.35) 0%, rgba(247,249,250,0) 60%)',
         }}
       />
 
-      {/* Logo */}
-      <div className="relative z-10 mb-14">
-        <img
-          src="/logo.png"
-          alt="The Sims App"
-          className="h-36 w-auto mx-auto"
-        />
-      </div>
-
-      {/* Login Card — clean, no shadows, no blur */}
-      <div
-        className="w-full max-w-sm relative z-10 p-7 rounded-3xl"
-        style={{
-          background: 'rgba(54,58,71,0.45)',
-          border: '1px solid rgba(208,217,226,0.12)',
-        }}
-      >
-        {error && (
-          <div
-            className="text-sm p-3 rounded-2xl text-center font-medium mb-5"
+      {/* ── Hero: Script logo ── */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full">
+        <div className="text-center">
+          <h1
+            className="font-script text-[72px] leading-none"
             style={{
-              background: 'rgba(212,54,92,0.15)',
-              border: '1px solid rgba(212,54,92,0.25)',
-              color: '#D0D9E2',
+              color: '#363A47',
+              fontFamily: 'Great Vibes, cursive',
+              transform: 'rotate(-3deg)',
             }}
           >
-            {error}
-          </div>
-        )}
+            The
+          </h1>
+          <h1
+            className="font-display text-[84px] leading-[0.9] font-black italic mt-1"
+            style={{
+              color: '#2B2E38',
+              fontFamily: 'Playfair Display, serif',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            Sims
+          </h1>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: 'rgba(208,217,226,0.5)' }}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full py-3.5 px-5 rounded-2xl text-[15px] outline-none transition-all placeholder:text-white/20"
-              style={{
-                background: 'rgba(247,249,250,0.06)',
-                border: '1.5px solid rgba(247,249,250,0.1)',
-                color: '#F7F9FA',
-              }}
-              placeholder="your@email.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-[0.15em] mb-1.5" style={{ color: 'rgba(208,217,226,0.5)' }}>Password</label>
-            <div className="relative">
+        {/* ── Sign In (hidden until tapped) ── */}
+        {showForm ? (
+          <div className="w-full max-w-xs mt-12 animate-fade-in">
+            {error && (
+              <div
+                className="text-sm p-3 rounded-2xl text-center font-medium mb-4"
+                style={{
+                  background: 'rgba(212,54,92,0.08)',
+                  border: '1px solid rgba(212,54,92,0.2)',
+                  color: '#D4365C',
+                }}
+              >
+                {error}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-3">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full py-3.5 px-5 rounded-2xl text-[14px] outline-none transition-all"
+                style={{
+                  background: '#fff',
+                  border: '1.5px solid #E7ECF1',
+                  color: '#2B2E38',
+                }}
+                placeholder="Email"
+                required
+                autoFocus
+              />
+              <input
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full py-3.5 px-5 pr-12 rounded-2xl text-[15px] outline-none transition-all placeholder:text-white/20"
+                className="w-full py-3.5 px-5 rounded-2xl text-[14px] outline-none transition-all"
                 style={{
-                  background: 'rgba(247,249,250,0.06)',
-                  border: '1.5px solid rgba(247,249,250,0.1)',
-                  color: '#F7F9FA',
+                  background: '#fff',
+                  border: '1.5px solid #E7ECF1',
+                  color: '#2B2E38',
                 }}
-                placeholder="••••••••"
+                placeholder="Password"
                 required
               />
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: 'rgba(208,217,226,0.4)' }}
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 rounded-2xl font-semibold text-[15px] disabled:opacity-50 transition-all active:scale-[0.98]"
+                style={{
+                  background: '#363A47',
+                  color: '#F7F9FA',
+                  letterSpacing: '0.02em',
+                }}
               >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                )}
+                {loading ? 'Signing in...' : 'Sign In'}
               </button>
-            </div>
+            </form>
           </div>
-
+        ) : (
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-2xl font-semibold text-[15px] disabled:opacity-50 transition-all mt-2"
+            onClick={() => setShowForm(true)}
+            className="mt-16 px-10 py-3.5 rounded-full font-semibold text-[14px] transition-all active:scale-95"
             style={{
               background: '#D0D9E2',
               color: '#2B2E38',
               letterSpacing: '0.05em',
+              boxShadow: '0 4px 16px rgba(54,58,71,0.08)',
             }}
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                Signing in...
-              </span>
-            ) : 'Sign In'}
+            Sign In
           </button>
-        </form>
+        )}
       </div>
 
-      {/* Bottom text */}
-      <p className="relative z-10 mt-10 text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(54,58,71,0.3)' }}>
-        The Sims App
+      {/* ── Bottom: version ── */}
+      <p className="relative z-10 pb-8 text-[10px] tracking-[0.2em] uppercase" style={{ color: 'rgba(54,58,71,0.35)' }}>
+        Update 1.2
       </p>
     </div>
   )

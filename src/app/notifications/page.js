@@ -50,48 +50,55 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-safe-nav">
-      <div className="liquid-glass px-5 pt-12 pb-4 relative overflow-hidden" style={{ borderRadius: '0 0 24px 24px' }}>
-        <GradientSpheres variant="compact" />
-        <div className="relative z-10">
-          <button onClick={() => router.push('/calendar')} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-2">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
-            Back
-          </button>
-        </div>
-        <div className="flex items-center justify-between relative z-10">
-          <div>
-            <h1 className="font-display text-3xl font-black italic text-gray-800">Alerts</h1>
-            <p className="text-xs text-gray-500">{unreadCount} unread</p>
-          </div>
+    <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
+      {/* ── Minimal Header ── */}
+      <div className="px-5 pt-14 pb-4">
+        <button onClick={() => router.push('/calendar')} className="flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 mb-3">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-3xl font-black italic" style={{ color: '#2B2E38' }}>Alerts</h1>
           {unreadCount > 0 && (
             <button onClick={markAllRead} className="text-xs font-semibold text-[#6B7B8D] hover:text-[#363A47]">
               Mark all read
             </button>
           )}
         </div>
+        {unreadCount > 0 && <p className="text-xs text-gray-400 mt-1">{unreadCount} unread</p>}
       </div>
 
-      <div className="px-4 pt-4 space-y-2">
+      <div className="px-4 pt-2 space-y-2">
         {notifications.map((n) => (
           <button
             key={n.id}
             onClick={() => markRead(n.id, n.event?.id)}
-            className={`liquid-glass-card p-4 w-full text-left flex items-start gap-3 transition-all hover:scale-[1.01] ${!n.read ? 'ring-1 ring-[#6B7B8D]/30' : 'opacity-70'}`}
+            className={`p-4 w-full text-left flex items-start gap-3 transition-all active:scale-[0.98] rounded-2xl ${!n.read ? '' : 'opacity-70'}`}
+            style={{
+              background: '#fff',
+              border: `1px solid ${!n.read ? 'rgba(107,123,141,0.2)' : '#E7ECF1'}`,
+            }}
           >
             <div className="mt-0.5">{typeIcons[n.type] || typeIcons.COMMENT}</div>
             <div className="flex-1 min-w-0">
               <p className={`text-sm ${!n.read ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>{n.message}</p>
-              <p className="text-[10px] text-gray-500 mt-1">{new Date(n.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+              <p className="text-[10px] text-gray-400 mt-1">{new Date(n.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
             </div>
-            {!n.read && <div className="w-2.5 h-2.5 rounded-full bg-[#6B7B8D] flex-shrink-0 mt-1.5" />}
+            {!n.read && <div className="w-2 h-2 rounded-full bg-[#6B7B8D] flex-shrink-0 mt-2" />}
           </button>
         ))}
 
         {notifications.length === 0 && (
-          <div className="text-center text-gray-500 text-sm py-16">
-            <svg className="w-12 h-12 mx-auto mb-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            No notifications yet
+          <div className="flex flex-col items-center justify-center py-28">
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+              style={{ background: '#E7ECF1' }}
+            >
+              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+            </div>
+            <p className="text-sm text-gray-400">No notifications yet</p>
           </div>
         )}
       </div>

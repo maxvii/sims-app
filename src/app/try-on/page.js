@@ -163,7 +163,7 @@ export default function VirtualTryOnPage() {
     if (!resultUrl) return
     const a = document.createElement('a')
     a.href = resultUrl
-    a.download = `simz-tryon-${Date.now()}.png`
+    a.download = `sims-tryon-${Date.now()}.png`
     a.target = '_blank'
     a.rel = 'noopener noreferrer'
     document.body.appendChild(a)

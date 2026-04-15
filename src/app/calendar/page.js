@@ -1,84 +1,119 @@
 'use client'
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const MONTH_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-const DAY_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function parseEventDate(dateStr) {
-  const p = dateStr.split(' ')
-  return new Date(parseInt(p[2]), MONTHS.indexOf(p[1]), parseInt(p[0]))
+function getGreeting(hour) {
+  if (hour >= 5 && hour < 12) return 'Good morning'
+  if (hour >= 12 && hour < 17) return 'Good afternoon'
+  if (hour >= 17 && hour < 22) return 'Good evening'
+  return 'Hello'
 }
 
-function isSameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+// ── 6 app tiles (iOS-style colored cards) ──
+function getTiles(isAdmin) {
+  const tiles = [
+    {
+      href: '/about',
+      label: 'About',
+      bg: 'linear-gradient(145deg, #E9D5B7 0%, #D4BC95 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6B4E2C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21v-1a8 8 0 0116 0v1"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/gallery',
+      label: 'Gallery',
+      bg: 'linear-gradient(145deg, #E89BC0 0%, #C97B9B 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#5C2B43" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="M21 15l-5-5L5 21"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/media-kit',
+      label: 'Sims Card',
+      bg: 'linear-gradient(145deg, #A8D5B5 0%, #85B895 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2C5C3D" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <path d="M7 10h4M7 14h6"/>
+          <circle cx="16" cy="13" r="2"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/analytics',
+      label: 'Simulate',
+      bg: 'linear-gradient(145deg, #9DB8E2 0%, #7795C7 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1E3A6B" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 3v18h18"/>
+          <path d="M7 15l4-4 3 3 5-6"/>
+          <circle cx="19" cy="8" r="1"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/try-on',
+      label: 'Try-On',
+      bg: 'linear-gradient(145deg, #F0B482 0%, #D89463 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6B3818" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 5l-4-2-4 2-4-2-4 2v4l3-1v13h10V8l3 1V5z"/>
+          <path d="M12 3v6"/>
+        </svg>
+      ),
+    },
+    {
+      href: '/chat',
+      label: 'Sims GPT',
+      bg: 'linear-gradient(145deg, #7FC5CB 0%, #5AA1A7 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1C4449" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          <circle cx="8" cy="10" r="0.8" fill="#1C4449"/>
+          <circle cx="12" cy="10" r="0.8" fill="#1C4449"/>
+          <circle cx="16" cy="10" r="0.8" fill="#1C4449"/>
+        </svg>
+      ),
+    },
+  ]
+  if (isAdmin) {
+    tiles.push({
+      href: '/admin',
+      label: 'Team',
+      bg: 'linear-gradient(145deg, #C4A3D9 0%, #9E7FBD 100%)',
+      icon: (
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#3E1F5C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="8" r="3.5"/>
+          <circle cx="17" cy="9" r="2.5"/>
+          <path d="M2 19a7 7 0 0114 0"/>
+          <path d="M14.5 19a5 5 0 017-4.6"/>
+        </svg>
+      ),
+    })
+  }
+  return tiles
 }
 
-const CATEGORY_DOTS = {
-  'Social/Key Moments': '#363A47',
-  'Corporate Campaign': '#6B7B8D',
-  'Corporate Event': '#4A6FA5',
-  'Sponsorships': '#8B6BA5',
-  'Gifting': '#C9956B',
-  'PR Birthdays': '#D4365C',
-  'HR & CSR': '#6B8E6B',
-  'Coca Cola Arena': '#CC4444',
-}
-
-function getDayNightIcon(hour) {
-  if (hour >= 6 && hour < 12) return { icon: '☀️', label: 'Morning', gradient: 'linear-gradient(135deg, rgba(255,236,210,0.15) 0%, rgba(255,220,180,0.08) 50%, transparent 100%)' }
-  if (hour >= 12 && hour < 17) return { icon: '🌤', label: 'Afternoon', gradient: 'linear-gradient(135deg, rgba(220,230,240,0.12) 0%, rgba(200,215,230,0.06) 50%, transparent 100%)' }
-  if (hour >= 17 && hour < 20) return { icon: '🌅', label: 'Evening', gradient: 'linear-gradient(135deg, rgba(255,180,130,0.15) 0%, rgba(200,150,180,0.1) 50%, transparent 100%)' }
-  return { icon: '🌙', label: 'Night', gradient: 'linear-gradient(135deg, rgba(100,120,180,0.12) 0%, rgba(80,90,140,0.08) 50%, transparent 100%)' }
-}
-
-export default function CalendarPage() {
+export default function HomePage() {
   const { data: session, status: authStatus } = useSession()
   const router = useRouter()
-  const [events, setEvents] = useState([])
-  const [selectedDate, setSelectedDate] = useState(null)
   const [now, setNow] = useState(new Date())
   const [showAddEvent, setShowAddEvent] = useState(false)
 
   useEffect(() => { if (authStatus === 'unauthenticated') router.push('/login') }, [authStatus, router])
-  const fetchEvents = () => fetch('/api/events').then(r => r.json()).then(d => { if (Array.isArray(d)) setEvents(d) }).catch(() => {})
-  useEffect(() => { fetchEvents() }, [])
   useEffect(() => { const t = setInterval(() => setNow(new Date()), 60000); return () => clearInterval(t) }, [])
-
-  const calendarDays = useMemo(() => {
-    const days = []
-    const start = new Date(now)
-    start.setDate(start.getDate() - 7)
-    for (let i = 0; i < 120; i++) {
-      const d = new Date(start)
-      d.setDate(start.getDate() + i)
-      days.push(d)
-    }
-    return days
-  }, [now.toDateString()])
-
-  const eventsByDate = useMemo(() => {
-    const map = {}
-    events.forEach(e => {
-      const d = parseEventDate(e.date)
-      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
-      if (!map[key]) map[key] = []
-      map[key].push(e)
-    })
-    return map
-  }, [events])
-
-  const getEventsForDate = (date) => {
-    const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-    return eventsByDate[key] || []
-  }
-
-  const selectedEvents = selectedDate ? getEventsForDate(selectedDate) : []
-  const todayIndex = calendarDays.findIndex(d => isSameDay(d, now))
 
   if (authStatus === 'loading') return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#F7F9FA' }}>
@@ -86,255 +121,93 @@ export default function CalendarPage() {
     </div>
   )
 
-  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
-  const dateStr = `${DAY_NAMES[now.getDay()]}, ${now.getDate()} ${MONTH_FULL[now.getMonth()]}`
-  const dayNight = getDayNightIcon(now.getHours())
+  const firstName = (session?.user?.name || 'there').split(' ')[0]
+  const greeting = getGreeting(now.getHours())
   const avatarUrl = session?.user?.avatar || '/images/sima-portrait.jpg'
+  const isAdmin = session?.user?.role === 'ADMIN'
+  const tiles = getTiles(isAdmin)
 
   return (
     <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
 
-      {/* ── Light Header — matching SIMS Calendar style ── */}
-      <div className="px-5 pt-14 pb-3 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(247,249,250,0.8) 0%, rgba(208,217,226,0.35) 50%, rgba(247,249,250,0.75) 100%)' }}>
-        <div className="absolute inset-0 z-0" style={{ background: dayNight.gradient }} />
-        <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #6B7B8D, transparent 70%)' }} />
-        <div className="absolute -bottom-6 -left-6 w-24 h-24 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #363A47, transparent 70%)' }} />
-        {/* Top row: logo + avatar */}
-        <div className="flex items-center justify-between mb-4 relative z-10">
-          <img src="/logo.png" alt="The Sims App" className="h-12" />
-          <button onClick={() => router.push('/profile')} className="active:scale-95 transition-transform">
-            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200">
+      {/* ── Greeting Header ── */}
+      <div className="px-5 pt-14 pb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-semibold mb-1">
+              {greeting}
+            </p>
+            <h1 className="font-display text-2xl font-black italic text-gray-800">
+              {firstName}
+            </h1>
+            <p className="text-xs text-gray-400 mt-1">
+              {now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </p>
+          </div>
+          <button
+            onClick={() => router.push('/profile')}
+            className="active:scale-95 transition-transform"
+          >
+            <div
+              className="w-12 h-12 rounded-full overflow-hidden"
+              style={{ border: '2px solid #E7ECF1', boxShadow: '0 2px 8px rgba(54,58,71,0.08)' }}
+            >
               <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
             </div>
           </button>
         </div>
-
-        {/* Date, time, day/night icon */}
-        <div className="flex items-center gap-2 mb-1 relative z-10">
-          <span className="text-2xl">{dayNight.icon}</span>
-          <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-[0.15em]">{dateStr}</p>
-            <p className="text-lg font-bold text-gray-800">{timeStr}</p>
-          </div>
-        </div>
-        <p className="text-sm text-gray-500 relative z-10">Hi, <span className="font-semibold text-gray-800">{session?.user?.name || 'Sima'}</span></p>
       </div>
 
-      {/* ── Date Sweeper — above icons ── */}
-      <DateSweeper
-        days={calendarDays}
-        today={now}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        getEventsForDate={getEventsForDate}
-        todayIndex={todayIndex}
-      />
-
-      {/* ── Selected Date Events ── */}
-      {selectedDate && (
-        <div className="px-4 pt-3 pb-2">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-700">
-              {selectedDate.getDate()} {MONTH_FULL[selectedDate.getMonth()]}
-              {isSameDay(selectedDate, now) && <span className="text-xs text-gray-400 ml-1">Today</span>}
-            </h3>
-            <button onClick={() => setSelectedDate(null)} className="text-[10px] font-medium text-gray-400">Clear</button>
-          </div>
-          {selectedEvents.length === 0 ? (
-            <p className="text-xs text-gray-400 py-3 text-center">No events</p>
-          ) : (
-            <div className="space-y-2">
-              {selectedEvents.map(e => (
-                <button
-                  key={e.id}
-                  onClick={() => router.push(`/events/${e.id}`)}
-                  className="w-full text-left p-3 rounded-xl flex items-center gap-3 active:scale-[0.98] transition-transform"
-                  style={{ background: 'rgba(54,58,71,0.04)', border: '1px solid rgba(54,58,71,0.06)' }}
-                >
-                  <div className="w-1 h-8 rounded-full" style={{ background: CATEGORY_DOTS[e.category] || '#6B7B8D' }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 truncate">{e.title}</p>
-                    <p className="text-[10px] text-gray-400">{e.category}</p>
-                  </div>
-                  {e.status !== 'Not Started' && (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full" style={{
-                      background: e.status === 'Approved' ? 'rgba(107,142,107,0.15)' : e.status === 'Cancelled' ? 'rgba(211,54,92,0.12)' : 'rgba(201,149,107,0.15)',
-                      color: e.status === 'Approved' ? '#6B8E6B' : e.status === 'Cancelled' ? '#D4365C' : '#C9956B',
-                    }}>{e.status}</span>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ── App Icons — 2 column, neumorphic style with creative SVG shapes ── */}
-      <div className="px-5 py-4">
-        <div className="grid grid-cols-2 gap-5">
-          {[
-            { href: '/about', label: 'About Sima', shape: (
-              <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
-                <circle cx="28" cy="20" r="10" fill="#363A47"/>
-                <ellipse cx="28" cy="42" rx="16" ry="10" fill="#363A47" opacity="0.7"/>
-                <circle cx="28" cy="20" r="6" fill="#F7F9FA" opacity="0.15"/>
-              </svg>
-            )},
-            { href: '/gallery', label: 'Gallery', shape: (
-              <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
-                <rect x="8" y="12" width="40" height="32" rx="6" fill="#363A47"/>
-                <circle cx="20" cy="24" r="5" fill="#F7F9FA" opacity="0.2"/>
-                <path d="M8 36 L22 26 L30 32 L38 22 L48 34 L48 38 C48 41.3 45.3 44 42 44 L14 44 C10.7 44 8 41.3 8 38 Z" fill="#363A47"/>
-                <path d="M8 36 L22 26 L30 32 L38 22 L48 34 L48 38 C48 41.3 45.3 44 42 44 L14 44 C10.7 44 8 41.3 8 38 Z" fill="#F7F9FA" opacity="0.15"/>
-              </svg>
-            )},
-            { href: '/media-kit', label: 'Simz Card', shape: (
-              <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
-                <rect x="14" y="6" width="28" height="44" rx="4" fill="#363A47"/>
-                <rect x="18" y="12" width="20" height="3" rx="1.5" fill="#F7F9FA" opacity="0.2"/>
-                <rect x="18" y="18" width="14" height="3" rx="1.5" fill="#F7F9FA" opacity="0.15"/>
-                <rect x="18" y="24" width="18" height="3" rx="1.5" fill="#F7F9FA" opacity="0.12"/>
-                <rect x="18" y="30" width="10" height="3" rx="1.5" fill="#F7F9FA" opacity="0.1"/>
-                <circle cx="36" cy="40" r="6" fill="#F7F9FA" opacity="0.12"/>
-                <path d="M34 40 L39 37 L39 43 Z" fill="#F7F9FA" opacity="0.2"/>
-              </svg>
-            )},
-            { href: '/analytics', label: 'Simulate', shape: (
-              <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
-                <rect x="10" y="30" width="8" height="16" rx="3" fill="#363A47" opacity="0.5"/>
-                <rect x="21" y="22" width="8" height="24" rx="3" fill="#363A47" opacity="0.7"/>
-                <rect x="32" y="14" width="8" height="32" rx="3" fill="#363A47" opacity="0.85"/>
-                <rect x="43" y="8" width="8" height="38" rx="3" fill="#363A47"/>
-                <path d="M12 28 C18 20 26 16 34 12 C38 10 44 7 48 6" stroke="#363A47" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.4"/>
-                <circle cx="48" cy="6" r="3" fill="#363A47" opacity="0.5"/>
-              </svg>
-            )},
-            { href: '/try-on', label: 'Try-On', shape: (
-              <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
-                <path d="M28 8 C28 8 22 8 20 14 C18 20 16 24 12 28 C8 32 10 40 16 42 C20 43.5 24 42 28 38 C32 42 36 43.5 40 42 C46 40 48 32 44 28 C40 24 38 20 36 14 C34 8 28 8 28 8 Z" fill="#363A47"/>
-                <path d="M22 22 C22 22 24 28 28 28 C32 28 34 22 34 22" stroke="#F7F9FA" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.2"/>
-                <circle cx="22" cy="20" r="2" fill="#F7F9FA" opacity="0.15"/>
-                <circle cx="34" cy="20" r="2" fill="#F7F9FA" opacity="0.15"/>
-              </svg>
-            )},
-            ...(session?.user?.role === 'ADMIN' ? [{ href: '/admin', label: 'Team', shape: (
-              <svg width="80" height="80" viewBox="0 0 56 56" fill="none">
-                <circle cx="20" cy="18" r="7" fill="#363A47" opacity="0.7"/>
-                <ellipse cx="20" cy="34" rx="11" ry="8" fill="#363A47" opacity="0.5"/>
-                <circle cx="38" cy="16" r="8" fill="#363A47"/>
-                <ellipse cx="38" cy="34" rx="12" ry="9" fill="#363A47" opacity="0.7"/>
-                <circle cx="38" cy="16" r="4" fill="#F7F9FA" opacity="0.1"/>
-              </svg>
-            )}] : []),
-          ].map((item) => (
+      {/* ── App Tile Grid (3x2 / 4 rows) ── */}
+      <div className="px-5 pt-2">
+        <div className="grid grid-cols-3 gap-4">
+          {tiles.map((tile) => (
             <button
-              key={item.href}
-              onClick={() => router.push(item.href)}
-              className="flex flex-col items-center gap-2.5 active:scale-90 transition-all"
+              key={tile.href}
+              onClick={() => router.push(tile.href)}
+              className="flex flex-col items-center gap-2 active:scale-90 transition-all duration-150"
             >
               <div
-                className="w-full aspect-square rounded-[28px] flex items-center justify-center"
+                className="w-full aspect-square rounded-[22px] flex items-center justify-center relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(145deg, #F0F3F6, #D8DEE5)',
-                  boxShadow: '8px 8px 20px rgba(166,180,200,0.4), -8px -8px 20px rgba(255,255,255,0.9), inset 0 1px 0 rgba(255,255,255,0.8)',
+                  background: tile.bg,
+                  boxShadow: '0 6px 16px rgba(54,58,71,0.12), inset 0 1.5px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.05)',
                 }}
               >
-                {item.shape}
+                {/* Shine overlay */}
+                <div
+                  className="absolute inset-0 rounded-[22px] pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)' }}
+                />
+                <div className="relative z-10">{tile.icon}</div>
               </div>
-              <span className="text-[13px] font-semibold text-gray-600">{item.label}</span>
+              <span className="text-[11px] font-semibold text-gray-700 tracking-tight">
+                {tile.label}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* FAB — Add Event */}
-      {session?.user?.role === 'ADMIN' && (
+      {/* ── FAB Add Event (admin only) ── */}
+      {isAdmin && (
         <button
           onClick={() => setShowAddEvent(true)}
           className="fixed bottom-24 right-5 w-14 h-14 rounded-full flex items-center justify-center z-40 active:scale-90 transition-transform"
-          style={{ background: '#363A47' }}
+          style={{ background: '#363A47', boxShadow: '0 8px 24px rgba(54,58,71,0.35)' }}
         >
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" /></svg>
         </button>
       )}
 
-      {showAddEvent && <AddEventModal onClose={() => setShowAddEvent(false)} onCreated={() => { fetchEvents(); setShowAddEvent(false) }} />}
+      {showAddEvent && <AddEventModal onClose={() => setShowAddEvent(false)} />}
       <Navbar />
     </div>
   )
 }
 
-/* ── Date Sweeper ── */
-function DateSweeper({ days, today, selectedDate, setSelectedDate, getEventsForDate, todayIndex }) {
-  const scrollRef = useRef(null)
-
-  useEffect(() => {
-    const el = document.getElementById('cal-today')
-    if (el && scrollRef.current) {
-      const container = scrollRef.current
-      const offset = el.offsetLeft - container.offsetWidth / 2 + el.offsetWidth / 2
-      container.scrollTo({ left: offset, behavior: 'instant' })
-    }
-  }, [todayIndex])
-
-  let currentMonth = -1
-
-  return (
-    <div className="px-0 pb-2">
-      <div ref={scrollRef} style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity' }}>
-        <div className="flex gap-0 px-4 min-w-max">
-          {days.map((day, i) => {
-            const isToday = isSameDay(day, today)
-            const isSelected = selectedDate && isSameDay(day, selectedDate)
-            const isPast = day < new Date(today.getFullYear(), today.getMonth(), today.getDate())
-            const dayEvents = getEventsForDate(day)
-            const hasEvents = dayEvents.length > 0
-            const topCat = hasEvents ? dayEvents[0].category : null
-
-            let monthLabel = null
-            if (day.getMonth() !== currentMonth) {
-              currentMonth = day.getMonth()
-              monthLabel = MONTH_FULL[day.getMonth()].substring(0, 3)
-            }
-
-            return (
-              <div key={i} className="flex flex-col items-center" style={{ scrollSnapAlign: isToday ? 'center' : 'none' }}>
-                {monthLabel ? <p className="text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 w-[42px] text-center">{monthLabel}</p> : <p className="text-[8px] mb-0.5 w-[42px]">&nbsp;</p>}
-                <button
-                  id={isToday ? 'cal-today' : undefined}
-                  onClick={() => setSelectedDate(isSelected ? null : day)}
-                  className={`w-[42px] h-[52px] rounded-xl flex flex-col items-center justify-center gap-0.5 mx-[1px] transition-all active:scale-95 ${
-                    isSelected ? 'text-white' : isPast ? 'opacity-40' : ''
-                  }`}
-                  style={
-                    isSelected ? { background: '#363A47' } :
-                    isToday ? { background: 'rgba(54,58,71,0.08)' } :
-                    {}
-                  }
-                >
-                  <span className={`text-[9px] font-medium ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
-                    {DAY_SHORT[day.getDay()]}
-                  </span>
-                  <span className={`text-[15px] font-bold ${isSelected ? 'text-white' : isToday ? 'text-gray-800' : 'text-gray-600'}`}>
-                    {day.getDate()}
-                  </span>
-                  {hasEvents ? (
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: isSelected ? '#fff' : (CATEGORY_DOTS[topCat] || '#6B7B8D') }} />
-                  ) : (
-                    <div className="w-1.5 h-1.5" />
-                  )}
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ── Add Event Modal ── */
-function AddEventModal({ onClose, onCreated }) {
+/* ── Add Event Modal (unchanged logic) ── */
+function AddEventModal({ onClose }) {
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
   const [category, setCategory] = useState('Social/Key Moments')
@@ -352,7 +225,7 @@ function AddEventModal({ onClose, onCreated }) {
       body: JSON.stringify({ title, date: formatted, category }),
     })
     setSaving(false)
-    onCreated()
+    onClose()
   }
 
   return (

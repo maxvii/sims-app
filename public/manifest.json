@@ -1,11 +1,11 @@
 {
-  "name": "The SMZ",
-  "short_name": "SMZ",
+  "name": "The Sims",
+  "short_name": "Sims",
   "description": "Personal brand management by Sima Ganwani Ved",
   "start_url": "/login",
   "display": "standalone",
-  "background_color": "#502D55",
-  "theme_color": "#502D55",
+  "background_color": "#F7F9FA",
+  "theme_color": "#363A47",
   "orientation": "portrait",
   "icons": [
     {
