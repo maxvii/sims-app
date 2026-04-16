@@ -176,10 +176,11 @@ function KindIcon({ kind, className = 'w-6 h-6' }) {
 }
 
 /** Fullscreen in-app preview modal with a Back-to-chat button.
- *  Used for Office docs / PDFs / any URL we want to show inline without
- *  kicking the user out to a new tab. Closes on Esc.
+ *  Handles images, videos, PDFs, Office docs, and any other URL.
+ *  Closes on Esc. Never opens a new tab.
  */
-function PreviewModal({ url, filename, onClose }) {
+function PreviewModal({ url, filename, mode, onClose }) {
+  // mode: 'image' | 'video' | 'iframe'
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
@@ -191,9 +192,14 @@ function PreviewModal({ url, filename, onClose }) {
     }
   }, [onClose])
 
+  // If we're showing the Office Online viewer, the actual file URL is embedded
+  // in the viewer URL — pull it back out so the Download button gives the real file.
   const downloadUrl = url.includes('view.officeapps.live.com')
     ? decodeURIComponent(url.split('src=')[1] || url)
     : url
+
+  // Choose background: image/video look best on a dark canvas, docs/iframes on light.
+  const bodyBg = (mode === 'image' || mode === 'video') ? '#0B0C10' : '#E7ECF1'
 
   return (
     <div
@@ -241,15 +247,36 @@ function PreviewModal({ url, filename, onClose }) {
         </a>
       </div>
 
-      {/* Body: iframe viewer */}
-      <div className="flex-1 relative" style={{ background: '#E7ECF1' }}>
-        <iframe
-          src={url}
-          title={filename}
-          className="w-full h-full"
-          style={{ border: 0 }}
-          allow="clipboard-read; clipboard-write; fullscreen"
-        />
+      {/* Body — kind-aware viewer */}
+      <div
+        className="flex-1 relative flex items-center justify-center overflow-auto"
+        style={{ background: bodyBg }}
+      >
+        {mode === 'image' ? (
+          <img
+            src={url}
+            alt={filename}
+            className="max-w-full max-h-full object-contain"
+            style={{ display: 'block' }}
+          />
+        ) : mode === 'video' ? (
+          <video
+            src={url}
+            controls
+            autoPlay
+            playsInline
+            className="max-w-full max-h-full"
+            style={{ display: 'block', background: '#000' }}
+          />
+        ) : (
+          <iframe
+            src={url}
+            title={filename}
+            className="w-full h-full"
+            style={{ border: 0 }}
+            allow="clipboard-read; clipboard-write; fullscreen"
+          />
+        )}
       </div>
     </div>
   )
@@ -287,44 +314,78 @@ function MediaThumbnail({ url }) {
 
   if (kind === 'pdf') {
     return (
-      <a href={url} download={filename} target="_blank" rel="noopener noreferrer"
-        className="my-2 block rounded-2xl overflow-hidden active:scale-[0.98] transition-transform"
-        style={{ background: 'rgba(54,58,71,0.06)', border: '1px solid rgba(54,58,71,0.08)', maxWidth: 280 }}
-      >
-        {pdfThumb ? (
-          <img src={pdfThumb} alt={filename} className="w-full" style={{ maxHeight: 320, objectFit: 'contain', background: '#fff' }} />
-        ) : (
-          <div className="w-full h-40 flex items-center justify-center" style={{ background: 'rgba(212, 54, 92, 0.08)', color: '#D4365C' }}>
-            <KindIcon kind="pdf" className="w-12 h-12" />
+      <>
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
+          className="my-2 block rounded-2xl overflow-hidden active:scale-[0.98] transition-transform w-full text-left"
+          style={{ background: 'rgba(54,58,71,0.06)', border: '1px solid rgba(54,58,71,0.08)', maxWidth: 280 }}
+        >
+          {pdfThumb ? (
+            <img src={pdfThumb} alt={filename} className="w-full" style={{ maxHeight: 320, objectFit: 'contain', background: '#fff' }} />
+          ) : (
+            <div className="w-full h-40 flex items-center justify-center" style={{ background: 'rgba(212, 54, 92, 0.08)', color: '#D4365C' }}>
+              <KindIcon kind="pdf" className="w-12 h-12" />
+            </div>
+          )}
+          <div className="flex items-center gap-2 p-2.5">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center text-white" style={{ background: '#DC2626' }}>
+              <KindIcon kind="pdf" className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-gray-700 truncate">{filename}</p>
+              <p className="text-[10px] text-gray-400">Tap to preview</p>
+            </div>
           </div>
+        </button>
+        {previewOpen && (
+          <PreviewModal url={url} filename={filename} mode="iframe" onClose={() => setPreviewOpen(false)} />
         )}
-        <div className="flex items-center gap-2 p-2.5">
-          <div className="w-7 h-7 rounded-md flex items-center justify-center text-white" style={{ background: '#DC2626' }}>
-            <KindIcon kind="pdf" className="w-4 h-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-gray-700 truncate">{filename}</p>
-            <p className="text-[10px] text-gray-400">Tap to download</p>
-          </div>
-        </div>
-      </a>
+      </>
     )
   }
 
   if (kind === 'video') {
     return (
-      <div className="my-2 rounded-2xl overflow-hidden" style={{ maxWidth: 280 }}>
-        <video src={url} controls preload="metadata" className="w-full" style={{ maxHeight: 220, objectFit: 'cover' }} />
-      </div>
+      <>
+        <div className="my-2 rounded-2xl overflow-hidden relative" style={{ maxWidth: 280 }}>
+          <video src={url} controls preload="metadata" className="w-full" style={{ maxHeight: 220, objectFit: 'cover' }} />
+          <button
+            type="button"
+            onClick={() => setPreviewOpen(true)}
+            className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+            style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+            aria-label="Open fullscreen"
+            title="Open fullscreen"
+          >
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M20.25 20.25v-4.5m0 4.5h-4.5m4.5 0L15 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15" />
+            </svg>
+          </button>
+        </div>
+        {previewOpen && (
+          <PreviewModal url={url} filename={filename} mode="video" onClose={() => setPreviewOpen(false)} />
+        )}
+      </>
     )
   }
 
   if (kind === 'image') {
     return (
-      <div className="my-2 rounded-2xl overflow-hidden" style={{ maxWidth: 280 }}>
-        <img src={url} alt="Shared media" onClick={() => window.open(url, '_blank')}
-          className="w-full cursor-pointer" style={{ maxHeight: 240, objectFit: 'cover' }} />
-      </div>
+      <>
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
+          className="my-2 rounded-2xl overflow-hidden block w-full text-left active:scale-[0.98] transition-transform"
+          style={{ maxWidth: 280 }}
+          aria-label="Open preview"
+        >
+          <img src={url} alt={filename} className="w-full cursor-pointer" style={{ maxHeight: 240, objectFit: 'cover' }} />
+        </button>
+        {previewOpen && (
+          <PreviewModal url={url} filename={filename} mode="image" onClose={() => setPreviewOpen(false)} />
+        )}
+      </>
     )
   }
 
@@ -388,6 +449,7 @@ function MediaThumbnail({ url }) {
           <PreviewModal
             url={previewSrc}
             filename={filename}
+            mode="iframe"
             onClose={() => setPreviewOpen(false)}
           />
         )}
