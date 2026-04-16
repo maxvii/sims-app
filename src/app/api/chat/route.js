@@ -172,6 +172,22 @@ async function expandAttachmentsForModel(content) {
   return out
 }
 
+// ─── Friendly error messages for upstream failures ───
+// Maps gateway / Cloudflare status codes to short, human-readable text
+// so we never dump raw HTML error pages into the chat bubble.
+function friendlyGatewayError(status) {
+  if (status === 401 || status === 403) return 'The AI gateway rejected our credentials. Try again in a moment — if it persists, the token needs refreshing.'
+  if (status === 404) return 'The AI endpoint returned 404. The gateway route may be misconfigured.'
+  if (status === 408) return 'The AI took too long to respond. Try a shorter or simpler request.'
+  if (status === 429) return 'The AI is rate-limited right now. Give it a few seconds and try again.'
+  if (status === 502) return 'The AI gateway is temporarily unreachable. Please try again in a moment.'
+  if (status === 503) return 'The AI service is restarting. Please try again in a moment.'
+  if (status === 504) return 'The AI took too long to respond (gateway timeout). Heavy generations like videos or big decks can exceed the upstream 100s limit — try a smaller scope or try again.'
+  if (status === 524) return 'The AI is still working but exceeded the upstream 100-second timeout. For long tasks (videos, pitch decks, deep research), try a smaller scope — or have the gateway stream output so progress is visible.'
+  if (status >= 500) return `The AI gateway returned an error (${status}). Please try again in a moment.`
+  return `The AI gateway returned an unexpected status (${status}).`
+}
+
 // ─── Call OpenClaw with the full conversation (last N turns) ───
 async function callOpenClaw(fullPrompt) {
   const url = process.env.OPENCLAW_URL
@@ -179,16 +195,37 @@ async function callOpenClaw(fullPrompt) {
   if (!url)   throw new Error('OPENCLAW_URL not configured — update the env var in Dokploy')
   if (!token) throw new Error('OPENCLAW_TOKEN not configured — update the env var in Dokploy')
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ message: fullPrompt, agent: 'main' }),
-  })
-  if (!res.ok) {
-    const errText = await res.text().catch(() => res.statusText)
-    throw new Error(`OpenClaw returned ${res.status}: ${errText}`)
+  let res
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ message: fullPrompt, agent: 'main' }),
+    })
+  } catch (err) {
+    // Network error, DNS failure, socket reset, etc.
+    const e = new Error('Could not reach the AI gateway. Please try again in a moment.')
+    e.cause = err
+    e.status = 0
+    throw e
   }
-  const data = await res.json()
+
+  if (!res.ok) {
+    // Drain the body so the connection releases, but do NOT echo it to the client
+    await res.text().catch(() => {})
+    const e = new Error(friendlyGatewayError(res.status))
+    e.status = res.status
+    throw e
+  }
+
+  // Parse JSON. If upstream returns non-JSON (e.g. an HTML error page with 200),
+  // catch it and show a friendly message instead of letting the JSON parse error leak.
+  let data
+  try {
+    data = await res.json()
+  } catch {
+    throw new Error('The AI gateway returned an unexpected response. Please try again.')
+  }
   return data.output || data.result || ''
 }
 
@@ -290,10 +327,16 @@ export async function POST(req) {
     })
     return createUIMessageStreamResponse({ stream, status: 200 })
   } catch (error) {
-    console.error('Sims GPT chat error:', error?.message || error)
+    // Log the full error server-side, but only return the short user-safe message.
+    console.error('Sims GPT chat error:', error?.status || '', error?.message || error)
+    const userMessage = typeof error?.message === 'string' && error.message.length < 400
+      ? error.message
+      : 'Failed to process chat request. Please try again.'
+    // Strip any HTML that might have slipped into an Error message, as a defence-in-depth
+    const safeMessage = userMessage.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
     return new Response(
-      JSON.stringify({ error: error?.message || 'Failed to process chat request. Please try again.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
+      JSON.stringify({ error: safeMessage }),
+      { status: 502, headers: { 'Content-Type': 'application/json' } },
     )
   }
 }
