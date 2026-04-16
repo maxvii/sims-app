@@ -188,7 +188,67 @@ function friendlyGatewayError(status) {
   return `The AI gateway returned an unexpected status (${status}).`
 }
 
+// ─── Read an SSE stream until we get a {type:"done"} frame ──────────────────
+// The bridge at :3456 sends a mix of progress/keepalive frames (to keep
+// Cloudflare's 100s edge timeout from firing) and a final {type:"done",
+// output:"..."} frame. We ignore progress frames and return the output.
+async function readSseUntilDone(res) {
+  const reader = res.body?.getReader()
+  if (!reader) throw new Error('The AI gateway returned an empty stream.')
+  const decoder = new TextDecoder()
+  let buf = ''
+  let finalOutput = ''
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buf += decoder.decode(value, { stream: true })
+
+      // SSE frames are separated by a blank line (\n\n). Each frame may
+      // contain multiple "data:" lines — concatenate them with newlines.
+      let sep
+      while ((sep = buf.indexOf('\n\n')) !== -1) {
+        const frame = buf.slice(0, sep)
+        buf = buf.slice(sep + 2)
+
+        const dataLines = frame.split('\n')
+          .filter((l) => l.startsWith('data:'))
+          .map((l) => l.slice(5).replace(/^\s/, ''))
+        if (dataLines.length === 0) continue
+
+        const payload = dataLines.join('\n')
+        if (payload === '[DONE]') continue  // some gateways send this as a terminator
+
+        let parsed
+        try { parsed = JSON.parse(payload) } catch { continue }
+
+        if (parsed?.type === 'done') {
+          finalOutput = parsed.output ?? parsed.result ?? ''
+          try { await reader.cancel() } catch {}
+          return String(finalOutput || '')
+        }
+        if (parsed?.type === 'error') {
+          const msg = parsed.message || parsed.error || 'The AI reported an error.'
+          throw new Error(msg)
+        }
+        // progress / keepalive / tool-call / anything else → ignore
+      }
+    }
+  } finally {
+    try { reader.releaseLock() } catch {}
+  }
+
+  // Stream closed without a done frame
+  if (finalOutput) return String(finalOutput)
+  throw new Error('The AI stream ended without a final response. Please try again.')
+}
+
 // ─── Call OpenClaw with the full conversation (last N turns) ───
+// Gateway may respond in two shapes:
+//   1. text/event-stream  — emits progress + a final {type:"done",output} frame
+//   2. application/json   — legacy single-blob { output|result } response
+// We handle both.
 async function callOpenClaw(fullPrompt) {
   const url = process.env.OPENCLAW_URL
   const token = process.env.OPENCLAW_TOKEN
@@ -199,11 +259,14 @@ async function callOpenClaw(fullPrompt) {
   try {
     res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream, application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify({ message: fullPrompt, agent: 'main' }),
     })
   } catch (err) {
-    // Network error, DNS failure, socket reset, etc.
     const e = new Error('Could not reach the AI gateway. Please try again in a moment.')
     e.cause = err
     e.status = 0
@@ -211,22 +274,27 @@ async function callOpenClaw(fullPrompt) {
   }
 
   if (!res.ok) {
-    // Drain the body so the connection releases, but do NOT echo it to the client
-    await res.text().catch(() => {})
+    await res.text().catch(() => {})  // drain + discard
     const e = new Error(friendlyGatewayError(res.status))
     e.status = res.status
     throw e
   }
 
-  // Parse JSON. If upstream returns non-JSON (e.g. an HTML error page with 200),
-  // catch it and show a friendly message instead of letting the JSON parse error leak.
+  const contentType = (res.headers.get('content-type') || '').toLowerCase()
+
+  // Path A — SSE: keep reading until {type:"done"}.
+  if (contentType.includes('text/event-stream')) {
+    return await readSseUntilDone(res)
+  }
+
+  // Path B — JSON fallback (back-compat).
   let data
   try {
     data = await res.json()
   } catch {
     throw new Error('The AI gateway returned an unexpected response. Please try again.')
   }
-  return data.output || data.result || ''
+  return data?.output || data?.result || ''
 }
 
 // Build the single-message prompt OpenClaw expects — prepend context + recent history.
