@@ -15,12 +15,23 @@ All bodies are JSON; set Content-Type: application/json on every POST/PATCH/DELE
 
 BASE URL: https://sims.ai-gcc.com
 
-CALENDAR:
-- GET    /api/events                — list events. Query: ?month=Apr&status=Not Started (month uses 3-letter abbrev: Jan–Dec)
-- POST   /api/events                — CREATE. Body: {"title":"...","date":"09 Apr 2026","category":"Social/Key Moments","status":"Not Started","notes":"..."}
+CALENDAR TOOLS (preferred — stable, minimal, POST-only, all take JSON bodies):
+- POST /api/sims-gpt/tools/create-event    — Body: {"title":"...","date":"09 Apr 2026","category":"Corporate Event","status":"Not Started","notes":"..."}
+- POST /api/sims-gpt/tools/update-event    — Body: {"eventId":"clx5...","status":"Approved","notes":"..."}  (any subset of writable fields)
+- POST /api/sims-gpt/tools/delete-event    — Body: {"eventId":"clx5..."}
+- POST /api/sims-gpt/tools/search-events   — Body: {"query":"fashion","month":"Oct","category":"Corporate Event","status":"Approved","dateFrom":"01 Oct 2026","dateTo":"31 Oct 2026","limit":20}  (all fields optional)
+- POST /api/sims-gpt/tools/today-brief     — Body: {}     → today + upcoming week + status totals
+- POST /api/sims-gpt/tools/analytics       — Body: {}     → totals by category, status, month
+- GET  /api/sims-gpt/tools                 — list every tool + its schema + one example body
+
+All tool responses use the shape: { ok: true, ...data }  OR  { ok: false, error: "..." }
+
+RAW ENDPOINTS (fallback only — prefer the tools above):
+- GET    /api/events                — list events. Query: ?month=Apr&status=Not Started
+- POST   /api/events                — CREATE
 - GET    /api/events/{id}           — event detail (with comments, approvals, references)
-- PATCH  /api/events/{id}           — UPDATE any subset of: title, date, endDate, category, status, opportunityType, platforms, postConcept, visualDirection, captionDirection, creativeBriefDue, round1Due, round2Due, finalCreativeDue, notes
-- DELETE /api/events/{id}           — REMOVE event (cascades comments, approvals, references, notifications, media)
+- PATCH  /api/events/{id}           — UPDATE (any subset of: title, date, endDate, category, status, opportunityType, platforms, postConcept, visualDirection, captionDirection, creativeBriefDue, round1Due, round2Due, finalCreativeDue, notes)
+- DELETE /api/events/{id}           — REMOVE event (cascades dependents)
 - GET    /api/analytics             — calendar stats
 
 VALID VALUES:
@@ -69,17 +80,18 @@ RULES:
 - There is ONLY ONE calendar. Never ask "which calendar".
 - Be concise and professional.
 
-EXAMPLE — create an event:
-    POST https://sims.ai-gcc.com/api/events
+EXAMPLE — create an event (preferred):
+    POST https://sims.ai-gcc.com/api/sims-gpt/tools/create-event
     Headers: { Authorization: "Bearer <OPENCLAW_TOKEN>", Content-Type: "application/json" }
     Body:    { "title": "Dubai Fashion Week opening", "date": "18 Oct 2026", "category": "Corporate Event", "status": "Not Started" }
 
 EXAMPLE — update status:
-    PATCH https://sims.ai-gcc.com/api/events/clx5abc123
-    Body:  { "status": "Approved" }
+    POST https://sims.ai-gcc.com/api/sims-gpt/tools/update-event
+    Body:  { "eventId": "clx5abc123", "status": "Approved", "notes": "Deck signed off" }
 
 EXAMPLE — delete:
-    DELETE https://sims.ai-gcc.com/api/events/clx5abc123`
+    POST https://sims.ai-gcc.com/api/sims-gpt/tools/delete-event
+    Body:  { "eventId": "clx5abc123" }`
 
 // ─── Sanitize response: strip local paths, server URLs, tokens ───
 function sanitizeResponse(text) {
