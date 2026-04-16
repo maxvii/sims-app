@@ -174,9 +174,10 @@ async function expandAttachmentsForModel(content) {
 
 // ─── Call OpenClaw with the full conversation (last N turns) ───
 async function callOpenClaw(fullPrompt) {
-  const url = process.env.OPENCLAW_URL || 'https://fool.khlije.app/agent'
+  const url = process.env.OPENCLAW_URL
   const token = process.env.OPENCLAW_TOKEN
-  if (!token) throw new Error('OPENCLAW_TOKEN not configured')
+  if (!url)   throw new Error('OPENCLAW_URL not configured — update the env var in Dokploy')
+  if (!token) throw new Error('OPENCLAW_TOKEN not configured — update the env var in Dokploy')
 
   const res = await fetch(url, {
     method: 'POST',
