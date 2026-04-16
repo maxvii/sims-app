@@ -59,8 +59,8 @@ export default function HomePage() {
         <img
           src="/images/the-sims-logo.png"
           alt="The Sims"
-          className="h-9 w-auto"
-          style={{ filter: 'brightness(0) saturate(100%) invert(15%) sepia(13%) saturate(547%) hue-rotate(196deg) brightness(94%) contrast(88%)' }}
+          className="h-10 w-auto select-none"
+          draggable={false}
         />
         <button
           onClick={() => router.push('/profile')}

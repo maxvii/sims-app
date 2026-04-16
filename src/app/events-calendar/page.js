@@ -6,21 +6,21 @@ import Navbar from '@/components/Navbar'
 
 // ── Category colors — matches Sims Design System v2.0 ──
 const CATEGORY_COLORS = {
-  'Social/Key Moments': '#2B2E38',  // Violet Dark
-  'Corporate Campaign': '#6B7B8D',  // Mauve Rose
-  'Corporate Event':    '#4A6FA5',  // Blue accent
-  'Sponsorships':       '#8B6BA5',  // Violet accent
-  'Gifting':            '#C9956B',  // Warm tan (= Rescheduled)
-  'PR Birthdays':       '#D4365C',  // Pink (= Cancelled)
-  'HR & CSR':           '#6B8E6B',  // Green (= Approved)
-  'Coca Cola Arena':    '#CC4444',  // Red
+  'Social/Key Moments': '#2B2E38',
+  'Corporate Campaign': '#6B7B8D',
+  'Corporate Event':    '#4A6FA5',
+  'Sponsorships':       '#8B6BA5',
+  'Gifting':            '#C9956B',
+  'PR Birthdays':       '#D4365C',
+  'HR & CSR':           '#6B8E6B',
+  'Coca Cola Arena':    '#CC4444',
 }
 
 const STATUS_STYLES = {
-  'Approved':    { bg: 'rgba(107,142,107,0.14)', text: '#6B8E6B', dot: '#6B8E6B' },
-  'Rescheduled': { bg: 'rgba(201,149,107,0.14)', text: '#C9956B', dot: '#C9956B' },
-  'Cancelled':   { bg: 'rgba(212,54,92,0.12)',   text: '#D4365C', dot: '#D4365C' },
-  'Not Started': { bg: 'rgba(156,163,175,0.14)', text: '#6B7B8D', dot: '#9CA3AF' },
+  'Approved':    { bg: 'rgba(107,142,107,0.14)', text: '#6B8E6B' },
+  'Rescheduled': { bg: 'rgba(201,149,107,0.14)', text: '#C9956B' },
+  'Cancelled':   { bg: 'rgba(212,54,92,0.12)',   text: '#D4365C' },
+  'Not Started': { bg: 'rgba(156,163,175,0.14)', text: '#6B7B8D' },
 }
 
 const MONTHS_FULL = [
@@ -28,7 +28,6 @@ const MONTHS_FULL = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-const DAYS = ['S','M','T','W','T','F','S']
 
 function getCategoryColor(category) {
   if (!category) return '#6B7B8D'
@@ -41,7 +40,6 @@ function getCategoryColor(category) {
 }
 
 function parseEventDate(ev) {
-  // ev.date is "DD MMM YYYY" like "12 Apr 2026"
   if (!ev.date) return null
   const parts = ev.date.trim().split(/\s+/)
   if (parts.length < 3) return null
@@ -57,10 +55,8 @@ export default function EventsCalendarPage() {
   const router = useRouter()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [viewMonthIdx, setViewMonthIdx] = useState(new Date().getMonth())
-  const [viewYear] = useState(2026)
-  const [selectedDay, setSelectedDay] = useState(new Date().getDate())
-  const [filterCat, setFilterCat] = useState(null)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+  const VIEW_YEAR = 2026
 
   useEffect(() => { if (authStatus === 'unauthenticated') router.push('/login') }, [authStatus, router])
 
@@ -74,38 +70,26 @@ export default function EventsCalendarPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  // ── Group events by date-key (YYYY-MM-DD) for fast lookup ──
-  const eventsByDay = useMemo(() => {
-    const map = {}
+  // Bucket events by month (0-indexed)
+  const eventsByMonth = useMemo(() => {
+    const buckets = Array.from({ length: 12 }, () => [])
     events.forEach((ev) => {
       const d = parseEventDate(ev)
       if (!d) return
-      if (d.year !== viewYear || d.month !== viewMonthIdx) return
-      if (filterCat && !ev.category?.toLowerCase().includes(filterCat.toLowerCase())) return
-      if (!map[d.day]) map[d.day] = []
-      map[d.day].push(ev)
+      if (d.year !== VIEW_YEAR) return
+      buckets[d.month].push(ev)
     })
-    return map
-  }, [events, viewMonthIdx, viewYear, filterCat])
+    // Sort each bucket by day ascending
+    buckets.forEach((arr) => arr.sort((a, b) => {
+      const da = parseEventDate(a)?.day || 0
+      const db = parseEventDate(b)?.day || 0
+      return da - db
+    }))
+    return buckets
+  }, [events])
 
-  // Build calendar grid for current month
-  const firstOfMonth = new Date(viewYear, viewMonthIdx, 1)
-  const startWeekday = firstOfMonth.getDay()
-  const daysInMonth = new Date(viewYear, viewMonthIdx + 1, 0).getDate()
-  const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7
-
-  const selectedDayEvents = eventsByDay[selectedDay] || []
-  const monthName = MONTHS_FULL[viewMonthIdx]
-
-  const totalMonthEvents = Object.values(eventsByDay).reduce((acc, arr) => acc + arr.length, 0)
-
-  const goMonth = (delta) => {
-    let m = viewMonthIdx + delta
-    if (m < 0) m = 11
-    if (m > 11) m = 0
-    setViewMonthIdx(m)
-    setSelectedDay(1)
-  }
+  const selectedEvents = eventsByMonth[selectedMonth] || []
+  const totalEvents = eventsByMonth.reduce((acc, arr) => acc + arr.length, 0)
 
   if (authStatus === 'loading') return null
 
@@ -125,7 +109,7 @@ export default function EventsCalendarPage() {
           Sims Calendar
         </h1>
         <p className="text-[11px] mt-1" style={{ color: '#6B7B8D' }}>
-          {totalMonthEvents} event{totalMonthEvents !== 1 ? 's' : ''} · {monthName} {viewYear}
+          {totalEvents} event{totalEvents !== 1 ? 's' : ''} across the year
         </p>
       </div>
 
@@ -135,73 +119,66 @@ export default function EventsCalendarPage() {
         </div>
       ) : (
         <>
-          {/* ── Month Pager ── */}
-          <div className="mx-4 mb-4 px-4 py-3 rounded-2xl flex items-center justify-between" style={{ background: '#E7ECF1' }}>
-            <button onClick={() => goMonth(-1)} className="w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform" style={{ background: '#F7F9FA' }}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#363A47" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <div className="text-center">
-              <div className="font-display text-lg font-bold" style={{ color: '#2B2E38' }}>
-                {monthName}
-              </div>
+          {/* ── Year Header (replaces the month name) ── */}
+          <div className="mx-4 mb-4 px-5 py-4 rounded-2xl flex items-center justify-between" style={{ background: '#E7ECF1' }}>
+            <div>
               <div className="text-[10px] font-semibold tracking-[0.22em] uppercase" style={{ color: '#6B7B8D' }}>
-                {viewYear}
+                Year
+              </div>
+              <div className="font-display text-3xl font-black italic" style={{ color: '#2B2E38' }}>
+                {VIEW_YEAR}
               </div>
             </div>
-            <button onClick={() => goMonth(1)} className="w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-transform" style={{ background: '#F7F9FA' }}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#363A47" strokeWidth={2.2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-            </button>
+            <div className="text-right">
+              <div className="text-[10px] font-semibold tracking-[0.18em] uppercase" style={{ color: '#6B7B8D' }}>
+                Viewing
+              </div>
+              <div className="font-display text-lg font-bold" style={{ color: '#2B2E38' }}>
+                {MONTHS_FULL[selectedMonth]}
+              </div>
+            </div>
           </div>
 
-          {/* ── Calendar Grid ── */}
+          {/* ── 12-Month Grid (4 cols × 3 rows) — replaces the day cells ── */}
           <div className="mx-4 p-4 rounded-3xl" style={{ background: '#FFFFFF', border: '1px solid #E7ECF1' }}>
-            {/* Weekday strip */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {DAYS.map((d, i) => (
-                <div key={i} className="text-center text-[10px] font-bold tracking-[0.15em]" style={{ color: '#9AAAB8' }}>
-                  {d}
-                </div>
-              ))}
-            </div>
-
-            {/* Day cells */}
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: totalCells }).map((_, idx) => {
-                const dayNum = idx - startWeekday + 1
-                const inMonth = dayNum >= 1 && dayNum <= daysInMonth
-                const dayEvents = inMonth ? (eventsByDay[dayNum] || []) : []
-                const isSelected = inMonth && dayNum === selectedDay
+            <div className="grid grid-cols-4 gap-2">
+              {MONTHS_FULL.map((monthName, idx) => {
+                const count = eventsByMonth[idx].length
+                const isSelected = idx === selectedMonth
                 const today = new Date()
-                const isToday = inMonth &&
-                  dayNum === today.getDate() &&
-                  viewMonthIdx === today.getMonth() &&
-                  viewYear === today.getFullYear()
+                const isCurrentMonth = idx === today.getMonth() && VIEW_YEAR === today.getFullYear()
 
                 return (
                   <button
-                    key={idx}
-                    disabled={!inMonth}
-                    onClick={() => inMonth && setSelectedDay(dayNum)}
-                    className="relative h-12 rounded-xl flex flex-col items-center justify-center transition-all active:scale-90"
+                    key={monthName}
+                    onClick={() => setSelectedMonth(idx)}
+                    className="aspect-square rounded-2xl flex flex-col items-center justify-center transition-all active:scale-90 relative"
                     style={{
-                      background: isSelected ? '#363A47' : (isToday ? '#D0D9E2' : 'transparent'),
-                      opacity: inMonth ? 1 : 0,
+                      background: isSelected ? '#363A47' : (isCurrentMonth ? '#D0D9E2' : 'transparent'),
+                      border: isSelected ? 'none' : `1px solid ${isCurrentMonth ? 'transparent' : '#E7ECF1'}`,
                     }}
                   >
-                    <span className="text-sm font-semibold" style={{
-                      color: isSelected ? '#F7F9FA' : (isToday ? '#2B2E38' : '#2B2E38'),
-                    }}>
-                      {inMonth ? dayNum : ''}
+                    <span
+                      className="text-[11px] font-bold tracking-[0.15em] uppercase"
+                      style={{ color: isSelected ? '#F7F9FA' : '#2B2E38' }}
+                    >
+                      {MONTHS_SHORT[idx]}
                     </span>
-                    {/* Event dots */}
-                    {dayEvents.length > 0 && (
-                      <div className="flex items-center gap-0.5 mt-0.5">
-                        {dayEvents.slice(0, 3).map((ev, i) => (
-                          <span key={i} className="w-1 h-1 rounded-full" style={{
-                            background: isSelected ? '#F7F9FA' : getCategoryColor(ev.category),
-                          }} />
-                        ))}
-                      </div>
+                    {count > 0 && (
+                      <span
+                        className="text-[10px] font-semibold mt-1"
+                        style={{ color: isSelected ? 'rgba(247,249,250,0.75)' : '#9AAAB8' }}
+                      >
+                        {count} event{count !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                    {count === 0 && (
+                      <span
+                        className="text-[10px] mt-1"
+                        style={{ color: isSelected ? 'rgba(247,249,250,0.55)' : '#C7CED5' }}
+                      >
+                        —
+                      </span>
                     )}
                   </button>
                 )
@@ -209,58 +186,31 @@ export default function EventsCalendarPage() {
             </div>
           </div>
 
-          {/* ── Category Legend (filter chips) ── */}
-          <div className="px-4 mt-5">
-            <p className="text-[10px] font-bold tracking-[0.18em] uppercase mb-2.5" style={{ color: '#6B7B8D' }}>
-              Categories
-            </p>
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              {Object.entries(CATEGORY_COLORS).map(([cat, color]) => {
-                const active = filterCat === cat
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setFilterCat(active ? null : cat)}
-                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all"
-                    style={{
-                      background: active ? color : '#FFFFFF',
-                      border: `1px solid ${active ? color : '#E7ECF1'}`,
-                    }}
-                  >
-                    <span className="w-2 h-2 rounded-full" style={{ background: active ? '#F7F9FA' : color }} />
-                    <span className="text-[11px] font-semibold whitespace-nowrap" style={{
-                      color: active ? '#F7F9FA' : '#2B2E38',
-                    }}>
-                      {cat}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* ── Selected Day Events ── */}
+          {/* ── Selected Month Events (shown below, like the wireframe) ── */}
           <div className="px-4 mt-5">
             <div className="flex items-end justify-between mb-3">
               <div>
                 <p className="text-[10px] font-bold tracking-[0.18em] uppercase" style={{ color: '#6B7B8D' }}>
-                  {monthName} {selectedDay}
+                  {MONTHS_FULL[selectedMonth]} {VIEW_YEAR}
                 </p>
                 <h3 className="font-display text-lg font-bold" style={{ color: '#2B2E38' }}>
-                  {selectedDayEvents.length === 0 ? 'No events' : `${selectedDayEvents.length} event${selectedDayEvents.length !== 1 ? 's' : ''}`}
+                  {selectedEvents.length === 0
+                    ? 'No events'
+                    : `${selectedEvents.length} event${selectedEvents.length !== 1 ? 's' : ''}`}
                 </h3>
               </div>
             </div>
 
-            {selectedDayEvents.length === 0 ? (
-              <div className="py-8 text-center rounded-2xl" style={{ background: '#FFFFFF', border: '1px dashed #E7ECF1' }}>
-                <p className="text-xs" style={{ color: '#9AAAB8' }}>Tap a day with a dot to see its events</p>
+            {selectedEvents.length === 0 ? (
+              <div className="py-10 text-center rounded-2xl" style={{ background: '#FFFFFF', border: '1px dashed #E7ECF1' }}>
+                <p className="text-xs" style={{ color: '#9AAAB8' }}>No events scheduled this month</p>
               </div>
             ) : (
-              <div className="space-y-2.5">
-                {selectedDayEvents.map((ev) => {
+              <div className="space-y-2.5 animate-fade-in">
+                {selectedEvents.map((ev) => {
                   const catColor = getCategoryColor(ev.category)
                   const statusStyle = STATUS_STYLES[ev.status] || STATUS_STYLES['Not Started']
+                  const parsed = parseEventDate(ev)
                   return (
                     <button
                       key={ev.id}
@@ -268,7 +218,20 @@ export default function EventsCalendarPage() {
                       className="w-full text-left rounded-2xl p-3.5 flex items-start gap-3 transition-all active:scale-[0.98]"
                       style={{ background: '#FFFFFF', border: '1px solid #E7ECF1' }}
                     >
-                      <div className="w-1 self-stretch rounded-full shrink-0" style={{ background: catColor }} />
+                      {/* Day badge */}
+                      <div
+                        className="shrink-0 w-11 h-11 rounded-xl flex flex-col items-center justify-center"
+                        style={{ background: `${catColor}14` }}
+                      >
+                        <span className="text-[9px] font-bold tracking-wider uppercase" style={{ color: catColor }}>
+                          {MONTHS_SHORT[selectedMonth]}
+                        </span>
+                        <span className="text-sm font-black leading-none" style={{ color: catColor }}>
+                          {parsed?.day ?? '—'}
+                        </span>
+                      </div>
+
+                      {/* Content */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="text-sm font-semibold leading-tight truncate" style={{ color: '#2B2E38' }}>
@@ -291,9 +254,9 @@ export default function EventsCalendarPage() {
                               {ev.category}
                             </span>
                           )}
-                          {ev.date && <span className="text-[10px]" style={{ color: '#9AAAB8' }}>{ev.date}</span>}
                         </div>
                       </div>
+
                       <svg className="w-4 h-4 shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="#D0D9E2" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                       </svg>

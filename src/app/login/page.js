@@ -31,30 +31,14 @@ export default function LoginPage() {
         }}
       />
 
-      {/* ── Hero: Script logo ── */}
+      {/* ── Hero: The Sims logo ── */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center w-full">
-        <div className="text-center">
-          <h1
-            className="font-script text-[72px] leading-none"
-            style={{
-              color: '#363A47',
-              fontFamily: 'Great Vibes, cursive',
-              transform: 'rotate(-3deg)',
-            }}
-          >
-            The
-          </h1>
-          <h1
-            className="font-display text-[84px] leading-[0.9] font-black italic mt-1"
-            style={{
-              color: '#2B2E38',
-              fontFamily: 'Playfair Display, serif',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Sims
-          </h1>
-        </div>
+        <img
+          src="/images/the-sims-logo.png"
+          alt="The Sims"
+          className="w-[260px] max-w-[70vw] h-auto select-none"
+          draggable={false}
+        />
 
         {/* ── Sign In (hidden until tapped) ── */}
         {showForm ? (
