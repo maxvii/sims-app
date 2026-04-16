@@ -188,22 +188,80 @@ function friendlyGatewayError(status) {
   return `The AI gateway returned an unexpected status (${status}).`
 }
 
-// ─── Extract URLs from an "artifacts" list ──────────────────────────────────
-// Gateway returns artifacts in the done frame. Shape isn't rigidly specified so
-// we accept strings OR objects and hunt for anything URL-shaped.
-function artifactUrls(artifacts) {
+// ─── Extract / rehost URLs from an "artifacts" list ──────────────────────────
+// DeerFlow often returns an artifact as a local container path
+// (e.g. "/mnt/user-data/outputs/deck.pptx") — useless to a browser.
+// We ask the bridge for the file at <gateway-origin>/artifacts/<basename>,
+// save the bytes under /public/uploads, and return a /api/uploads/... URL
+// that the client's MediaThumbnail can render immediately.
+function gatewayOrigin() {
+  try { return new URL(process.env.OPENCLAW_URL || '').origin } catch { return null }
+}
+
+function isHttpUrl(s)   { return typeof s === 'string' && /^https?:\/\//i.test(s) }
+function isLocalUrl(s)  { return typeof s === 'string' && s.startsWith('/api/uploads/') }
+function basename(p)    { return String(p).split(/[\\/]/).pop() || '' }
+
+async function fetchArtifactFromBridge(artifactPath) {
+  const origin = gatewayOrigin()
+  const token  = process.env.OPENCLAW_TOKEN
+  if (!origin || !token) return null
+  const name = basename(artifactPath)
+  if (!name || name.includes('..')) return null
+
+  let res
+  try {
+    res = await fetch(`${origin}/artifacts/${encodeURIComponent(name)}`, {
+      headers: {
+        'x-webhook-secret': token,
+        'Authorization':    `Bearer ${token}`,
+      },
+    })
+  } catch {
+    return null
+  }
+  if (!res.ok) return null
+
+  const mimetype = res.headers.get('content-type') || 'application/octet-stream'
+  const buffer = Buffer.from(await res.arrayBuffer())
+  if (buffer.length < 10) return null
+
+  try {
+    const { persistBuffer } = await import('@/lib/chat-upload')
+    const saved = await persistBuffer({ buffer, originalName: name, mimetype })
+    return saved.url   // e.g. /api/uploads/chat-<hash>-<name>
+  } catch {
+    return null
+  }
+}
+
+async function artifactUrls(artifacts) {
   if (!artifacts) return []
   const list = Array.isArray(artifacts) ? artifacts : [artifacts]
   const urls = []
+
   for (const a of list) {
     if (!a) continue
-    if (typeof a === 'string') {
-      urls.push(a)
-      continue
+
+    // 1) already-usable URL?
+    if (typeof a === 'string' && (isHttpUrl(a) || isLocalUrl(a))) { urls.push(a); continue }
+    if (typeof a === 'object') {
+      const cand = a.url || a.fullUrl || a.download_url || a.downloadUrl || a.href
+      if (isHttpUrl(cand) || isLocalUrl(cand)) { urls.push(cand); continue }
     }
-    // Common field names — try them in order
-    const candidate = a.url || a.fullUrl || a.download_url || a.downloadUrl || a.path || a.href
-    if (candidate) urls.push(String(candidate))
+
+    // 2) a local container path we can try to rehost via the bridge
+    const localPath = typeof a === 'string' ? a : (a.path || a.filepath || a.localPath || null)
+    if (!localPath) continue
+    const rehosted = await fetchArtifactFromBridge(localPath)
+    if (rehosted) urls.push(rehosted)
+    else {
+      // Last-resort: construct a direct bridge URL so at least there's something
+      // clickable if the rehost fetch fails but the file is publicly served.
+      const origin = gatewayOrigin()
+      const name = basename(localPath)
+      if (origin && name) urls.push(`${origin}/artifacts/${encodeURIComponent(name)}`)
+    }
   }
   return urls
 }
@@ -289,7 +347,7 @@ async function readSseUntilDone(res) {
   // Compose the final reply: .result text first, then each artifact URL on its
   // own line so the client renders them as thumbnails / players / preview cards.
   const text = String(finalFrame.result ?? finalFrame.output ?? '').trim()
-  const urls = artifactUrls(finalFrame.artifacts)
+  const urls = await artifactUrls(finalFrame.artifacts)
   if (urls.length === 0) return text
   const joinedUrls = urls.join('\n')
   return text ? `${text}\n\n${joinedUrls}` : joinedUrls
