@@ -1,8 +1,10 @@
 import { createUIMessageStream, createUIMessageStreamResponse } from 'ai'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { readFile } from 'fs/promises'
+import path from 'path'
 
-export const maxDuration = 120
+export const maxDuration = 180
 
 const SIMS_CONTEXT = `You are Sims GPT — the AI assistant for Sima Ganwani Ved's brand management app.
 
@@ -18,14 +20,17 @@ CALENDAR:
 - GET /api/analytics — calendar stats
 
 MEDIA & FILES:
-- GET /api/uploads/{filename} — download uploaded files (no auth needed)
-- POST /api/chat/upload — upload a file. Send as multipart form with field "file". Response: {"url":"/api/uploads/chat-xxx.pdf","fullUrl":"..."}
+- GET /api/uploads/{filename} — download uploaded files (Bearer token OR session auth required for chat-* files)
+- POST /api/chat/upload-base64 — upload a file from base64. Body: {"data":"...","filename":"foo.pdf","mimetype":"application/pdf"}
 
 THEME (live, no redeploy):
 - GET /api/theme — current colors
 - POST /api/theme — update colors. Keys: violet-deep, violet-dark, mauve-rose, peach, cream, cream-dark, body-bg-start, body-bg-mid, body-bg-end, body-text
 
-PRESENTATIONS (use this when asked to create a deck, presentation, or slides):
+MULTIMODAL:
+When the user shares images, they will appear inline as data: URIs inside the message text. Treat them as first-class visual content — analyze their contents directly. For videos and large files the message will include an [ATTACHMENT filename=... kind=... url=...] tag with the public URL; fetch via web_fetch if you need the bytes.
+
+PRESENTATIONS:
 Wrap your slides in [SLIDES]...[/SLIDES] tags. Each slide is a <div class="slide"> with h1/h2/p/ul content.
 Example:
 [SLIDES]
@@ -33,71 +38,60 @@ Example:
 <div class="slide"><h2>Key Point</h2><ul><li>First point</li><li>Second point</li></ul></div>
 <div class="slide"><h2>Thank You</h2><p>Contact info</p></div>
 [/SLIDES]
-The server generates a styled PDF deck from these slides. User gets a download link.
+The server renders these as a styled HTML deck. User gets a link.
 
-SOCIAL MEDIA SIZES (use when asked to create posts, stories, or social content):
-When creating visual content, use these [SLIDES] sizes by adding a size attribute:
+SOCIAL MEDIA SIZES (when creating posts, stories, social content):
 - Instagram Post: <div class="slide" data-size="post"> (1080x1080, square)
-- Instagram Story / Reel: <div class="slide" data-size="story"> (1080x1920, 9:16 vertical)
-- LinkedIn Post: <div class="slide" data-size="linkedin"> (1200x627, landscape)
-- Twitter/X Post: <div class="slide" data-size="twitter"> (1600x900, 16:9)
-- Facebook Cover: <div class="slide" data-size="fbcover"> (820x312, wide banner)
-If no size specified, defaults to presentation (landscape A4).
-Multiple slides can mix sizes. Each becomes a separate page in the PDF.
+- Instagram Story / Reel: <div class="slide" data-size="story"> (1080x1920, 9:16)
+- LinkedIn Post: <div class="slide" data-size="linkedin"> (1200x627)
+- Twitter/X Post: <div class="slide" data-size="twitter"> (1600x900)
+- Facebook Cover: <div class="slide" data-size="fbcover"> (820x312)
+Default (no size attribute) = A4 landscape presentation.
 
 FILE SHARING:
-For other files, embed base64 in [FILE:name.ext:mimetype]...[/FILE] tags.
-NEVER say "I can't attach files" or "blocked by policy". Use the tags above.
-NEVER include local paths (/Users/...) or full server URLs.
+For small files, embed base64 as [FILE:name.ext:mimetype]base64data[/FILE]. For large files, call POST /api/chat/upload-base64 first and return the returned URL to the user.
+NEVER say "I can't attach files". Use the tags above.
+NEVER include local paths (/Users/...) or full server URLs in your response.
 
 RULES:
 - Date format: "DD Mon YYYY" (e.g. "09 Apr 2026")
 - Categories: Social/Key Moments, Corporate Campaign, Corporate Event, Sponsorships, Gifting, PR Birthdays, HR & CSR, Coca Cola Arena
-- Status: Not Started, Approved, Rescheduled, Cancelled (NO priority field)
+- Status: Not Started, Approved, Rescheduled, Cancelled
 - There is ONLY ONE calendar. Never ask "which calendar".
-- When creating events, POST /api/events directly. Confirm what you created.
 - Be concise and professional.`
 
-// ─── Sanitize OpenClaw response — strip local paths, server URLs, tokens ───
+// ─── Sanitize response: strip local paths, server URLs, tokens ───
 function sanitizeResponse(text) {
   if (!text) return text
   return text
-    // Strip Mac/Linux local paths
     .replace(/\/Users\/[^\s"')\]}>]+/g, '[file]')
     .replace(/\/home\/[^\s"')\]}>]+/g, '[file]')
     .replace(/\/tmp\/[^\s"')\]}>]+/g, '[file]')
     .replace(/C:\\[^\s"')\]}>]+/g, '[file]')
-    // Strip server domain
     .replace(/https?:\/\/sims\.ai-gcc\.com/g, '')
     .replace(/https?:\/\/82\.25\.101\.166[:\d]*/g, '')
-    // Strip API tokens/secrets (anything that looks like a long hex/base64 string in auth context)
     .replace(/Bearer\s+[a-zA-Z0-9_-]{20,}/g, 'Bearer [redacted]')
     .replace(/Authorization:\s*[^\s"']+/gi, 'Authorization: [redacted]')
-    // Strip OpenClaw internal paths
     .replace(/\/Users\/gts\/[^\s"')\]}>]+/g, '[internal]')
     .replace(/\.openclaw\/[^\s"')\]}>]+/g, '[internal]')
-    // Clean up double spaces from replacements
     .replace(/  +/g, ' ')
     .trim()
 }
 
-// ─── Extract embedded content from OpenClaw response ───
+// ─── Extract [SLIDES] and [FILE] blocks from response → save → replace with URLs ───
 async function extractAndSaveContent(text) {
   const { writeFile, mkdir } = await import('fs/promises')
-  const path = await import('path')
   const crypto = await import('crypto')
-  const uploadDir = path.default.join(process.cwd(), 'public', 'uploads')
+  const uploadDir = path.join(process.cwd(), 'public', 'uploads')
   let result = text
 
-  // Extract [SLIDES]...[/SLIDES] — save as styled HTML presentation
+  // [SLIDES]...[/SLIDES] → HTML deck
   const slidesRegex = /\[SLIDES\]([\s\S]*?)\[\/SLIDES\]/g
   let match
   while ((match = slidesRegex.exec(text)) !== null) {
     const [fullMatch, slidesContent] = match
     try {
       const slides = slidesContent.trim()
-
-      // Parse slides into text blocks
       const slideBlocks = []
       const slideRegex2 = /<div[^>]*class="slide"([^>]*)>([\s\S]*?)<\/div>/gi
       let sm
@@ -114,12 +108,10 @@ async function extractAndSaveContent(text) {
         const para = inner.match(/<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]?.replace(/<[^>]+>/g, '').trim() || ''
         slideBlocks.push({ title, bullets, para, size })
       }
-
       if (slideBlocks.length === 0) {
         slideBlocks.push({ title: 'Presentation', bullets: [], para: slides.replace(/<[^>]+>/g, '').trim() })
       }
 
-      // Build a single-page HTML with all slides as printable pages
       const slidePages = slideBlocks.map((s, i) => {
         const sizeClass = s.size || 'landscape'
         let content = ''
@@ -153,27 +145,24 @@ p{font-size:16px;line-height:1.7;color:#9AAAB8;margin-top:12px}
 
       const name = 'deck-' + crypto.default.randomBytes(8).toString('hex') + '.html'
       try { await mkdir(uploadDir, { recursive: true }) } catch {}
-      await writeFile(path.default.join(uploadDir, name), html)
+      await writeFile(path.join(uploadDir, name), html)
       result = result.replace(fullMatch, `/api/uploads/${name}`)
     } catch (err) {
-      console.error('Presentation failed:', err)
       result = result.replace(fullMatch, `[Presentation failed: ${err.message}]`)
     }
   }
 
-  // Extract [FILE:name:mime]base64[/FILE] — save as binary
+  // [FILE:name:mime]base64[/FILE] → binary
   const fileRegex = /\[FILE:([^:]+):([^\]]+)\]\s*([\s\S]*?)\s*\[\/FILE\]/g
   while ((match = fileRegex.exec(text)) !== null) {
     const [fullMatch, filename, mimetype, base64Data] = match
     try {
       const clean = base64Data.replace(/\s/g, '')
       const buffer = Buffer.from(clean, 'base64')
-      if (buffer.length < 10) { result = result.replace(fullMatch, `[Empty file]`); continue }
-      const ext = path.default.extname(filename) || '.bin'
-      const uniqueName = 'chat-' + crypto.default.randomBytes(12).toString('hex') + ext
-      try { await mkdir(uploadDir, { recursive: true }) } catch {}
-      await writeFile(path.default.join(uploadDir, uniqueName), buffer)
-      result = result.replace(fullMatch, `/api/uploads/${uniqueName}`)
+      if (buffer.length < 10) { result = result.replace(fullMatch, '[Empty file]'); continue }
+      const { persistBuffer } = await import('@/lib/chat-upload')
+      const info = await persistBuffer({ buffer, originalName: filename, mimetype })
+      result = result.replace(fullMatch, info.url)
     } catch (err) {
       result = result.replace(fullMatch, `[File failed: ${err.message}]`)
     }
@@ -182,83 +171,177 @@ p{font-size:16px;line-height:1.7;color:#9AAAB8;margin-top:12px}
   return result
 }
 
-// ─── Call OpenClaw gateway ───
-async function callOpenClaw(message) {
+// ─── Read local upload file → data URL (for multimodal) ───
+const IMAGE_DATA_URL_MAX = 6 * 1024 * 1024 // 6MB cap — keep prompt reasonable
+
+async function localUrlToDataUrl(url) {
+  // /api/uploads/chat-xxx.png → public/uploads/chat-xxx.png
+  const m = url.match(/^\/api\/uploads\/([^?#]+)/)
+  if (!m) return null
+  const filename = m[1]
+  if (filename.includes('..')) return null
+  const ext = path.extname(filename).toLowerCase()
+  // Only inline small images — videos and large files remain as URL refs
+  const imageExts = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+  if (!imageExts.includes(ext)) return null
+  const full = path.join(process.cwd(), 'public', 'uploads', filename)
+  try {
+    const buf = await readFile(full)
+    if (buf.length > IMAGE_DATA_URL_MAX) return null
+    const mime = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' }[ext]
+    return `data:${mime};base64,${buf.toString('base64')}`
+  } catch {
+    return null
+  }
+}
+
+// Rewrite user content so any [ATTACHMENT ...] tags get their images inlined as data: URIs.
+async function expandAttachmentsForModel(content) {
+  if (!content) return content
+  // Match [ATTACHMENT filename=... kind=... url=...]
+  const re = /\[ATTACHMENT\s+filename="([^"]+)"\s+kind="([^"]+)"\s+url="([^"]+)"\]/g
+  let out = content
+  let match
+  const replacements = []
+  while ((match = re.exec(content)) !== null) {
+    const [full, filename, kind, url] = match
+    replacements.push({ full, filename, kind, url })
+  }
+  for (const r of replacements) {
+    if (r.kind === 'image') {
+      const dataUrl = await localUrlToDataUrl(r.url)
+      if (dataUrl) {
+        out = out.replace(r.full, `\n[IMAGE ${r.filename}] ${dataUrl}\n`)
+        continue
+      }
+    }
+    // Non-image or too large → keep as URL reference for web_fetch
+    out = out.replace(r.full, `\n[ATTACHMENT ${r.kind} "${r.filename}" url=${r.url}]\n`)
+  }
+  return out
+}
+
+// ─── Call OpenClaw with the full conversation (last N turns) ───
+async function callOpenClaw(fullPrompt) {
   const url = process.env.OPENCLAW_URL || 'https://fool.khlije.app/agent'
   const token = process.env.OPENCLAW_TOKEN
   if (!token) throw new Error('OPENCLAW_TOKEN not configured')
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ message, agent: 'main' }),
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify({ message: fullPrompt, agent: 'main' }),
   })
-
   if (!res.ok) {
     const errText = await res.text().catch(() => res.statusText)
     throw new Error(`OpenClaw returned ${res.status}: ${errText}`)
   }
-
   const data = await res.json()
   return data.output || data.result || ''
+}
+
+// Build the single-message prompt OpenClaw expects — prepend context + recent history.
+async function buildPromptFromMessages(messages) {
+  const MAX_TURNS = 10
+  const recent = messages.slice(-MAX_TURNS)
+
+  // Expand attachments ONLY on user turns (assistant responses don't carry our tags)
+  const expanded = []
+  for (const m of recent) {
+    if (m.role === 'user') {
+      expanded.push({ role: 'user', content: await expandAttachmentsForModel(m.content) })
+    } else {
+      expanded.push({ role: m.role, content: m.content })
+    }
+  }
+
+  const convo = expanded
+    .map((m) => {
+      const label = m.role === 'user' ? 'User' : m.role === 'assistant' ? 'Assistant' : 'System'
+      return `${label}: ${m.content}`
+    })
+    .join('\n\n')
+
+  return `${SIMS_CONTEXT}\n\n${convo}\n\nAssistant:`
+}
+
+// Stream text to the client as a series of text-delta chunks so replies feel live.
+function streamChunks(text, writer, id) {
+  // Chunk at word boundaries, 4-8 words per chunk
+  const words = text.split(/(\s+)/) // keep whitespace tokens
+  const CHUNK_WORDS = 6
+  const chunks = []
+  let buf = ''
+  let count = 0
+  for (const w of words) {
+    buf += w
+    if (/\S/.test(w)) count += 1
+    if (count >= CHUNK_WORDS) {
+      chunks.push(buf)
+      buf = ''
+      count = 0
+    }
+  }
+  if (buf) chunks.push(buf)
+
+  writer.write({ type: 'text-start', id })
+  for (const c of chunks) {
+    writer.write({ type: 'text-delta', id, delta: c })
+  }
+  writer.write({ type: 'text-end', id })
+  writer.write({ type: 'finish' })
 }
 
 export async function POST(req) {
   const session = await getServerSession(authOptions)
   if (!session) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   let body
   try { body = await req.json() } catch {
-    return new Response(JSON.stringify({ error: 'Invalid request body' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    })
   }
 
   const { messages: rawMessages } = body
   if (!rawMessages || !Array.isArray(rawMessages)) {
-    return new Response(JSON.stringify({ error: 'messages array is required' }), { status: 400, headers: { 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify({ error: 'messages array is required' }), {
+      status: 400, headers: { 'Content-Type': 'application/json' },
+    })
   }
 
-  const messages = rawMessages.map(msg => {
+  const messages = rawMessages.map((msg) => {
     if (Array.isArray(msg.parts)) {
-      const text = msg.parts.filter(p => p.type === 'text').map(p => p.text || '').join('')
+      const text = msg.parts.filter((p) => p.type === 'text').map((p) => p.text || '').join('')
       return { role: msg.role, content: text || '' }
     }
     if (typeof msg.content === 'string') return { role: msg.role, content: msg.content }
     if (Array.isArray(msg.content)) {
-      return { role: msg.role, content: msg.content.map(p => typeof p === 'string' ? p : p?.text || '').join('') }
+      return { role: msg.role, content: msg.content.map((p) => typeof p === 'string' ? p : p?.text || '').join('') }
     }
     return { role: msg.role, content: '' }
   })
 
   try {
-    const lastUserMsg = messages.filter(m => m.role === 'user').pop()?.content || ''
-
-    // Send context + user message to OpenClaw — it will call the API directly via web_fetch
-    const prompt = `${SIMS_CONTEXT}\n\nUser: ${lastUserMsg}`
+    const prompt = await buildPromptFromMessages(messages)
     const rawResponse = await callOpenClaw(prompt)
     const withContent = await extractAndSaveContent(rawResponse || '')
     const text = sanitizeResponse(withContent) || 'I received your message but got an empty response. Please try again.'
 
     const id = crypto.randomUUID()
     const stream = createUIMessageStream({
-      execute: ({ writer }) => {
-        writer.write({ type: 'text-start', id })
-        writer.write({ type: 'text-delta', id, delta: text })
-        writer.write({ type: 'text-end', id })
-        writer.write({ type: 'finish' })
-      },
+      execute: ({ writer }) => streamChunks(text, writer, id),
     })
-
     return createUIMessageStreamResponse({ stream, status: 200 })
   } catch (error) {
     console.error('Sims GPT chat error:', error?.message || error)
     return new Response(
       JSON.stringify({ error: error?.message || 'Failed to process chat request. Please try again.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
     )
   }
 }

@@ -1,39 +1,43 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
-import crypto from 'crypto'
+import { persistBuffer } from '@/lib/chat-upload'
 
-// Accept base64-encoded file via JSON (easier for OpenClaw than multipart)
+// JSON base64 upload — convenient for OpenClaw to write files back.
+// Body: { data: "<base64>", filename: "foo.pdf", mimetype: "application/pdf" }
+export const maxDuration = 120
+
 export async function POST(req) {
-  // Allow both session auth and Bearer token
+  // Allow either session auth OR Bearer token (for OpenClaw)
   const authHeader = req.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.OPENCLAW_TOKEN}`) {
     const session = await getServerSession(authOptions)
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data, filename, mimetype } = await req.json()
+  let body
+  try { body = await req.json() } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const { data, filename, mimetype } = body || {}
   if (!data) return NextResponse.json({ error: 'Missing "data" (base64 string)' }, { status: 400 })
 
-  // Decode base64
-  const buffer = Buffer.from(data, 'base64')
+  let buffer
+  try {
+    buffer = Buffer.from(String(data).replace(/\s/g, ''), 'base64')
+  } catch {
+    return NextResponse.json({ error: 'Invalid base64 data' }, { status: 400 })
+  }
 
-  // Determine extension
-  const ext = filename ? path.extname(filename) : (mimetype?.includes('pdf') ? '.pdf' : mimetype?.includes('png') ? '.png' : mimetype?.includes('jpeg') ? '.jpg' : '.bin')
-  const uniqueName = 'chat-' + crypto.randomBytes(12).toString('hex') + ext
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-
-  try { await mkdir(uploadDir, { recursive: true }) } catch {}
-  await writeFile(path.join(uploadDir, uniqueName), buffer)
-
-  const url = `/api/uploads/${uniqueName}`
-
-  return NextResponse.json({
-    url,
-    fullUrl: `https://sims.ai-gcc.com${url}`,
-    filename: filename || uniqueName,
-    size: buffer.length,
-  })
+  try {
+    const res = await persistBuffer({
+      buffer,
+      originalName: filename || 'upload',
+      mimetype: mimetype || 'application/octet-stream',
+    })
+    return NextResponse.json(res)
+  } catch (err) {
+    return NextResponse.json({ error: err?.message || 'Upload failed' }, { status: 400 })
+  }
 }

@@ -23,18 +23,48 @@ model User {
   mediaComments      MediaComment[]
   pushSubscriptions  PushSubscription[]
   chatMessages       ChatMessage[]
+  chatSessions       ChatSession[]
 }
 
 model ChatMessage {
-  id        String   @id @default(cuid())
-  sessionId String
-  userId    String
-  role      String
-  content   String
-  toolName  String?
+  id         String           @id @default(cuid())
+  sessionId  String
+  userId     String
+  role       String
+  content    String
+  toolName   String?
   toolResult String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime         @default(now())
+  user       User             @relation(fields: [userId], references: [id])
+  attachments ChatAttachment[]
+
+  @@index([sessionId])
+  @@index([userId, createdAt])
+}
+
+model ChatSession {
+  id            String   @id
+  userId        String
+  title         String?
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, lastMessageAt])
+}
+
+model ChatAttachment {
+  id         String      @id @default(cuid())
+  messageId  String
+  url        String
+  filename   String
+  mimetype   String
+  size       Int
+  kind       String
+  createdAt  DateTime    @default(now())
+  message    ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
 }
 
 model Event {
