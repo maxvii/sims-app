@@ -188,67 +188,105 @@ function friendlyGatewayError(status) {
   return `The AI gateway returned an unexpected status (${status}).`
 }
 
+// ─── Extract URLs from an "artifacts" list ──────────────────────────────────
+// Gateway returns artifacts in the done frame. Shape isn't rigidly specified so
+// we accept strings OR objects and hunt for anything URL-shaped.
+function artifactUrls(artifacts) {
+  if (!artifacts) return []
+  const list = Array.isArray(artifacts) ? artifacts : [artifacts]
+  const urls = []
+  for (const a of list) {
+    if (!a) continue
+    if (typeof a === 'string') {
+      urls.push(a)
+      continue
+    }
+    // Common field names — try them in order
+    const candidate = a.url || a.fullUrl || a.download_url || a.downloadUrl || a.path || a.href
+    if (candidate) urls.push(String(candidate))
+  }
+  return urls
+}
+
 // ─── Read an SSE stream until we get a {type:"done"} frame ──────────────────
-// The bridge at :3456 sends a mix of progress/keepalive frames (to keep
-// Cloudflare's 100s edge timeout from firing) and a final {type:"done",
-// output:"..."} frame. We ignore progress frames and return the output.
+// Reference shape from the bridge:
+//   data: { type: "progress", ... }      ← keep-alive / thinking / tool-call
+//   data: { type: "done",
+//           result: "<text>",
+//           artifacts: [ { url, filename, mimetype, ... }, ... ],
+//           quality: { ... } }
+//   data: { type: "error", error: "<msg>" }
+//
+// We ignore progress/keepalive frames (Cloudflare sees bytes → no 524), and on
+// {done} we concatenate the result text + one-line-per-artifact URL so the
+// client's MediaThumbnail renders images/videos/PDFs/decks automatically.
 async function readSseUntilDone(res) {
   const reader = res.body?.getReader()
   if (!reader) throw new Error('The AI gateway returned an empty stream.')
   const decoder = new TextDecoder()
   let buf = ''
-  let finalOutput = ''
+  let finalFrame = null
 
   try {
-    while (true) {
+    outer: while (true) {
       const { done, value } = await reader.read()
       if (done) break
       buf += decoder.decode(value, { stream: true })
 
-      // SSE frames are separated by a blank line (\n\n). Each frame may
-      // contain multiple "data:" lines — concatenate them with newlines.
+      // SSE frames are separated by a blank line (\n\n).
       let sep
       while ((sep = buf.indexOf('\n\n')) !== -1) {
         const frame = buf.slice(0, sep)
         buf = buf.slice(sep + 2)
 
+        // A frame may contain multiple "data:" lines — concatenate them.
         const dataLines = frame.split('\n')
           .filter((l) => l.startsWith('data:'))
           .map((l) => l.slice(5).replace(/^\s/, ''))
         if (dataLines.length === 0) continue
-
         const payload = dataLines.join('\n')
-        if (payload === '[DONE]') continue  // some gateways send this as a terminator
+        if (payload === '[DONE]') continue
 
         let parsed
         try { parsed = JSON.parse(payload) } catch { continue }
 
         if (parsed?.type === 'done') {
-          finalOutput = parsed.output ?? parsed.result ?? ''
+          finalFrame = parsed
           try { await reader.cancel() } catch {}
-          return String(finalOutput || '')
+          break outer
         }
         if (parsed?.type === 'error') {
-          const msg = parsed.message || parsed.error || 'The AI reported an error.'
+          const msg = parsed.error || parsed.message || 'The AI reported an error.'
           throw new Error(msg)
         }
-        // progress / keepalive / tool-call / anything else → ignore
+        // progress / tool-call / anything else → ignore
       }
     }
   } finally {
     try { reader.releaseLock() } catch {}
   }
 
-  // Stream closed without a done frame
-  if (finalOutput) return String(finalOutput)
-  throw new Error('The AI stream ended without a final response. Please try again.')
+  if (!finalFrame) {
+    throw new Error('The AI stream ended without a final response. Please try again.')
+  }
+
+  // Compose the final reply: .result text first, then each artifact URL on its
+  // own line so the client renders them as thumbnails / players / preview cards.
+  const text = String(finalFrame.result ?? finalFrame.output ?? '').trim()
+  const urls = artifactUrls(finalFrame.artifacts)
+  if (urls.length === 0) return text
+  const joinedUrls = urls.join('\n')
+  return text ? `${text}\n\n${joinedUrls}` : joinedUrls
 }
 
-// ─── Call OpenClaw with the full conversation (last N turns) ───
-// Gateway may respond in two shapes:
-//   1. text/event-stream  — emits progress + a final {type:"done",output} frame
-//   2. application/json   — legacy single-blob { output|result } response
-// We handle both.
+// ─── Call the gateway with the full conversation (last N turns) ───
+// Request shape (per bridge spec):
+//   POST <OPENCLAW_URL>
+//   x-webhook-secret: <OPENCLAW_TOKEN>          ← primary auth header
+//   Authorization:    Bearer <OPENCLAW_TOKEN>   ← kept for back-compat
+//   Content-Type:     application/json
+//   body:             { "message": "<prompt>" }
+// Response is SSE by default (text/event-stream), JSON legacy fallback also ok.
 async function callOpenClaw(fullPrompt) {
   const url = process.env.OPENCLAW_URL
   const token = process.env.OPENCLAW_TOKEN
@@ -260,11 +298,12 @@ async function callOpenClaw(fullPrompt) {
     res = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/event-stream, application/json',
-        'Authorization': `Bearer ${token}`,
+        'Content-Type':    'application/json',
+        'Accept':          'text/event-stream, application/json',
+        'x-webhook-secret': token,
+        'Authorization':   `Bearer ${token}`,
       },
-      body: JSON.stringify({ message: fullPrompt, agent: 'main' }),
+      body: JSON.stringify({ message: fullPrompt }),
     })
   } catch (err) {
     const e = new Error('Could not reach the AI gateway. Please try again in a moment.')
