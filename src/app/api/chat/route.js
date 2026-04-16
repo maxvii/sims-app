@@ -21,7 +21,7 @@ YOUR CAPABILITIES — use them whenever the task calls for them:
 Never describe these tools by name or brand — present the finished output naturally.
 
 You have DIRECT API access to her calendar database, media, and theme. Every write to the calendar MUST use web_fetch with this header:
-    Authorization: Bearer <GATEWAY_TOKEN>
+    Authorization: Bearer <OPENCLAW_TOKEN>
 Never call events endpoints without that header — requests without it will 401.
 All bodies are JSON; set Content-Type: application/json on every POST/PATCH/DELETE.
 
@@ -72,7 +72,7 @@ Use your built-in tools to generate images, videos, presentations, and pitch dec
   • Do NOT emit [SLIDES], [FILE:...], or raw HTML — they will not render. Let your media tools produce the finished artifact and share the URL.
 
 RESPONSE FORMAT:
-Reply in plain text or light markdown (**bold**, *italic*, `code`, bullets, numbered lists). Keep answers tight and conversational. Never include local paths (/Users/...) or full internal server URLs in your reply.
+Reply in plain text or light markdown (**bold**, *italic*, inline code, bullets, numbered lists). Keep answers tight and conversational. Never include local paths (/Users/...) or full internal server URLs in your reply.
 
 RULES:
 - Date format: "DD Mon YYYY" (e.g. "09 Apr 2026")
@@ -172,14 +172,11 @@ async function expandAttachmentsForModel(content) {
   return out
 }
 
-// ─── Call the upstream AI gateway with the full conversation (last N turns) ───
-// Env vars unchanged (OPENCLAW_URL / OPENCLAW_TOKEN) — they now point at DearFlow,
-// but the request/response shape is identical so no code change needed there.
-async function callGateway(fullPrompt) {
-  const url = process.env.OPENCLAW_URL
+// ─── Call OpenClaw with the full conversation (last N turns) ───
+async function callOpenClaw(fullPrompt) {
+  const url = process.env.OPENCLAW_URL || 'https://fool.khlije.app/agent'
   const token = process.env.OPENCLAW_TOKEN
-  if (!url)   throw new Error('AI gateway URL not configured')
-  if (!token) throw new Error('AI gateway token not configured')
+  if (!token) throw new Error('OPENCLAW_TOKEN not configured')
 
   const res = await fetch(url, {
     method: 'POST',
@@ -188,7 +185,7 @@ async function callGateway(fullPrompt) {
   })
   if (!res.ok) {
     const errText = await res.text().catch(() => res.statusText)
-    throw new Error(`AI gateway returned ${res.status}: ${errText}`)
+    throw new Error(`OpenClaw returned ${res.status}: ${errText}`)
   }
   const data = await res.json()
   return data.output || data.result || ''
@@ -282,7 +279,7 @@ export async function POST(req) {
 
   try {
     const prompt = await buildPromptFromMessages(messages)
-    const rawResponse = await callGateway(prompt)
+    const rawResponse = await callOpenClaw(prompt)
     const cleaned = stripLegacyBlocks(rawResponse || '')
     const text = sanitizeResponse(cleaned) || 'I received your message but got an empty response. Please try again.'
 
