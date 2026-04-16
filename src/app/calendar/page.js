@@ -13,95 +13,19 @@ function getGreeting(hour) {
   return 'Hello'
 }
 
-// ── 6 app tiles (iOS-style colored cards) ──
+// ── 6 dashboard tiles (glass-morphism PNG icons from brand assets) ──
+// Admin sees 7 (adds Team)
 function getTiles(isAdmin) {
   const tiles = [
-    {
-      href: '/about',
-      label: 'About',
-      bg: 'linear-gradient(145deg, #E9D5B7 0%, #D4BC95 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6B4E2C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M4 21v-1a8 8 0 0116 0v1"/>
-        </svg>
-      ),
-    },
-    {
-      href: '/gallery',
-      label: 'Gallery',
-      bg: 'linear-gradient(145deg, #E89BC0 0%, #C97B9B 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#5C2B43" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <circle cx="8.5" cy="8.5" r="1.5"/>
-          <path d="M21 15l-5-5L5 21"/>
-        </svg>
-      ),
-    },
-    {
-      href: '/media-kit',
-      label: 'Sims Card',
-      bg: 'linear-gradient(145deg, #A8D5B5 0%, #85B895 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2C5C3D" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="5" width="18" height="14" rx="2"/>
-          <path d="M7 10h4M7 14h6"/>
-          <circle cx="16" cy="13" r="2"/>
-        </svg>
-      ),
-    },
-    {
-      href: '/analytics',
-      label: 'Simulate',
-      bg: 'linear-gradient(145deg, #9DB8E2 0%, #7795C7 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1E3A6B" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M3 3v18h18"/>
-          <path d="M7 15l4-4 3 3 5-6"/>
-          <circle cx="19" cy="8" r="1"/>
-        </svg>
-      ),
-    },
-    {
-      href: '/try-on',
-      label: 'Try-On',
-      bg: 'linear-gradient(145deg, #F0B482 0%, #D89463 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6B3818" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 5l-4-2-4 2-4-2-4 2v4l3-1v13h10V8l3 1V5z"/>
-          <path d="M12 3v6"/>
-        </svg>
-      ),
-    },
-    {
-      href: '/chat',
-      label: 'Sims GPT',
-      bg: 'linear-gradient(145deg, #7FC5CB 0%, #5AA1A7 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#1C4449" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          <circle cx="8" cy="10" r="0.8" fill="#1C4449"/>
-          <circle cx="12" cy="10" r="0.8" fill="#1C4449"/>
-          <circle cx="16" cy="10" r="0.8" fill="#1C4449"/>
-        </svg>
-      ),
-    },
+    { href: '/about',     label: 'About',     src: '/images/icons/About-Teams-Dashboard-Icon.png' },
+    { href: '/gallery',   label: 'Gallery',   src: '/images/icons/Gallery-Dashboard-Icon.png' },
+    { href: '/media-kit', label: 'Sims Card', src: '/images/icons/SimsCard-Dashboard-Icon.png' },
+    { href: '/analytics', label: 'Simulate',  src: '/images/icons/Simulate-Dashboard-Icon.png' },
+    { href: '/try-on',    label: 'Try-On',    src: '/images/icons/Tryon-Dashboard-Icon.png' },
+    { href: '/events-calendar', label: 'Calendar', src: null, isCalendar: true },
   ]
   if (isAdmin) {
-    tiles.push({
-      href: '/admin',
-      label: 'Team',
-      bg: 'linear-gradient(145deg, #C4A3D9 0%, #9E7FBD 100%)',
-      icon: (
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#3E1F5C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="9" cy="8" r="3.5"/>
-          <circle cx="17" cy="9" r="2.5"/>
-          <path d="M2 19a7 7 0 0114 0"/>
-          <path d="M14.5 19a5 5 0 017-4.6"/>
-        </svg>
-      ),
-    })
+    tiles.push({ href: '/admin', label: 'Team', src: '/images/icons/Teams-Dashboard-Icon.png' })
   }
   return tiles
 }
@@ -130,36 +54,42 @@ export default function HomePage() {
   return (
     <div className="min-h-screen pb-safe-nav" style={{ background: '#F7F9FA' }}>
 
-      {/* ── Greeting Header ── */}
-      <div className="px-5 pt-14 pb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-semibold mb-1">
-              {greeting}
-            </p>
-            <h1 className="font-display text-2xl font-black italic text-gray-800">
-              {firstName}
-            </h1>
-            <p className="text-xs text-gray-400 mt-1">
-              {now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
-            </p>
-          </div>
-          <button
-            onClick={() => router.push('/profile')}
-            className="active:scale-95 transition-transform"
+      {/* ── Header: The Sims logo + avatar ── */}
+      <div className="px-5 pt-12 pb-3 flex items-center justify-between">
+        <img
+          src="/images/the-sims-logo.png"
+          alt="The Sims"
+          className="h-9 w-auto"
+          style={{ filter: 'brightness(0) saturate(100%) invert(15%) sepia(13%) saturate(547%) hue-rotate(196deg) brightness(94%) contrast(88%)' }}
+        />
+        <button
+          onClick={() => router.push('/profile')}
+          className="active:scale-95 transition-transform"
+        >
+          <div
+            className="w-11 h-11 rounded-full overflow-hidden"
+            style={{ border: '2px solid #E7ECF1', boxShadow: '0 2px 8px rgba(54,58,71,0.08)' }}
           >
-            <div
-              className="w-12 h-12 rounded-full overflow-hidden"
-              style={{ border: '2px solid #E7ECF1', boxShadow: '0 2px 8px rgba(54,58,71,0.08)' }}
-            >
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-            </div>
-          </button>
-        </div>
+            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+          </div>
+        </button>
       </div>
 
-      {/* ── App Tile Grid (3x2 / 4 rows) ── */}
-      <div className="px-5 pt-2">
+      {/* ── Greeting ── */}
+      <div className="px-5 pb-5">
+        <p className="text-[10px] uppercase tracking-[0.22em] font-semibold" style={{ color: '#6B7B8D' }}>
+          {greeting}
+        </p>
+        <h1 className="font-display text-3xl font-black italic" style={{ color: '#2B2E38' }}>
+          {firstName}
+        </h1>
+        <p className="text-xs mt-1" style={{ color: '#9AAAB8' }}>
+          {now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </p>
+      </div>
+
+      {/* ── App Tile Grid (3 cols) ── */}
+      <div className="px-5 pt-1">
         <div className="grid grid-cols-3 gap-4">
           {tiles.map((tile) => (
             <button
@@ -168,20 +98,18 @@ export default function HomePage() {
               className="flex flex-col items-center gap-2 active:scale-90 transition-all duration-150"
             >
               <div
-                className="w-full aspect-square rounded-[22px] flex items-center justify-center relative overflow-hidden"
+                className="w-full aspect-square rounded-[22px] overflow-hidden relative"
                 style={{
-                  background: tile.bg,
-                  boxShadow: '0 6px 16px rgba(54,58,71,0.12), inset 0 1.5px 0 rgba(255,255,255,0.5), inset 0 -1px 0 rgba(0,0,0,0.05)',
+                  boxShadow: '0 6px 18px rgba(54,58,71,0.12), 0 1px 2px rgba(54,58,71,0.06)',
                 }}
               >
-                {/* Shine overlay */}
-                <div
-                  className="absolute inset-0 rounded-[22px] pointer-events-none"
-                  style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 50%)' }}
-                />
-                <div className="relative z-10">{tile.icon}</div>
+                {tile.isCalendar ? (
+                  <CalendarTile now={now} />
+                ) : (
+                  <img src={tile.src} alt={tile.label} className="w-full h-full object-cover" />
+                )}
               </div>
-              <span className="text-[11px] font-semibold text-gray-700 tracking-tight">
+              <span className="text-[11px] font-semibold tracking-tight" style={{ color: '#2B2E38' }}>
                 {tile.label}
               </span>
             </button>
@@ -202,6 +130,35 @@ export default function HomePage() {
 
       {showAddEvent && <AddEventModal onClose={() => setShowAddEvent(false)} />}
       <Navbar />
+    </div>
+  )
+}
+
+// ── Mini-calendar tile (matches palette) ──
+function CalendarTile({ now }) {
+  const day = now.getDate()
+  const monthShort = MONTHS[now.getMonth()].toUpperCase()
+  return (
+    <div
+      className="w-full h-full flex flex-col items-center justify-center relative"
+      style={{
+        background: 'linear-gradient(145deg, #363A47 0%, #2B2E38 100%)',
+      }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 py-1.5 text-center text-[9px] font-bold tracking-[0.2em]"
+        style={{ background: '#D4365C', color: '#fff' }}
+      >
+        {monthShort}
+      </div>
+      <div className="flex flex-col items-center justify-center mt-3">
+        <div className="font-display text-4xl font-black leading-none" style={{ color: '#F7F9FA' }}>
+          {day}
+        </div>
+        <div className="text-[8px] font-semibold tracking-[0.2em] mt-1.5 uppercase" style={{ color: '#D0D9E2' }}>
+          {now.toLocaleDateString('en-US', { weekday: 'short' })}
+        </div>
+      </div>
     </div>
   )
 }
