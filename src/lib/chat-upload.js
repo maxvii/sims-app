@@ -16,6 +16,12 @@ const ALLOWED = [
   { test: (m) => m === 'application/vnd.ms-excel'
               || m === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
               || m === 'text/csv',                     kind: 'doc',   maxBytes: 25 * 1024 * 1024, exts: ['.xls','.xlsx','.csv'] },
+  { test: (m) => m === 'application/vnd.ms-powerpoint'
+              || m === 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+              || m === 'application/vnd.oasis.opendocument.presentation',
+                                                       kind: 'doc',   maxBytes: 50 * 1024 * 1024, exts: ['.ppt','.pptx','.odp'] },
+  { test: (m) => m === 'application/zip'
+              || m === 'application/x-zip-compressed', kind: 'doc',   maxBytes: 100 * 1024 * 1024, exts: ['.zip'] },
   { test: (m) => m === 'text/plain' || m === 'text/markdown' || m === 'application/json',
                                                        kind: 'text',  maxBytes: 5  * 1024 * 1024,  exts: ['.txt','.md','.json'] },
 ]
@@ -27,6 +33,10 @@ const KIND_FOR_EXT = {
   '.pdf': 'pdf',
   '.doc': 'doc', '.docx': 'doc',
   '.xls': 'doc', '.xlsx': 'doc', '.csv': 'doc',
+  '.ppt': 'doc', '.pptx': 'doc', '.odp': 'doc',
+  '.key': 'doc', '.pages': 'doc', '.numbers': 'doc',
+  '.odt': 'doc', '.ods': 'doc', '.rtf': 'doc',
+  '.zip': 'doc',
   '.txt': 'text', '.md': 'text', '.json': 'text',
 }
 

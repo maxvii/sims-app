@@ -270,6 +270,22 @@ async function readSseUntilDone(res) {
     throw new Error('The AI stream ended without a final response. Please try again.')
   }
 
+  // Diagnostic logging — helps debug why artifacts aren't showing up.
+  // (Dokploy service logs; trims the blob so it stays readable.)
+  try {
+    const snapshot = {
+      hasResult: typeof finalFrame.result === 'string',
+      resultLen: (finalFrame.result || '').length,
+      artifactCount: Array.isArray(finalFrame.artifacts) ? finalFrame.artifacts.length : 0,
+      artifactSample: Array.isArray(finalFrame.artifacts)
+        ? finalFrame.artifacts.slice(0, 3).map((a) => typeof a === 'string' ? a.slice(0, 200) : a)
+        : undefined,
+      qualityKeys: finalFrame.quality ? Object.keys(finalFrame.quality) : null,
+      frameKeys: Object.keys(finalFrame),
+    }
+    console.log('[chat] done frame:', JSON.stringify(snapshot).slice(0, 2000))
+  } catch {}
+
   // Compose the final reply: .result text first, then each artifact URL on its
   // own line so the client renders them as thumbnails / players / preview cards.
   const text = String(finalFrame.result ?? finalFrame.output ?? '').trim()

@@ -28,6 +28,10 @@ const KIND_FOR_EXT = {
   pdf: 'pdf',
   doc: 'doc', docx: 'doc',
   xls: 'doc', xlsx: 'doc', csv: 'doc',
+  ppt: 'doc', pptx: 'doc', odp: 'doc',
+  key: 'doc', pages: 'doc', numbers: 'doc',
+  odt: 'doc', ods: 'doc', rtf: 'doc',
+  zip: 'doc',
   txt: 'text', md: 'text', json: 'text',
   html: 'html',
 }
@@ -113,10 +117,15 @@ async function renderPdfFirstPageToDataUrl(fileOrUrl) {
 }
 
 // ─── Media rendering helpers (for message bodies) ───────────────────────────
+// Extensions the client will render as an inline card in a chat bubble.
+// Kept in sync with KIND_FOR_EXT above.
+const RENDERABLE_EXT_RE = '(?:jpg|jpeg|png|gif|webp|heic|heif|mp4|webm|mov|m4v|pdf|html|docx?|xlsx?|pptx?|odp|key|pages|numbers|odt|ods|rtf|zip|csv|txt|md|json)'
+const HTTPS_MEDIA_RE = new RegExp('^https?:\\/\\/.+\\.' + RENDERABLE_EXT_RE + '(?:\\?[^\\s]*)?(?:#[^\\s]*)?$', 'i')
+const LOCAL_MEDIA_RE = new RegExp('\\/api\\/uploads\\/.+\\.' + RENDERABLE_EXT_RE + '(?:\\?[^\\s]*)?(?:#[^\\s]*)?', 'i')
+
 function isMediaUrl(str) {
   const s = str.trim()
-  return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|heic|heif|mp4|webm|mov|m4v|pdf|html|docx?|xlsx?|csv|txt|md|json)/i.test(s)
-    || /\/api\/uploads\/.+\.(jpg|jpeg|png|gif|webp|heic|heif|mp4|webm|mov|m4v|pdf|html|docx?|xlsx?|csv|txt|md|json)/i.test(s)
+  return HTTPS_MEDIA_RE.test(s) || LOCAL_MEDIA_RE.test(s)
 }
 
 function KindIcon({ kind, className = 'w-6 h-6' }) {
@@ -289,8 +298,10 @@ function renderMarkdown(text) {
   })
 }
 
+// Split text for inline formatting — keep markdown + any URL (we'll classify
+// URLs downstream: media URLs become thumbnails, others become link chips).
 function formatInline(text) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|https?:\/\/\S+|\/api\/uploads\/\S+)/)
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|https?:\/\/[^\s)]+|\/api\/uploads\/[^\s)]+)/)
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**'))
       return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>
