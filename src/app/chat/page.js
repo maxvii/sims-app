@@ -175,9 +175,90 @@ function KindIcon({ kind, className = 'w-6 h-6' }) {
   )
 }
 
+/** Fullscreen in-app preview modal with a Back-to-chat button.
+ *  Used for Office docs / PDFs / any URL we want to show inline without
+ *  kicking the user out to a new tab. Closes on Esc.
+ */
+function PreviewModal({ url, filename, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
+
+  const downloadUrl = url.includes('view.officeapps.live.com')
+    ? decodeURIComponent(url.split('src=')[1] || url)
+    : url
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex flex-col animate-fade-in"
+      style={{ background: '#F7F9FA' }}
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* Top bar */}
+      <div
+        className="shrink-0 flex items-center gap-2 px-4 py-3"
+        style={{
+          background: 'linear-gradient(135deg, rgba(247,249,250,0.95), rgba(208,217,226,0.65))',
+          borderBottom: '1px solid rgba(54,58,71,0.08)',
+          backdropFilter: 'blur(20px) saturate(1.5)',
+          WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-xs active:scale-95 transition-transform"
+          style={{ background: '#363A47', color: '#F7F9FA' }}
+          aria-label="Back to chat"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to chat
+        </button>
+        <div className="flex-1 min-w-0 px-2">
+          <p className="text-sm font-semibold truncate" style={{ color: '#2B2E38' }}>
+            {filename}
+          </p>
+        </div>
+        <a
+          href={downloadUrl}
+          download={filename}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl font-semibold text-xs active:scale-95 transition-transform"
+          style={{ background: 'rgba(54,58,71,0.08)', color: '#363A47' }}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+          </svg>
+          Download
+        </a>
+      </div>
+
+      {/* Body: iframe viewer */}
+      <div className="flex-1 relative" style={{ background: '#E7ECF1' }}>
+        <iframe
+          src={url}
+          title={filename}
+          className="w-full h-full"
+          style={{ border: 0 }}
+          allow="clipboard-read; clipboard-write; fullscreen"
+        />
+      </div>
+    </div>
+  )
+}
+
 /** Render a media URL inside a message body — kind-aware */
 function MediaThumbnail({ url }) {
   const [pdfThumb, setPdfThumb] = useState(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
   const kind = kindForUrl(url)
   const filename = decodeURIComponent(url.split('/').pop() || 'file')
 
@@ -254,63 +335,63 @@ function MediaThumbnail({ url }) {
       : (typeof window !== 'undefined' ? window.location.origin + url : url)
     const ext = (filename.split('.').pop() || '').toLowerCase()
     const officeViewable = ['ppt','pptx','doc','docx','xls','xlsx'].includes(ext)
-    const officePreviewUrl = officeViewable
+    const previewSrc = officeViewable
       ? `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(absoluteUrl)}`
-      : null
+      : absoluteUrl
+    const canPreview = officeViewable || ext === 'pdf' || ext === 'txt' || ext === 'md' || ext === 'json' || ext === 'csv' || ext === 'html'
 
     return (
-      <div className="my-2 rounded-xl overflow-hidden"
-        style={{ background: 'rgba(54,58,71,0.06)', border: '1px solid rgba(54,58,71,0.08)', maxWidth: 300 }}
-      >
-        {/* Primary row — click anywhere to download */}
-        <a href={url} download={filename}
-          className="flex items-center gap-3 p-3 active:scale-[0.98] transition-transform"
+      <>
+        <div className="my-2 rounded-xl overflow-hidden"
+          style={{ background: 'rgba(54,58,71,0.06)', border: '1px solid rgba(54,58,71,0.08)', maxWidth: 300 }}
         >
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0"
-            style={{ background: ext === 'pptx' || ext === 'ppt' ? '#D24726' : '#6B7B8D' }}
-          >
-            <KindIcon kind={kind} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-gray-700 truncate">{filename}</p>
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider">{ext || 'file'}</p>
-          </div>
-        </a>
-        {/* Action row — Download + Preview (when supported) */}
-        <div className="flex border-t" style={{ borderColor: 'rgba(54,58,71,0.08)' }}>
+          {/* Primary row — click anywhere to download */}
           <a href={url} download={filename}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold active:scale-95 transition-transform"
-            style={{ color: '#363A47' }}
+            className="flex items-center gap-3 p-3 active:scale-[0.98] transition-transform"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
-            </svg>
-            Download
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-white shrink-0"
+              style={{ background: ext === 'pptx' || ext === 'ppt' ? '#D24726' : '#6B7B8D' }}
+            >
+              <KindIcon kind={kind} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-gray-700 truncate">{filename}</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider">{ext || 'file'}</p>
+            </div>
           </a>
-          {officePreviewUrl && (
-            <a href={officePreviewUrl} target="_blank" rel="noopener noreferrer"
+          {/* Action row — Download + Preview (in-app, with Back-to-chat) */}
+          <div className="flex border-t" style={{ borderColor: 'rgba(54,58,71,0.08)' }}>
+            <a href={url} download={filename}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold active:scale-95 transition-transform"
+              style={{ color: '#363A47' }}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+              </svg>
+              Download
+            </a>
+            <button
+              type="button"
+              onClick={() => setPreviewOpen(true)}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold active:scale-95 transition-transform border-l"
               style={{ color: '#363A47', borderColor: 'rgba(54,58,71,0.08)' }}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
               </svg>
               Preview
-            </a>
-          )}
-          {!officePreviewUrl && (
-            <a href={url} target="_blank" rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold active:scale-95 transition-transform border-l"
-              style={{ color: '#363A47', borderColor: 'rgba(54,58,71,0.08)' }}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-              Open
-            </a>
-          )}
+            </button>
+          </div>
         </div>
-      </div>
+        {previewOpen && canPreview && (
+          <PreviewModal
+            url={previewSrc}
+            filename={filename}
+            onClose={() => setPreviewOpen(false)}
+          />
+        )}
+      </>
     )
   }
 
