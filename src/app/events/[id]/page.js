@@ -415,66 +415,87 @@ function EditEventModal({ event, onClose, onSaved }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-end justify-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-lg mx-auto rounded-t-3xl p-6 pb-10 animate-slide-up max-h-[85vh] overflow-y-auto"
+        className="modal-shell w-full max-w-lg mx-auto rounded-3xl animate-fade-in overflow-hidden"
         style={{
-          background: 'linear-gradient(145deg, rgba(247,249,250,0.97), rgba(208,217,226,0.3))',
+          background: 'linear-gradient(145deg, rgba(247,249,250,0.98), rgba(208,217,226,0.4))',
           backdropFilter: 'blur(40px)',
-          border: '1px solid rgba(255,255,255,0.5)',
+          WebkitBackdropFilter: 'blur(40px)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          boxShadow: '0 24px 64px rgba(54,58,71,0.25)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
-        <h3 className="font-display text-xl font-bold text-gray-800 italic mb-5">Edit Event</h3>
+        {/* Header */}
+        <div className="px-6 pt-5 pb-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(54,58,71,0.06)' }}>
+          <h3 className="font-display text-xl font-bold text-gray-800 italic">Edit Event</h3>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+            style={{ background: 'rgba(54,58,71,0.06)' }}
+            aria-label="Close"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#363A47" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="modal-shell" style={{ minHeight: 0 }}>
+          {/* Scrollable form fields */}
+          <div className="modal-scroll px-6 py-4 space-y-3">
             <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Category</label>
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Title</label>
+              <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
             </div>
-            <div>
-              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
-              <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
-                <option value="Not Started">Not Started</option>
-                <option value="Approved">Approved</option>
-                <option value="Rescheduled">Rescheduled</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Category</label>
+                <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Status</label>
+                <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none">
+                  <option value="Not Started">Not Started</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Rescheduled">Rescheduled</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Platforms</label>
               <input value={platforms} onChange={(e) => setPlatforms(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none" placeholder="Instagram, LinkedIn..." />
             </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Post Concept</label>
+              <textarea value={postConcept} onChange={(e) => setPostConcept(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Describe the post concept..." />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Visual Direction</label>
+              <textarea value={visualDirection} onChange={(e) => setVisualDirection(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Visual style and tone..." />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Caption Direction</label>
+              <textarea value={captionDirection} onChange={(e) => setCaptionDirection(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Caption guidelines..." />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Notes</label>
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Additional notes..." />
+            </div>
           </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Post Concept</label>
-            <textarea value={postConcept} onChange={(e) => setPostConcept(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Describe the post concept..." />
+
+          {/* Sticky footer — Save button is ALWAYS visible & clickable */}
+          <div className="modal-footer px-6 pb-5">
+            <button type="submit" disabled={saving || !title} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50 active:scale-[0.99] transition-transform" style={{ background: 'linear-gradient(135deg, #6B7B8D, #363A47)' }}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Visual Direction</label>
-            <textarea value={visualDirection} onChange={(e) => setVisualDirection(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Visual style and tone..." />
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Caption Direction</label>
-            <textarea value={captionDirection} onChange={(e) => setCaptionDirection(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Caption guidelines..." />
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Notes</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none" placeholder="Additional notes..." />
-          </div>
-          <button type="submit" disabled={saving || !title} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6B7B8D, #363A47)' }}>
-            {saving ? 'Saving...' : 'Save Changes'}
-          </button>
         </form>
       </div>
     </div>
@@ -511,33 +532,56 @@ function RescheduleModal({ event, onClose, onSaved }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-end justify-center" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-lg mx-auto rounded-t-3xl p-6 pb-10 animate-slide-up"
+        className="modal-shell w-full max-w-lg mx-auto rounded-3xl animate-fade-in overflow-hidden"
         style={{
-          background: 'linear-gradient(145deg, rgba(247,249,250,0.97), rgba(208,217,226,0.3))',
+          background: 'linear-gradient(145deg, rgba(247,249,250,0.98), rgba(208,217,226,0.4))',
           backdropFilter: 'blur(40px)',
-          border: '1px solid rgba(255,255,255,0.5)',
+          WebkitBackdropFilter: 'blur(40px)',
+          border: '1px solid rgba(255,255,255,0.6)',
+          boxShadow: '0 24px 64px rgba(54,58,71,0.25)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-5" />
-        <h3 className="font-display text-xl font-bold text-gray-800 italic mb-2">Reschedule Event</h3>
-        <p className="text-sm text-gray-500 mb-5">{event.title}</p>
-        <p className="text-xs text-gray-400 mb-4">Current: <span className="font-semibold text-gray-600">{event.date}{event.endDate ? ` — ${event.endDate}` : ''}</span></p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">New Date *</label>
-            <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
+        {/* Header */}
+        <div className="px-6 pt-5 pb-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(54,58,71,0.06)' }}>
+          <div className="min-w-0">
+            <h3 className="font-display text-xl font-bold text-gray-800 italic">Reschedule Event</h3>
+            <p className="text-sm text-gray-500 truncate">{event.title}</p>
           </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">End Date (optional)</label>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" />
-          </div>
-          <button type="submit" disabled={saving || !newDate} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #3B82F6, #2563EB)' }}>
-            {saving ? 'Rescheduling...' : 'Reschedule'}
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+            style={{ background: 'rgba(54,58,71,0.06)' }}
+            aria-label="Close"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="#363A47" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="modal-shell" style={{ minHeight: 0 }}>
+          <div className="modal-scroll px-6 py-4 space-y-4">
+            <p className="text-xs text-gray-400">Current: <span className="font-semibold text-gray-600">{event.date}{event.endDate ? ` — ${event.endDate}` : ''}</span></p>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">New Date *</label>
+              <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" required />
+            </div>
+            <div>
+              <label className="block text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">End Date (optional)</label>
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full px-4 py-3 rounded-xl bg-white/60 border border-white/40 text-sm text-gray-800 outline-none focus:border-[#6B7B8D]/50" />
+            </div>
+          </div>
+
+          <div className="modal-footer px-6 pb-5">
+            <button type="submit" disabled={saving || !newDate} className="w-full py-3.5 rounded-xl font-semibold text-white text-sm disabled:opacity-50 active:scale-[0.99] transition-transform" style={{ background: 'linear-gradient(135deg, #3B82F6, #2563EB)' }}>
+              {saving ? 'Rescheduling...' : 'Reschedule'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

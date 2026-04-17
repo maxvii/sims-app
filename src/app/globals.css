@@ -28,6 +28,12 @@
   --font-script: 'Great Vibes', cursive;
 }
 
+html, body {
+  /* Kill horizontal page slide caused by long URLs / wide media in chat bubbles */
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   font-family: var(--font-sans);
   background: linear-gradient(165deg, #F7F9FA 0%, #EFF3F7 25%, #E7ECF1 50%, #F0F4F7 75%, #F7F9FA 100%);
@@ -36,9 +42,36 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Force long unbroken strings (URLs, hashes, deck filenames) to wrap inside chat bubbles. */
+.wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .pb-safe-nav { padding-bottom: 100px; }
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .pb-safe-nav { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+}
+
+/* Modal that stays clear of the bottom Navbar AND has its action footer
+   pinned so the Save / Reschedule button is always reachable. */
+.modal-shell {
+  /* Cap height so it never disappears behind the Navbar (~96px tall) or notch. */
+  max-height: calc(100dvh - 120px);
+  display: flex;
+  flex-direction: column;
+}
+.modal-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-footer {
+  flex: 0 0 auto;
+  position: sticky;
+  bottom: 0;
+  padding-top: 12px;
+  background: linear-gradient(to top, rgba(247,249,250,0.98) 70%, rgba(247,249,250,0));
 }
 
 .touch-scroll-x { -webkit-overflow-scrolling: touch; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; }

@@ -571,15 +571,15 @@ function MessageBubble({ message }) {
   const toolInvocations = getToolInvocations(message)
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in min-w-0`}>
       {!isUser && (
         <div className="w-7 h-7 rounded-full shrink-0 mt-1 mr-2 overflow-hidden" style={{ background: '#000' }}>
           <img src="/images/sims-eye.gif" alt="" className="w-full h-full object-cover" />
         </div>
       )}
-      <div className="max-w-[80%] flex flex-col gap-0.5">
+      <div className="max-w-[80%] min-w-0 flex flex-col gap-0.5">
         {textContent ? (
-          <div className={`px-4 py-2.5 text-sm leading-relaxed ${isUser ? 'text-white rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm'}`}
+          <div className={`wrap-anywhere px-4 py-2.5 text-sm leading-relaxed ${isUser ? 'text-white rounded-2xl rounded-br-sm' : 'rounded-2xl rounded-bl-sm'}`}
             style={isUser ? { background: 'linear-gradient(135deg, #363A47, #6B7B8D)' } : { background: 'rgba(247,249,250,0.65)', backdropFilter: 'blur(36px)', WebkitBackdropFilter: 'blur(36px)', border: '1px solid rgba(247,249,250,0.65)', color: '#1f1f1f' }}>
             {isUser ? <UserMessageText text={textContent} /> : renderMarkdown(textContent)}
           </div>
@@ -961,7 +961,11 @@ export default function ChatPage() {
   if (authStatus === 'loading') return null
 
   return (
-    <div className="flex flex-col h-screen relative" style={{ background: '#F7F9FA' }} ref={dropZoneRef}>
+    <div
+      className="flex flex-col h-screen relative overflow-x-hidden"
+      style={{ background: '#F7F9FA', maxWidth: '100vw' }}
+      ref={dropZoneRef}
+    >
 
       {/* ── Drag overlay ── */}
       {isDragOver && (
